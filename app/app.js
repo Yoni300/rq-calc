@@ -349,6 +349,8 @@ const TOP_ICONS = {
   code: '<path d="M8 7l-5 5 5 5M16 7l5 5-5 5M13.5 5l-3 14"/>',
   globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.6 3.9 5.6 3.9 9s-1.3 6.4-3.9 9c-2.6-2.6-3.9-5.6-3.9-9S9.4 5.6 12 3z"/>',
   down: '<path d="M6 9l6 6 6-6"/>',
+  // dizzy spiral with stars (crowd control)
+  stun: '<path d="M12.5 12.2a1.6 1.6 0 1 1-1.4-2.2 3.4 3.4 0 1 1-3 4.6 5.2 5.2 0 1 1 9.4 1.6"/><path d="M5 4.5l.6 1.3 1.4.2-1 1 .2 1.4L5 7.7l-1.2.7.2-1.4-1-1 1.4-.2zM19 3.5l.5 1 1 .1-.7.7.2 1-1-.5-.9.5.2-1-.7-.7 1-.1z"/>',
   // tabs
   gear: '<path d="M12 3l7.5 3v5.5c0 4.4-3.1 7.9-7.5 9.5-4.4-1.6-7.5-5.1-7.5-9.5V6z"/><path d="M12 7.5v9M8.5 11h7"/>',
   talents: '<path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.8-5.2 2.8 1-5.8-4.3-4.1 5.9-.9z"/>',
@@ -525,7 +527,12 @@ function renderLeft() {
     h('div', { class: 'field' }, h('label', null, T.state), seg(ctx.states.map(s => [s.Id, s.Name]), ch.stateId, v => changed(c => { c.stateId = v; }))),
     h('div', { class: 'field' }, h('label', null, T.event), eventSel),
     eventHints(),
-    h('label', { class: 'check' }, h('input', { type: 'checkbox', checked: !!ch.lostControl, onchange: e => changed(c => { c.lostControl = e.target.checked; }) }), T.lostControl),
+    // "under crowd control": a switch card; turns on item bonuses that only work while stunned etc.
+    h('label', { class: 'lc' + (ch.lostControl ? ' on' : ''), title: T.lostControl },
+      h('input', { type: 'checkbox', checked: !!ch.lostControl, onchange: e => changed(c => { c.lostControl = e.target.checked; }) }),
+      h('span', { class: 'lc-ic' }, iconEl('stun')),
+      h('span', { class: 'lc-text' }, h('b', null, T.lcTitle), h('small', null, T.lcSub)),
+      h('span', { class: 'sw' })),
   ));
 
   // attributes are spent with +/− on the mastery bars in the stat sheet (right panel)

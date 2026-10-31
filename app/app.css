@@ -675,3 +675,23 @@ input[type=range] { accent-color: var(--gold-2); }
 .tab .ic { width: 16px; height: 16px; margin-right: 8px; vertical-align: -3px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; opacity: .75; transition: opacity .15s; }
 .tab:hover .ic, .tab.on .ic { opacity: 1; }
 .tab.on .ic { filter: drop-shadow(0 0 4px rgba(230, 184, 92, .45)); }
+
+/* "under crowd control" switch card */
+.lc { display: grid; grid-template-columns: 26px 1fr 36px; gap: 10px; align-items: center; margin-top: 12px; padding: 9px 10px; cursor: pointer; user-select: none;
+  border: 1px solid var(--line); border-radius: 8px; background: rgba(0, 0, 0, .2); transition: border-color .18s, background .18s, box-shadow .18s; }
+.lc:hover { border-color: var(--line-2); }
+.lc input { position: absolute; opacity: 0; width: 0; height: 0; }
+.lc-ic { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; color: var(--dim); background: rgba(255, 255, 255, .03); transition: color .18s; }
+.lc-ic .ic { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.lc-text { display: flex; flex-direction: column; line-height: 1.25; }
+.lc-text b { font-size: 13px; color: var(--fg); font-weight: 600; }
+.lc-text small { font-size: 10.5px; color: var(--dim); margin-top: 2px; }
+.lc .sw { position: relative; width: 36px; height: 20px; border-radius: 10px; background: #231d16; border: 1px solid var(--line-2); transition: background .18s, border-color .18s; }
+.lc .sw::after { content: ''; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: #7d6e55; transition: transform .18s, background .18s; }
+.lc input:focus-visible ~ .sw { outline: 2px solid var(--gold-2); outline-offset: 2px; }
+.lc.on { border-color: var(--line-3); background: linear-gradient(90deg, rgba(230, 184, 92, .12), rgba(0, 0, 0, .2)); box-shadow: 0 0 12px rgba(230, 184, 92, .15); }
+.lc.on .lc-ic { color: var(--gold); filter: drop-shadow(0 0 4px rgba(230, 184, 92, .5)); }
+.lc.on .lc-text small { color: var(--muted); }
+.lc.on .sw { background: linear-gradient(180deg, var(--gold-hi), var(--gold-2)); border-color: var(--gold-hi); }
+.lc.on .sw::after { transform: translateX(16px); background: #1a1206; }
+.lc:active .sw::after { width: 17px; }
