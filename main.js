@@ -2,9 +2,19 @@ const { app, BrowserWindow, shell, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
-// Saved builds live in %APPDATA%\rq-calc for both the dev run and the installed app.
-// RQC_USERDATA: separate profile for test runs.
-app.setPath('userData', process.env.RQC_USERDATA || path.join(app.getPath('appData'), 'rq-calc'));
+// The installed app keeps its data in %APPDATA%\rq-calc. Running from the source code is the TEST client:
+// it has its own profile (%APPDATA%\rq-calc-test, first filled with a copy of the main one) and reloads itself
+// when files change. RQC_USERDATA: separate profile for automated test runs.
+const IS_TEST = !app.isPackaged;
+const mainProfile = path.join(app.getPath('appData'), 'rq-calc');
+const profile = process.env.RQC_USERDATA || (IS_TEST ? path.join(app.getPath('appData'), 'rq-calc-test') : mainProfile);
+if (IS_TEST && !process.env.RQC_USERDATA && !fs.existsSync(profile)) {
+  try {
+    // bring over saved builds and settings; LOCK files belong to a running app and are skipped
+    fs.cpSync(path.join(mainProfile, 'Local Storage'), path.join(profile, 'Local Storage'), { recursive: true, filter: src => path.basename(src) !== 'LOCK' });
+  } catch { /* no main profile yet */ }
+}
+app.setPath('userData', profile);
 if (!process.env.RQC_USERDATA && !app.requestSingleInstanceLock()) app.quit();
 
 let win;
@@ -15,8 +25,9 @@ function createWindow() {
     icon: path.join(__dirname, 'build', 'icon.png'),
     webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true, preload: path.join(__dirname, 'preload.js') },
   });
-  win.loadFile(path.join(__dirname, 'app', 'index.html'));
+  win.loadFile(path.join(__dirname, 'app', 'index.html'), IS_TEST ? { query: { test: '1' } } : undefined);
   win.once('ready-to-show', () => win.show());
+  if (IS_TEST && !process.env.RQC_SCREENSHOT) watchForChanges();
   // links open in the normal browser
   win.webContents.setWindowOpenHandler(({ url }) => { shell.openExternal(url); return { action: 'deny' }; });
 
@@ -31,6 +42,15 @@ function createWindow() {
         app.quit();
       }, 1500);
     });
+  }
+}
+
+// TEST client: reload the page when the app, engine or data change (main.js/preload.js need a restart)
+function watchForChanges() {
+  let timer = null;
+  const reload = () => { clearTimeout(timer); timer = setTimeout(() => { if (win && !win.isDestroyed()) win.webContents.reloadIgnoringCache(); }, 400); };
+  for (const dir of ['app', 'src', 'data']) {
+    try { fs.watch(path.join(__dirname, dir), { recursive: true }, (_e, file) => { if (file && !/\.(tmp|swp)$|~$/.test(file)) reload(); }); } catch { /* ignore */ }
   }
 }
 

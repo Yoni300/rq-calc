@@ -662,3 +662,7 @@ input[type=range] { accent-color: var(--gold-2); }
 .pb-card.bad { border-color: rgba(224, 96, 80, .45); }
 .pb-card.bad .pb-stats b { color: var(--muted); }
 .upd-btns { display: flex; justify-content: flex-end; gap: 8px; }
+
+/* TEST client (started from the source code) */
+.test-badge { margin-left: 10px; padding: 2px 8px; border-radius: 6px; font: 800 11px var(--f-body); letter-spacing: .12em; vertical-align: middle;
+  color: #fff; background: linear-gradient(180deg, #d9534a, #a8322b); box-shadow: 0 0 10px rgba(217, 83, 74, .5); cursor: help; }

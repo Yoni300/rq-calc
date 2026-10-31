@@ -20,7 +20,12 @@ if (!remoteTags) {
 // doesn't exist yet, both create one, splitting the files between two releases.
 let hasRelease = true;
 try { out(`gh release view ${tag} -R Yoni300/rq-calc --json tagName`); } catch { hasRelease = false; }
-if (!hasRelease) run(`gh release create ${tag} -R Yoni300/rq-calc --verify-tag --title "RQ Calc ${version}" --notes "RQ Calc ${version}"`);
+if (!hasRelease) {
+  // release notes: what tools/publish.mjs asked ("Що нового?"), otherwise just the version
+  fs.writeFileSync('.git/RQC_NOTES', process.env.RQC_NOTES || `RQ Calc ${version}`);
+  run(`gh release create ${tag} -R Yoni300/rq-calc --verify-tag --title "RQ Calc ${version}" --notes-file .git/RQC_NOTES`);
+  fs.unlinkSync('.git/RQC_NOTES');
+}
 const env = { ...process.env, GH_TOKEN: process.env.GH_TOKEN || out('gh auth token') };
 delete env.ELECTRON_RUN_AS_NODE;
 run('node tools/write-version.mjs');

@@ -12,6 +12,8 @@ const store = {
 };
 
 let lang = store.get('lang', 'uk');
+// started from the source code (the TEST client), not the installed app
+const IS_TEST = new URLSearchParams(location.search).get('test') === '1';
 let T = RQC_I18N[lang] || RQC_I18N.uk;
 let ch = normalize(store.get('current', null)) || ctx.defaultCharacter();
 let buildName = store.get('currentName', '');
@@ -342,7 +344,8 @@ function talentText(t) {
 function renderTop() {
   document.documentElement.lang = lang;
   $('appTitle').textContent = T.title;
-  document.title = T.title;
+  document.title = T.title + (IS_TEST ? ' — ТЕСТ' : '');
+  if (IS_TEST && !$('testBadge')) $('appTitle').after(h('span', { id: 'testBadge', class: 'test-badge', title: T.testTip }, 'ТЕСТ'));
   $('buildName').placeholder = T.buildName;
   $('buildName').value = buildName;
   $('btnSave').textContent = T.save;
