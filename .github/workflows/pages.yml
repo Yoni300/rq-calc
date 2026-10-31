@@ -34,16 +34,16 @@ jobs:
           echo "Site from $TAG ($SHA)"
           mkdir _site
           git archive "$TAG" app src data | tar -x -C _site
-          cp web/web.js _site/app/web.js
+          cp web/web.js web/favicon.png web/apple-touch-icon.png _site/app/
           echo "{\"build\":\"$SHA\",\"version\":\"${TAG#v}\"}" > _site/app/build.json
-          # the page lives at the site root but keeps its paths relative to app/;
+          # the page lives at the site root but keeps its paths relative to app/; tab icon = the app's icon;
           # web.js goes right after i18n.js; ?v=<build> makes browsers load new files after an update
-          sed -e 's|<meta charset="utf-8">|&\n  <base href="app/">|' \
+          sed -e 's|<meta charset="utf-8">|&\n  <base href="app/">\n  <link rel="icon" type="image/png" href="favicon.png">\n  <link rel="apple-touch-icon" href="apple-touch-icon.png">|' \
               -e 's|<script src="builds.js"></script>|<script src="web.js"></script>\n  &|' \
               _site/app/index.html \
             | sed -E 's/(src|href)="([^"]+\.(js|css))"/\1="\2?v='"$SHA"'"/g' > _site/index.html
           rm _site/app/index.html
-          grep -q 'web.js?v=' _site/index.html && grep -q '<base href="app/">' _site/index.html
+          grep -q 'web.js?v=' _site/index.html && grep -q '<base href="app/">' _site/index.html && grep -q 'rel="icon"' _site/index.html
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
