@@ -55,3 +55,4 @@ fs.unlinkSync('.git/RQC_MSG');
 console.log(`\n  Збираю й викладаю v${next}… (кілька хвилин)\n`);
 execSync('node tools/release.mjs', { stdio: 'inherit', env: { ...process.env, RQC_NOTES: notes } });
 console.log(`\n  Готово! Гравці отримають v${next} протягом кількох хвилин.`);
+console.log('  Сайт https://yoni300.github.io/rq-calc/ оновиться сам за 1–2 хвилини (Actions → Website).');

@@ -1,0 +1,54 @@
+# Web version on GitHub Pages: https://yoni300.github.io/rq-calc/
+# Runs on every release tag (tools/release.mjs pushes it), so the site always has the same version as the app.
+# Run it by hand (Actions → Website → Run workflow) to rebuild the site from the latest release.
+name: Website
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build the site from the latest release
+        run: |
+          if [ "$GITHUB_REF_TYPE" = tag ]; then TAG="$GITHUB_REF_NAME"; else TAG=$(git tag -l 'v*' --sort=-v:refname | head -n1); fi
+          SHA=$(git rev-parse --short "$TAG^{commit}")
+          echo "Site from $TAG ($SHA)"
+          mkdir _site
+          git archive "$TAG" app src data | tar -x -C _site
+          cp web/web.js _site/app/web.js
+          echo "{\"build\":\"$SHA\",\"version\":\"${TAG#v}\"}" > _site/app/build.json
+          # the page lives at the site root but keeps its paths relative to app/;
+          # web.js goes right after i18n.js; ?v=<build> makes browsers load new files after an update
+          sed -e 's|<meta charset="utf-8">|&\n  <base href="app/">|' \
+              -e 's|<script src="builds.js"></script>|<script src="web.js"></script>\n  &|' \
+              _site/app/index.html \
+            | sed -E 's/(src|href)="([^"]+\.(js|css))"/\1="\2?v='"$SHA"'"/g' > _site/index.html
+          rm _site/app/index.html
+          grep -q 'web.js?v=' _site/index.html && grep -q '<base href="app/">' _site/index.html
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deploy
+        uses: actions/deploy-pages@v4

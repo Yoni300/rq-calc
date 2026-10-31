@@ -1,0 +1,41 @@
+// Web version (GitHub Pages, see .github/workflows/pages.yml). Stands in for the desktop app's update bridge
+// (preload.js): checks build.json every 5 minutes and when the tab comes back, and a new build reloads the page
+// through the same banner and countdown the app uses. The page's own build id comes from this script's ?v=.
+(() => {
+  const me = document.currentScript && new URL(document.currentScript.src).searchParams.get('v');
+  let state = { status: 'idle' }, last = 0;
+  const listeners = [];
+  const set = s => { state = s; listeners.forEach(cb => cb(s)); };
+
+  async function check() {
+    if (!me || state.status === 'ready') return;
+    last = Date.now();
+    try {
+      const r = await fetch('build.json?t=' + Date.now(), { cache: 'no-store' });
+      if (!r.ok) return;
+      const b = await r.json();
+      if (b.build && b.build !== me) set({ status: 'ready', version: b.version });
+    } catch { /* offline: try next time */ }
+  }
+
+  window.rqcApp = {
+    onUpdate: cb => listeners.push(cb),
+    updateState: () => Promise.resolve(state),
+    installUpdate: () => location.reload(),
+    version: () => Promise.resolve(window.RQC_VERSION && window.RQC_VERSION.version),
+  };
+
+  setTimeout(check, 5000); // the browser may have opened a cached old page
+  setInterval(check, 5 * 60 * 1000);
+  const again = () => { if (document.visibilityState === 'visible' && Date.now() - last > 60 * 1000) check(); };
+  document.addEventListener('visibilitychange', again);
+  window.addEventListener('focus', again);
+
+  // update texts talk about the page, not the program
+  const texts = {
+    uk: { updIn: 'Сторінка оновиться через {s} с. Ваш білд збережено.', updWaiting: 'Оновлення зачекає, поки ви закінчите редагувати.', updLater: 'Оновиться, коли перезавантажите сторінку.', updDone: 'Сайт оновлено до v{v}' },
+    ru: { updIn: 'Страница обновится через {s} с. Ваш билд сохранён.', updWaiting: 'Обновление подождёт, пока вы закончите редактировать.', updLater: 'Обновится, когда перезагрузите страницу.', updDone: 'Сайт обновлён до v{v}' },
+    en: { updIn: 'The page reloads in {s} s. Your build is saved.', updWaiting: 'The reload waits until you finish editing.', updLater: 'It updates when you reload the page.', updDone: 'Updated to v{v}' },
+  };
+  for (const [k, t] of Object.entries(texts)) if (window.RQC_I18N && RQC_I18N[k]) Object.assign(RQC_I18N[k], t);
+})();
