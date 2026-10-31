@@ -1,4 +1,4 @@
-// Web version (GitHub Pages, see .github/workflows/pages.yml). Stands in for the desktop app's update bridge
+// Web version (GitHub Pages, see .github/workflows/pages.yml; tools/release.mjs starts it). Stands in for the desktop app's update bridge
 // (preload.js): checks build.json every 5 minutes and when the tab comes back, and a new build reloads the page
 // through the same banner and countdown the app uses. The page's own build id comes from this script's ?v=.
 (() => {

@@ -16,6 +16,8 @@ if (!remoteTags) {
   run('git push origin HEAD');
   run(`git push origin ${tag}`);
 }
+// the website (.github/workflows/pages.yml) builds from the latest tag; a failure here must not stop the release
+try { run('gh workflow run pages.yml -R Yoni300/rq-calc --ref main'); } catch { console.warn('Could not start the website update: run Actions → Website by hand.'); }
 // Create the GitHub release first: electron-builder runs two upload jobs in parallel and, if the release
 // doesn't exist yet, both create one, splitting the files between two releases.
 let hasRelease = true;
