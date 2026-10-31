@@ -29,5 +29,11 @@ if (!hasRelease) {
 const env = { ...process.env, GH_TOKEN: process.env.GH_TOKEN || out('gh auth token') };
 delete env.ELECTRON_RUN_AS_NODE;
 run('node tools/write-version.mjs');
-run('npx electron-builder --win --publish always', { env });
+// building/uploading sometimes fails once for no reason (network, a locked file): try again before giving up
+for (let attempt = 1; ; attempt++) {
+  try { run('npx electron-builder --win --publish always', { env }); break; } catch (e) {
+    if (attempt >= 3) throw e;
+    console.log(`\nBuild/upload failed, trying again (${attempt + 1}/3)…\n`);
+  }
+}
 console.log(`\nReleased ${tag}: https://github.com/Yoni300/rq-calc/releases/tag/${tag}`);

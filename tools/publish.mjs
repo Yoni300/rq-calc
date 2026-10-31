@@ -16,6 +16,17 @@ let unpublished = '';
 try { unpublished = out(`git log v${pkg.version}..HEAD --oneline`); } catch { /* no tag yet */ }
 
 console.log(`\n  RQ Calc — публікація оновлення (зараз у гравців v${pkg.version})\n`);
+// the last publish stopped half way (release without files): players don't get it, so finish it first
+let unfinished = false;
+try { unfinished = !out(`gh release view v${pkg.version} -R Yoni300/rq-calc --json assets --jq ".assets[].name"`).includes('latest.yml'); } catch { /* no release */ }
+if (unfinished) {
+  const ok = (await ask(`  Минула публікація v${pkg.version} не завершилась (у релізі немає файлів). Довикласти її? (т/н) `)).trim().toLowerCase();
+  rl.close();
+  if (!['т', 'так', 'y', 'yes', 'д', 'да'].includes(ok)) { console.log('\n  Скасовано.'); process.exit(0); }
+  execSync('node tools/release.mjs', { stdio: 'inherit' });
+  console.log(`\n  Готово! Гравці отримають v${pkg.version} протягом кількох хвилин.`);
+  process.exit(0);
+}
 if (!changes.length && !unpublished) {
   console.log('  Немає нових змін: публікувати нічого.');
   process.exit(0);
