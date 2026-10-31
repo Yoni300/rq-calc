@@ -656,3 +656,8 @@ input[type=range] { accent-color: var(--gold-2); }
 .gt-step button:active:not(:disabled) { transform: scale(.9); }
 .gt-step button:disabled { opacity: .35; cursor: default; }
 .tal:has(.gt-pts) img { border-radius: inherit; }
+
+/* public build whose data is impossible in the game */
+.pb-bad { font-size: 10.5px; font-weight: 700; color: var(--bad); border: 1px solid currentColor; border-radius: 8px; padding: 0 7px; cursor: help; white-space: nowrap; }
+.pb-card.bad { border-color: rgba(224, 96, 80, .45); }
+.pb-card.bad .pb-stats b { color: var(--muted); }

@@ -35,9 +35,11 @@ async function loadPublic() {
   try {
     await myHash();
     const order = PB.sort === 'top' ? 'likes.desc,created_at.desc' : 'created_at.desc';
-    let q = `builds?select=id,created_at,name,author,description,class_id,level,dps,hp,ehp,likes,owner_hash&order=${order}&limit=200`;
+    let q = `builds?select=id,created_at,name,author,description,class_id,level,likes,owner_hash,data&order=${order}&limit=200`;
     if (PB.filter === 'class') q += `&class_id=eq.${ch.classId}`;
-    PB.list = await sb(q) || [];
+    // numbers, class and level are recomputed from the build itself (see verifyBuild)
+    PB.list = (await sb(q) || []).map(b => { b.v = verifyBuild(b.data); delete b.data; return b; })
+      .filter(b => PB.filter !== 'class' || b.v?.classId === ch.classId);
     PB.loaded = true;
     await syncLikes();
   } catch (e) { PB.error = e.message; }
@@ -137,20 +139,23 @@ function drawPublicList() {
   const items = PB.list.filter(b => matches(PB.q, b.name, b.author, b.description, ctx.classes.get(b.class_id)?.name));
   if (!items.length) { list.append(h('div', { class: 'hint pb-msg' }, PB.loaded ? T.pbEmpty : T.pbLoading)); return; }
   for (const b of items) {
-    const cls = ctx.classes.get(b.class_id);
+    const v = b.v;
+    const cls = ctx.classes.get(v ? v.classId : b.class_id);
+    const bad = !v || v.problems.length > 0;
     const mine = PB.myHash && b.owner_hash === PB.myHash;
     const isLiked = liked.has(b.id);
-    list.append(h('div', { class: 'pb-card' + (mine ? ' mine' : '') },
+    list.append(h('div', { class: 'pb-card' + (mine ? ' mine' : '') + (bad ? ' bad' : '') },
       h('div', { class: 'pb-head' },
         img(cls?.imageId),
         h('div', { class: 'pb-title' },
           h('div', { class: 'pb-name' }, b.name),
-          h('div', { class: 'pb-meta' }, `${cls?.name || '?'} · ${T.level.toLowerCase()} ${b.level}`, b.author ? ` · ${b.author}` : '', ` · ${new Date(b.created_at).toLocaleDateString()}`)),
+          h('div', { class: 'pb-meta' }, `${cls?.name || '?'} · ${T.level.toLowerCase()} ${v ? v.level : '?'}`, b.author ? ` · ${b.author}` : '', ` · ${new Date(b.created_at).toLocaleDateString()}`)),
+        bad ? h('span', { class: 'pb-bad', title: v ? v.problems.join('\n') : T.pbBroken }, '⚠ ' + T.pbImpossible) : null,
         mine ? h('span', { class: 'pb-mine' }, T.pbMine) : null),
       h('div', { class: 'pb-stats' },
-        h('div', null, h('span', null, 'DPS'), h('b', null, fmtNum(+b.dps || 0, 0))),
-        h('div', null, h('span', null, ctx.stats.get(ctx.ids.HP).name), h('b', null, fmtNum(+b.hp || 0, 0))),
-        h('div', null, h('span', null, 'EHP'), h('b', null, fmtNum(+b.ehp || 0, 0)))),
+        h('div', null, h('span', null, 'DPS'), h('b', null, v ? fmtNum(v.dps, 0) : '?')),
+        h('div', null, h('span', null, ctx.stats.get(ctx.ids.HP).name), h('b', null, v ? fmtNum(v.hp, 0) : '?')),
+        h('div', null, h('span', null, 'EHP'), h('b', null, v ? fmtNum(v.ehp, 0) : '?'))),
       b.description ? h('div', { class: 'pb-desc' }, b.description) : null,
       h('div', { class: 'pb-foot' },
         h('button', { class: 'pb-like' + (isLiked ? ' on' : ''), title: isLiked ? T.pbUnlike : T.pbLike, onclick: () => likePublic(b) }, isLiked ? '♥ ' : '♡ ', String(b.likes)),

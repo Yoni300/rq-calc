@@ -102,6 +102,25 @@ function validTalents(c) {
 }
 
 // The engine gets a cleaned copy: things the character can't use are left out.
+// Recomputes a shared build from its data: the DPS/HP/EHP numbers stored with a public build are typed in by
+// whoever published it, so they are never shown as is. Also lists what makes the build impossible in the game.
+function verifyBuild(data) {
+  try {
+    const c = normalize(data && typeof data === 'object' ? JSON.parse(JSON.stringify(data)) : null);
+    if (!c) return null;
+    const cls = ctx.classes.get(c.classId);
+    const problems = [];
+    if (!(c.level >= cls.minLevel && c.level <= cls.maxLevel)) { problems.push(T.pbBadLevel); c.level = clamp(+c.level || cls.minLevel, cls.minLevel, cls.maxLevel); }
+    if (Object.values(c.stats).some(v => !Number.isInteger(v) || v < 1 || v > ctx.settings.maxStatCount) || ctx.freeStats(c) < 0) problems.push(T.pbBadStats);
+    const x = calcInput(c);
+    const worn = Object.entries(c.equipment || {}).filter(([key, e]) => e && !slotLockedByTwoHander(c, key));
+    if (worn.length > Object.keys(x.equipment).length) problems.push(T.pbBadGear);
+    if ((c.talents || []).length > x.talents.length) problems.push(T.pbBadTalents);
+    const r = ctx.calc(x);
+    return { classId: c.classId, level: c.level, dps: r.stats.get(75) ?? 0, hp: r.stats.get(ctx.ids.HP) ?? 0, ehp: r.stats.get(76) ?? 0, problems };
+  } catch { return null; }
+}
+
 function calcInput(c) {
   const sets = allowedSets(c);
   const x = JSON.parse(JSON.stringify(c));
