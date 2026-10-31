@@ -666,3 +666,9 @@ input[type=range] { accent-color: var(--gold-2); }
 /* TEST client (started from the source code) */
 .test-badge { margin-left: 10px; padding: 2px 8px; border-radius: 6px; font: 800 11px var(--f-body); letter-spacing: .12em; vertical-align: middle;
   color: #fff; background: linear-gradient(180deg, #d9534a, #a8322b); box-shadow: 0 0 10px rgba(217, 83, 74, .5); cursor: help; }
+
+/* top bar buttons with line icons */
+#btnSave, #btnBuilds, #btnNew, #btnCode, #btnPublic { display: inline-flex; align-items: center; gap: 7px; }
+.btn .ic { width: 15px; height: 15px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; opacity: .9; }
+.btn .ic.caret { width: 12px; height: 12px; margin-left: -2px; opacity: .7; transition: transform .15s; }
+#btnBuilds:hover .ic.caret { transform: translateY(1px); }

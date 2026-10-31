@@ -341,6 +341,20 @@ function talentText(t) {
 }
 
 // ---------- top bar ----------
+// line icons for the top bar buttons (24×24, drawn with the text color)
+const TOP_ICONS = {
+  save: '<path d="M5 3h11l3 3v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M7.5 3v4.5h7V3"/><rect x="7" y="13" width="10" height="6" rx="1"/>',
+  folder: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M3 10h18"/>',
+  new: '<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M12 12v6M9 15h6"/>',
+  code: '<path d="M8 7l-5 5 5 5M16 7l5 5-5 5M13.5 5l-3 14"/>',
+  globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.6 3.9 5.6 3.9 9s-1.3 6.4-3.9 9c-2.6-2.6-3.9-5.6-3.9-9S9.4 5.6 12 3z"/>',
+  down: '<path d="M6 9l6 6 6-6"/>',
+};
+const svgIcon = (name, cls = 'ic') => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${TOP_ICONS[name]}</svg>`;
+function topButton(id, icon, label, menu = false) {
+  $(id).innerHTML = svgIcon(icon) + `<span>${esc(label)}</span>` + (menu ? svgIcon('down', 'ic caret') : '');
+}
+
 function renderTop() {
   document.documentElement.lang = lang;
   $('appTitle').textContent = T.title;
@@ -348,11 +362,11 @@ function renderTop() {
   if (IS_TEST && !$('testBadge')) $('appTitle').after(h('span', { id: 'testBadge', class: 'test-badge', title: T.testTip }, 'ТЕСТ'));
   $('buildName').placeholder = T.buildName;
   $('buildName').value = buildName;
-  $('btnSave').textContent = T.save;
-  $('btnBuilds').textContent = T.builds + ' ▾';
-  $('btnNew').textContent = T.newBuild;
-  $('btnCode').textContent = T.code;
-  $('btnPublic').textContent = '🌐 ' + T.publicBuilds;
+  topButton('btnSave', 'save', T.save);
+  topButton('btnBuilds', 'folder', T.builds, true);
+  topButton('btnNew', 'new', T.newBuild);
+  topButton('btnCode', 'code', T.code);
+  topButton('btnPublic', 'globe', T.publicBuilds);
   $('btnPublic').classList.toggle('on', tab === 'builds');
   const ls = $('langSwitch'); ls.innerHTML = ''; ls.title = T.language;
   for (const [k, label] of [['uk', 'УКР'], ['ru', 'РУС'], ['en', 'ENG']]) {
