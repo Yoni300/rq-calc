@@ -35,12 +35,17 @@ async function loadPublic() {
   try {
     await myHash();
     const order = PB.sort === 'top' ? 'likes.desc,created_at.desc' : 'created_at.desc';
-    let q = `builds?select=id,created_at,name,author,description,class_id,level,likes,owner_hash,data&order=${order}&limit=200`;
+    let q = `builds?select=id,created_at,name,author,description,class_id,level,likes,owner_hash,data${PB.noTags ? '' : ',tags'}&order=${order}&limit=200`;
     // class filter: the chosen class together with its professions (Стрелок → Охотник, Снайпер)
     const ids = filterClassIds();
     if (ids) q += `&class_id=in.(${ids.join(',')})`;
     // numbers, class and level are recomputed from the build itself (see verifyBuild)
-    PB.list = (await sb(q) || []).map(b => { b.v = verifyBuild(b.data); delete b.data; return b; })
+    let rows;
+    try { rows = await sb(q); } catch (e) {
+      if (PB.noTags || !/tags/.test(e.message)) throw e;
+      PB.noTags = true; rows = await sb(q.replace(',tags', '')); // server without update 4
+    }
+    PB.list = (rows || []).map(b => { b.v = verifyBuild(b.data); delete b.data; return b; })
       .filter(b => !ids || ids.includes(b.v?.classId));
     PB.loaded = true;
     await syncLikes();
@@ -102,6 +107,17 @@ function openPublish() {
   const desc = h('textarea', { class: 'code-area', maxLength: 500, placeholder: T.pbDescPh, style: 'height:90px;font-family:var(--f-body);font-size:13px' });
   const err = h('div', { class: 'warn', style: 'margin-top:6px' });
   const stat = id => fmtNum(r.stats.get(id) ?? 0, 0);
+  const chosen = new Set();
+  const tagBox = h('div', { class: 'pb-tagpick' });
+  const drawTags = () => {
+    tagBox.innerHTML = '';
+    for (const t of BUILD_TAGS) {
+      const on = chosen.has(t), full = !on && chosen.size >= MAX_TAGS;
+      tagBox.append(h('button', { type: 'button', class: 'tag' + (on ? ' on' : '') + (full ? ' off' : ''), disabled: full,
+        onclick: () => { if (on) chosen.delete(t); else chosen.add(t); drawTags(); } }, tagLabel(t)));
+    }
+  };
+  drawTags();
   const btn = h('button', { class: 'btn primary', onclick: async () => {
     if (!name.value.trim()) { err.textContent = T.pbNeedName; return; }
     btn.disabled = true; err.textContent = '';
@@ -112,6 +128,7 @@ function openPublish() {
         class_id: ch.classId, level: ch.level,
         dps: Math.round((r.stats.get(75) ?? 0) * 100) / 100, hp: Math.round(r.stats.get(ctx.ids.HP) ?? 0), ehp: Math.round(r.stats.get(76) ?? 0),
         data: JSON.parse(JSON.stringify(ch)), owner_hash: await myHash(),
+        ...(chosen.size && !PB.noTags ? { tags: [...chosen] } : {}),
       }) });
       closeModal();
       PB.sort = 'new'; tab = 'builds'; store.set('tab', 'builds'); renderCenter(); renderTop();
@@ -126,6 +143,7 @@ function openPublish() {
       h('div', { class: 'field' }, h('label', null, T.pbName), name),
       h('div', { class: 'field' }, h('label', null, T.pbAuthor), author),
       h('div', { class: 'field', style: 'align-items:start' }, h('label', null, T.pbDesc), desc),
+      PB.noTags ? null : h('div', { class: 'field', style: 'align-items:start' }, h('label', null, T.pbTags, h('small', null, ` (${T.pbTagsMax})`)), tagBox),
       h('div', { class: 'hint' }, T.pbPublicNote), err),
     h('div', { class: 'dialog-foot' }, h('button', { class: 'btn', onclick: closeModal }, T.close), btn)));
   setTimeout(() => name.select(), 0);
@@ -138,7 +156,10 @@ function drawPublicList() {
   if (PB.loading && !PB.loaded) { list.append(h('div', { class: 'hint pb-msg' }, T.pbLoading)); return; }
   if (PB.error) { list.append(h('div', { class: 'warn pb-msg' }, T.pbError + ' ' + PB.error)); return; }
   const liked = new Set(store.get('likedBuilds', []));
-  const items = PB.list.filter(b => matches(PB.q, b.name, b.author, b.description, ctx.classes.get(b.class_id)?.name));
+  const items = PB.list.filter(b => (!PB.tag || (b.tags || []).includes(PB.tag))
+    && matches(PB.q, b.name, b.author, b.description, ctx.classes.get(b.class_id)?.name, ...(b.tags || []).map(tagLabel)));
+  if (PB.tag) list.append(h('div', { class: 'pb-tagfilter' }, T.pbTagFilter + ': ',
+    h('button', { type: 'button', class: 'tag on', onclick: () => { PB.tag = null; drawPublicList(); } }, tagLabel(PB.tag), ' ✕')));
   if (!items.length) { list.append(h('div', { class: 'hint pb-msg' }, PB.loaded ? T.pbEmpty : T.pbLoading)); return; }
   for (const b of items) {
     const v = b.v;
@@ -159,6 +180,9 @@ function drawPublicList() {
         h('div', null, h('span', null, ctx.stats.get(ctx.ids.HP).name), h('b', null, v ? fmtNum(v.hp, 0) : '?')),
         h('div', null, h('span', null, 'EHP'), h('b', null, v ? fmtNum(v.ehp, 0) : '?'))),
       b.description ? h('div', { class: 'pb-desc' }, b.description) : null,
+      (b.tags || []).length ? h('div', { class: 'pb-tags' }, b.tags.filter(t => BUILD_TAGS.includes(t)).map(t =>
+        h('button', { type: 'button', class: 'tag' + (PB.tag === t ? ' on' : ''), title: T.pbTagClick,
+          onclick: () => { PB.tag = PB.tag === t ? null : t; drawPublicList(); } }, tagLabel(t)))) : null,
       h('div', { class: 'pb-foot' },
         h('button', { class: 'pb-like' + (isLiked ? ' on' : ''), title: isLiked ? T.pbUnlike : T.pbLike, onclick: () => likePublic(b) }, isLiked ? '♥ ' : '♡ ', String(b.likes)),
         h('div', { class: 'spacer' }),
@@ -166,6 +190,11 @@ function drawPublicList() {
         h('button', { class: 'btn small primary', onclick: () => openPublic(b) }, T.load))));
   }
 }
+
+// Tags: a fixed list (checked by the server, see server/004-build-tags.sql); names come from i18n (T.tagNames)
+const BUILD_TAGS = ['pve', 'pvp', 'farm', 'solo', 'party', 'boss', 'tank', 'support', 'dd', 'crit', 'dodge', 'budget', 'endgame', 'newbie', 'event', 'arena'];
+const MAX_TAGS = 5;
+const tagLabel = t => (T.tagNames && T.tagNames[t]) || t;
 
 function filterClassIds() {
   const c = PB.filter != null && ctx.classes.get(PB.filter);
