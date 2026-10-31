@@ -39,6 +39,7 @@ async function loadPublic() {
     if (PB.filter === 'class') q += `&class_id=eq.${ch.classId}`;
     PB.list = await sb(q) || [];
     PB.loaded = true;
+    await syncLikes();
   } catch (e) { PB.error = e.message; }
   PB.loading = false;
   drawPublicList();
@@ -54,14 +55,25 @@ async function openPublic(b) {
     toast(T.pbOpened);
   } catch (e) { toast(T.pbError + ' ' + e.message); }
 }
+// The server remembers who liked what (see server/003-fair-likes.sql); the local list is only a cache.
+// Returns false on an old server without my_likes, then the local list is kept.
+async function syncLikes() {
+  try {
+    const ids = await sb('rpc/my_likes', { method: 'POST', body: '{}' });
+    if (Array.isArray(ids)) { store.set('likedBuilds', ids.map(x => (x && typeof x === 'object' ? Object.values(x)[0] : x))); return true; }
+  } catch { /* old server */ }
+  return false;
+}
 // a second click takes the like back
 async function likePublic(b) {
   const liked = new Set(store.get('likedBuilds', []));
   const had = liked.has(b.id);
   try {
     const n = await sb(had ? 'rpc/unlike_build' : 'rpc/like_build', { method: 'POST', body: JSON.stringify({ p_id: b.id }) });
-    if (had) liked.delete(b.id); else liked.add(b.id);
-    store.set('likedBuilds', [...liked]);
+    if (!await syncLikes()) {
+      if (had) liked.delete(b.id); else liked.add(b.id);
+      store.set('likedBuilds', [...liked]);
+    }
     b.likes = typeof n === 'number' ? n : Math.max(0, b.likes + (had ? -1 : 1));
     drawPublicList();
   } catch (e) {
@@ -101,7 +113,7 @@ function openPublish() {
       PB.sort = 'new'; tab = 'builds'; store.set('tab', 'builds'); renderCenter(); renderTop();
       toast(T.pbPublished);
       loadPublic();
-    } catch (e) { err.textContent = T.pbError + ' ' + e.message; btn.disabled = false; }
+    } catch (e) { err.textContent = /row-level security|42501/.test(e.message) ? T.pbTooMany : T.pbError + ' ' + e.message; btn.disabled = false; }
   } }, T.pbPublish);
   openModal(h('div', { class: 'dialog narrow' },
     h('div', { class: 'dialog-head' }, h('h3', null, T.pbPublishTitle), h('button', { class: 'btn small ghost', onclick: closeModal }, '✕')),
