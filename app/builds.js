@@ -108,16 +108,7 @@ function openPublish() {
   const err = h('div', { class: 'warn', style: 'margin-top:6px' });
   const stat = id => fmtNum(r.stats.get(id) ?? 0, 0);
   const chosen = new Set();
-  const tagBox = h('div', { class: 'pb-tagpick' });
-  const drawTags = () => {
-    tagBox.innerHTML = '';
-    for (const t of BUILD_TAGS) {
-      const on = chosen.has(t), full = !on && chosen.size >= MAX_TAGS;
-      tagBox.append(h('button', { type: 'button', class: 'tag' + (on ? ' on' : '') + (full ? ' off' : ''), disabled: full,
-        onclick: () => { if (on) chosen.delete(t); else chosen.add(t); drawTags(); } }, tagLabel(t)));
-    }
-  };
-  drawTags();
+  const tagBox = tagPicker(chosen);
   const btn = h('button', { class: 'btn primary', onclick: async () => {
     if (!name.value.trim()) { err.textContent = T.pbNeedName; return; }
     btn.disabled = true; err.textContent = '';
@@ -159,7 +150,7 @@ function drawPublicList() {
   const items = PB.list.filter(b => (!PB.tag || (b.tags || []).includes(PB.tag))
     && matches(PB.q, b.name, b.author, b.description, ctx.classes.get(b.class_id)?.name, ...(b.tags || []).map(tagLabel)));
   if (PB.tag) list.append(h('div', { class: 'pb-tagfilter' }, T.pbTagFilter + ': ',
-    h('button', { type: 'button', class: 'tag on', onclick: () => { PB.tag = null; drawPublicList(); } }, tagLabel(PB.tag), ' ✕')));
+    h('button', { type: 'button', class: 'tag on', onclick: () => { PB.tag = null; renderCenter(); } }, tagLabel(PB.tag), ' ✕')));
   if (!items.length) { list.append(h('div', { class: 'hint pb-msg' }, PB.loaded ? T.pbEmpty : T.pbLoading)); return; }
   for (const b of items) {
     const v = b.v;
@@ -180,9 +171,11 @@ function drawPublicList() {
         h('div', null, h('span', null, ctx.stats.get(ctx.ids.HP).name), h('b', null, v ? fmtNum(v.hp, 0) : '?')),
         h('div', null, h('span', null, 'EHP'), h('b', null, v ? fmtNum(v.ehp, 0) : '?'))),
       b.description ? h('div', { class: 'pb-desc' }, b.description) : null,
-      (b.tags || []).length ? h('div', { class: 'pb-tags' }, b.tags.filter(t => BUILD_TAGS.includes(t)).map(t =>
+      (b.tags || []).length || (mine && !PB.noTags) ? h('div', { class: 'pb-tags' }, (b.tags || []).filter(t => BUILD_TAGS.includes(t)).map(t =>
         h('button', { type: 'button', class: 'tag' + (PB.tag === t ? ' on' : ''), title: T.pbTagClick,
-          onclick: () => { PB.tag = PB.tag === t ? null : t; drawPublicList(); } }, tagLabel(t)))) : null,
+          onclick: () => { PB.tag = PB.tag === t ? null : t; renderCenter(); } }, tagLabel(t))),
+        mine && !PB.noTags ? h('button', { type: 'button', class: 'tag edit', title: T.pbEditTags, onclick: () => editTags(b) },
+          (b.tags || []).length ? '✎' : '+ ' + T.pbAddTags) : null) : null,
       h('div', { class: 'pb-foot' },
         h('button', { class: 'pb-like' + (isLiked ? ' on' : ''), title: isLiked ? T.pbUnlike : T.pbLike, onclick: () => likePublic(b) }, isLiked ? '♥ ' : '♡ ', String(b.likes)),
         h('div', { class: 'spacer' }),
@@ -195,6 +188,58 @@ function drawPublicList() {
 const BUILD_TAGS = ['pve', 'pvp', 'farm', 'solo', 'party', 'boss', 'tank', 'support', 'dd', 'crit', 'dodge', 'budget', 'endgame', 'newbie', 'event', 'arena'];
 const MAX_TAGS = 5;
 const tagLabel = t => (T.tagNames && T.tagNames[t]) || t;
+
+// chips to choose up to MAX_TAGS tags; changes the given Set
+function tagPicker(chosen) {
+  const box = h('div', { class: 'pb-tagpick' });
+  const draw = () => {
+    box.innerHTML = '';
+    for (const t of BUILD_TAGS) {
+      const on = chosen.has(t), full = !on && chosen.size >= MAX_TAGS;
+      box.append(h('button', { type: 'button', class: 'tag' + (on ? ' on' : '') + (full ? ' off' : ''), disabled: full,
+        onclick: () => { if (on) chosen.delete(t); else chosen.add(t); draw(); } }, tagLabel(t)));
+    }
+  };
+  draw();
+  return box;
+}
+// the author changes the tags of a published build (server/005-edit-tags.sql checks the secret token)
+function editTags(b) {
+  const chosen = new Set((b.tags || []).filter(t => BUILD_TAGS.includes(t)));
+  const err = h('div', { class: 'warn', style: 'margin-top:6px' });
+  const save = h('button', { class: 'btn primary', onclick: async () => {
+    save.disabled = true; err.textContent = '';
+    try {
+      const ok = await sb('rpc/set_build_tags', { method: 'POST', body: JSON.stringify({ p_id: b.id, p_token: ownerToken(), p_tags: [...chosen] }) });
+      if (ok !== true) throw new Error(T.pbNotYours);
+      b.tags = [...chosen];
+      closeModal(); drawPublicList(); toast(T.pbTagsSaved);
+    } catch (e) { err.textContent = /set_build_tags|PGRST202/.test(e.message) ? T.pbNeedTagsSql : T.pbError + ' ' + e.message; save.disabled = false; }
+  } }, T.save);
+  openModal(h('div', { class: 'dialog narrow' },
+    h('div', { class: 'dialog-head' }, h('h3', null, T.pbEditTags + ': ' + b.name), h('button', { class: 'btn small ghost', onclick: closeModal }, '✕')),
+    h('div', { class: 'dialog-body' }, h('div', { class: 'hint', style: 'margin:0 0 10px' }, T.pbTagsMax), tagPicker(chosen), err),
+    h('div', { class: 'dialog-foot' }, h('button', { class: 'btn', onclick: closeModal }, T.close), save)));
+}
+
+// "Tags ▾" in the bar: pick a tag to show only builds that have it
+function tagFilterButton() {
+  return h('button', { class: 'btn pb-cls' + (PB.tag ? ' on' : ''), type: 'button', title: T.pbTagClick, onclick: e => {
+    const anchor = e.currentTarget;
+    if (!popoverToggle(anchor)) return;
+    const pick = t => { closePopover(); PB.tag = t; renderCenter(); };
+    popover = h('div', { class: 'pop tp' },
+      h('button', { type: 'button', class: 'tag' + (PB.tag ? '' : ' on'), onclick: () => pick(null) }, T.pbAllTags),
+      h('div', { class: 'tp-list' }, BUILD_TAGS.map(t => {
+        const n = PB.list.filter(b => (b.tags || []).includes(t)).length;
+        return h('button', { type: 'button', class: 'tag' + (PB.tag === t ? ' on' : '') + (n ? '' : ' empty'), onclick: () => pick(t) }, tagLabel(t), n ? h('small', null, ' ' + n) : null);
+      })));
+    document.body.append(popover);
+    const rc = anchor.getBoundingClientRect();
+    popover.style.left = Math.max(8, Math.min(rc.left, innerWidth - popover.offsetWidth - 8)) + 'px';
+    popover.style.top = rc.bottom + 6 + 'px';
+  } }, iconEl('tag'), h('span', null, PB.tag ? tagLabel(PB.tag) : T.pbTags), iconEl('down'));
+}
 
 function filterClassIds() {
   const c = PB.filter != null && ctx.classes.get(PB.filter);
@@ -221,6 +266,7 @@ function renderBuilds(el) {
   el.append(h('div', { class: 'pb-bar' },
     h('button', { class: 'btn primary', onclick: openPublish }, '⬆ ' + T.pbPublishBtn),
     classFilterButton(),
+    PB.noTags ? null : tagFilterButton(),
     seg([['new', T.pbNew], ['top', T.pbTop]], PB.sort, v => { PB.sort = v; renderCenter(); loadPublic(); }),
     search,
     h('button', { class: 'btn', title: T.pbRefresh, onclick: () => loadPublic() }, '⟳')));
