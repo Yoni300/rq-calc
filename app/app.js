@@ -349,7 +349,14 @@ const TOP_ICONS = {
   code: '<path d="M8 7l-5 5 5 5M16 7l5 5-5 5M13.5 5l-3 14"/>',
   globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.6 3.9 5.6 3.9 9s-1.3 6.4-3.9 9c-2.6-2.6-3.9-5.6-3.9-9S9.4 5.6 12 3z"/>',
   down: '<path d="M6 9l6 6 6-6"/>',
+  // tabs
+  gear: '<path d="M12 3l7.5 3v5.5c0 4.4-3.1 7.9-7.5 9.5-4.4-1.6-7.5-5.1-7.5-9.5V6z"/><path d="M12 7.5v9M8.5 11h7"/>',
+  talents: '<path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.8-5.2 2.8 1-5.8-4.3-4.1 5.9-.9z"/>',
+  effects: '<path d="M9.5 3h5M10.5 3v5.6L5.4 17.4A2.4 2.4 0 0 0 7.5 21h9a2.4 2.4 0 0 0 2.1-3.6l-5.1-8.8V3"/><path d="M7.4 14.5h9.2"/>',
+  collection: '<path d="M7.5 4h9v5.5a4.5 4.5 0 0 1-9 0z"/><path d="M7.5 6.5H5a2.8 2.8 0 0 0 3 3.6M16.5 6.5H19a2.8 2.8 0 0 1-3 3.6M12 14v3.5M8.5 20.5h7M9.5 17.5h5v3h-5z"/>',
 };
+// the same icons as DOM elements, for h(...)
+function iconEl(name) { const t = document.createElement('template'); t.innerHTML = svgIcon(name); return t.content.firstChild; }
 const svgIcon = (name, cls = 'ic') => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${TOP_ICONS[name]}</svg>`;
 function topButton(id, icon, label, menu = false) {
   $(id).innerHTML = svgIcon(icon) + `<span>${esc(label)}</span>` + (menu ? svgIcon('down', 'ic caret') : '');
@@ -532,7 +539,7 @@ function renderTabs() {
   const talCount = validTalents(ch).length;
   const effCount = Object.keys(ch.buffs).length + (ch.auraId ? 1 : 0) + Object.keys(ch.sharedAuras || {}).length + (ch.elixirId ? 1 : 0) + ch.consumables.length;
   for (const [k, label, n] of [['gear', T.tabGear, eqCount], ['talents', T.tabTalents, talCount], ['effects', T.tabEffects, effCount], ['collection', T.tabCollection, ch.collected.length]]) {
-    el.append(h('button', { class: 'tab' + (tab === k ? ' on' : ''), onclick: () => { if (tab === k) return; tab = k; store.set('tab', k); renderCenter(); animateEnter($('center')); renderTop(); } }, label, n ? h('span', { class: 'n' }, n) : null));
+    el.append(h('button', { class: 'tab' + (tab === k ? ' on' : ''), onclick: () => { if (tab === k) return; tab = k; store.set('tab', k); renderCenter(); animateEnter($('center')); renderTop(); } }, iconEl(k), label, n ? h('span', { class: 'n' }, n) : null));
   }
 }
 // fade the content in only when the tab changes, not on every update (that made pictures blink)
