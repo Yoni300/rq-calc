@@ -334,7 +334,7 @@ for (const v of RQDATA.TalentVariable || []) { if (!talentVars.has(v.Talent_Id))
 function talentText(t) {
   const vars = talentVars.get(t.id) || [];
   const sub = s => String(s || '').replace(/\{(\d+)\}/g, (_, n) => vars[+n] ?? '?').replace(/◊/g, '• ');
-  let s = `<b>${esc(t.name)}</b>${t.active ? ' <span class="m">(активный)</span>' : ''}\n${esc(sub(t.description))}`;
+  let s = `<b>${esc(t.name)}</b>${t.active ? ` <span class="m">(${esc(T.activeTalent)})</span>` : ''}\n${esc(sub(t.description))}`;
   if (t.passiveDescription) s += `\n<span class="m">${esc(sub(t.passiveDescription))}</span>`;
   if (t.equipmentCondition) s += `\n<span class="m">${esc(t.equipmentCondition)}</span>`;
   return s;
@@ -380,7 +380,7 @@ function renderTop() {
   $('btnPublic').classList.toggle('on', tab === 'builds');
   const ls = $('langSwitch'); ls.innerHTML = ''; ls.title = T.language;
   for (const [k, label] of [['uk', 'УКР'], ['ru', 'РУС'], ['en', 'ENG']]) {
-    ls.append(h('button', { class: k === lang ? 'on' : '', onclick: () => { lang = k; T = RQC_I18N[k]; store.set('lang', k); renderAll(); } }, label));
+    ls.append(h('button', { class: k === lang ? 'on' : '', onclick: () => { lang = k; T = RQC_I18N[k]; store.set('lang', k); applyGameLang(); recalc(); renderAll(); } }, label));
   }
 }
 $('buildName').addEventListener('input', e => { buildName = e.target.value; store.set('currentName', buildName); });
@@ -909,7 +909,7 @@ function renderEditorDetail() {
   const max = ctx.maxUpgrade(item);
   el.append(h('h4', null, T.upgrade), h('div', { class: 'upg' },
     Array.from({ length: max + 1 }, (_, i) => h('button', { class: ((e.upgrade || 0) === i ? 'on' : '') + J('upg:' + i), onclick: () => { flash = 'upg:' + i; upd(x => { x.upgrade = i; }); } }, '+' + i))));
-  if (res?.upgrade?.allStat) el.append(h('div', { class: 'sub-note' }, `+${res.upgrade.allStat} ко всем характеристикам`));
+  if (res?.upgrade?.allStat) el.append(h('div', { class: 'sub-note' }, `+${res.upgrade.allStat} ${T.allStats}`));
 
   // stamp: the list shows each stamp's bonuses in the current color, computed for this item
   const stamps = ctx.stampsForItem(item, ch.classId);
@@ -1055,7 +1055,7 @@ function guildTalentText(t, pts, max) {
   const shown = pts || 1;
   const desc = t.description.replace(/\{(\d+)\}/g, (_, n) => t.value(+n, shown));
   const bon = t.bonuses(shown).map(bonusText).join('\n');
-  let s = `<b>${esc(t.name)}</b>${t.active ? ' <span class="m">(активный)</span>' : ''}`;
+  let s = `<b>${esc(t.name)}</b>${t.active ? ` <span class="m">(${esc(T.activeTalent)})</span>` : ''}`;
   if (max > 1) s += `\n<span class="m">${T.guildLevel}: ${pts}/${max}</span>`;
   if (desc) s += `\n${esc(desc)}`;
   if (bon) s += `\n<span class="g">${esc(bon)}</span>`;
@@ -1212,7 +1212,7 @@ function statTip(s, r) {
     txt += '\n' + esc(s.descTemplate.replace(/\[[^\]]*\]/g, '').replace(/\{0\}/g, shown).replace(/\r/g, '').trim());
   }
   const src = r.bonuses.filter(b => ctx.bonusTypes.get(b.typeId)?.stats.some(x => x.statId === s.id));
-  if (src.length) txt += `\n\n<span class="m">${esc(T.sourceTitle)}:</span>\n` + src.slice(0, 18).map(b => `<span class="g">${esc(bonusText(b))}</span> <span class="m">— ${esc(b.source || '')}</span>`).join('\n') + (src.length > 18 ? `\n<span class="m">… +${src.length - 18}</span>` : '');
+  if (src.length) txt += `\n\n<span class="m">${esc(T.sourceTitle)}:</span>\n` + src.slice(0, 18).map(b => `<span class="g">${esc(bonusText(b))}</span> <span class="m">— ${esc(sourceLabel(b.source))}</span>`).join('\n') + (src.length > 18 ? `\n<span class="m">… +${src.length - 18}</span>` : '');
   return txt;
 }
 const openSections = new Set(store.get('openSections', ['attributes', 'offense', 'defenseSec']));
@@ -1303,6 +1303,7 @@ function renderRight() {
   // author contact; click copies the Discord name
   el.append(h('div', { class: 'note contact', title: T.copyContact, onclick: () => navigator.clipboard.writeText('ondirty').then(() => toast(T.copied + ': ondirty')) },
     T.author + ': ', h('span', { class: 'discord' }, 'Discord ', h('b', null, 'ondirty'))));
+  if (!window.RQC_WEB) el.append(h('div', { class: 'note' }, h('a', { class: 'site-link', href: SITE_URL, target: '_blank' }, T.siteLink)));
   el.scrollTop = scroll;
 }
 
@@ -1351,5 +1352,61 @@ if (window.rqcApp && window.RQC_VERSION) {
   store.set('lastVersion', v);
 }
 
+// ---------- the web version (installed app only): told once, then a link under the results ----------
+const SITE_URL = 'https://yoni300.github.io/rq-calc/';
+function showSiteNotice() {
+  if (window.RQC_WEB || store.get('siteNoticeSeen', false)) return;
+  const close = () => { store.set('siteNoticeSeen', true); el.remove(); };
+  const el = h('div', { class: 'upd site' },
+    h('div', { class: 'upd-t' }, T.siteTitle),
+    h('div', { class: 'upd-s' }, T.siteText),
+    h('div', { class: 'upd-btns' },
+      h('button', { class: 'btn small', onclick: close }, T.siteClose),
+      h('a', { class: 'btn primary small', href: SITE_URL, target: '_blank', onclick: close }, T.siteOpen)));
+  document.body.append(el);
+}
+
+// ---------- game texts in the chosen language ----------
+// The game database is Russian; data/lang-*.js translate what the interface shows (stats, bonuses, classes, slots…).
+// The engine keeps working with the database as is; only display fields of its objects change, the originals are kept.
+const gameRu = new Map();
+function applyGameLang() {
+  const tr = (window.RQC_GAME_I18N || {})[lang] || {};
+  const set = (obj, field, text) => {
+    if (!obj) return;
+    let orig = gameRu.get(obj);
+    if (!orig) gameRu.set(obj, orig = {});
+    if (!(field in orig)) orig[field] = obj[field];
+    obj[field] = text ?? orig[field];
+  };
+  const names = (table, list, field = 'name', idKey = 'id') => { for (const o of list) set(o, field, tr[table]?.[o[idKey]]); };
+  for (const s of ctx.stats.values()) {
+    const t = tr.Stat?.[s.id] || {};
+    set(s, 'name', t.Name); set(s, 'descTemplate', t.DescriptionTemplate); set(s, 'progressName', t.ProgressName);
+  }
+  names('BonusType', ctx.bonusTypes.values(), 'template');
+  names('Class', ctx.classes.values());
+  names('EquipmentSlot', ctx.slots.values());
+  names('EquipmentType', ctx.eqTypes.values());
+  names('TalentBranch', ctx.talentBranches.values());
+  names('GuildTalentBranch', ctx.guildBranches);
+  names('Aura', ctx.auras.values());
+  names('Buff', ctx.buffs.values());
+  names('Elixir', ctx.elixirs.values());
+  names('Consumable', ctx.consumables.values());
+  names('Gender', ctx.genders, 'Name', 'Id');
+  names('State', ctx.states, 'Name', 'Id');
+  names('Event', ctx.events, 'Name', 'Id');
+  names('CollectedGroup', ctx.collectedGroups, 'Name', 'Id');
+}
+// bonus sources come from the engine in Russian ("Печать: …"): translate the label part
+function sourceLabel(src) {
+  const s = String(src || ''), map = T.srcNames || {};
+  const i = s.indexOf(': ');
+  return i < 0 ? map[s] || s : (map[s.slice(0, i)] || s.slice(0, i)) + s.slice(i);
+}
+
+applyGameLang();
 recalc();
 renderAll();
+showSiteNotice();

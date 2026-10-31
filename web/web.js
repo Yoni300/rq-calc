@@ -2,6 +2,7 @@
 // (preload.js): checks build.json every 5 minutes and when the tab comes back, and a new build reloads the page
 // through the same banner and countdown the app uses. The page's own build id comes from this script's ?v=.
 (() => {
+  window.RQC_WEB = true;
   const me = document.currentScript && new URL(document.currentScript.src).searchParams.get('v');
   let state = { status: 'idle' }, last = 0;
   const listeners = [];

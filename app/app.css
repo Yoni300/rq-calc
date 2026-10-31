@@ -605,6 +605,11 @@ input[type=range] { accent-color: var(--gold-2); }
 /* update banner */
 .upd { position: fixed; right: 18px; bottom: 18px; z-index: 110; width: 300px; padding: 12px 14px; border-radius: 9px;
   background: linear-gradient(180deg, #221c14, #17130e); border: 1px solid var(--line-3); box-shadow: 0 12px 30px rgba(0, 0, 0, .6), var(--frame); animation: pop-in .2s ease-out; }
+/* "the calculator is now on the web": bottom left, so it never covers the update banner */
+.upd.site { right: auto; left: 18px; width: 320px; }
+.upd.site a.btn { text-decoration: none; display: inline-flex; align-items: center; }
+.note .site-link { color: var(--gold); text-decoration: none; }
+.note .site-link:hover { text-decoration: underline; }
 .upd-t { font-family: var(--f-display); font-weight: 700; color: var(--gold); margin-bottom: 6px; }
 .upd-s { font-size: 12px; color: var(--muted); margin-bottom: 9px; }
 .upd-bar { height: 6px; border-radius: 3px; background: rgba(0, 0, 0, .5); overflow: hidden; }

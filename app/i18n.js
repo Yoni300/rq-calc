@@ -44,6 +44,9 @@ window.RQC_I18N = {
     codeTitle: 'Код білда', codeHelp: 'Скопіюйте код, щоб поділитися білдом, або вставте чужий код і натисніть «Відкрити».',
     copy: 'Копіювати', copied: 'Скопійовано', badCode: 'Код не розпізнано.', close: 'Закрити', language: 'Мова',
     sourceTitle: 'Звідки бонус',
+    activeTalent: 'активний',
+    srcNames: { 'Класс': 'Клас', 'Печать': 'Печатка', 'Эликсир': 'Еліксир', 'Гильдия': 'Гільдія', 'Аура': 'Аура', 'Бафф': 'Бафф', 'Талант': 'Талант', 'Карта': 'Карта', 'Коллекция': 'Колекція', 'Без оружия': 'Без зброї', 'Уровень': 'Рівень', 'Очки характеристик': 'Очки характеристик', 'База': 'База', 'Снаряжение': 'Спорядження' },
+    siteTitle: 'Калькулятор тепер є на сайті', siteText: 'Відкривайте його в браузері без встановлення й діліться посиланням з друзями. «Збірки гравців» спільні з програмою.', siteOpen: 'Відкрити сайт', siteClose: 'Зрозуміло', siteLink: 'Онлайн-версія',
   },
   ru: {
     updDownloading: 'Загружается обновление v{v}…', updReady: 'Обновление v{v} готово', updLater: 'Установится само, когда закроете программу.', updRestart: 'Перезапустить и обновить', updNow: 'Обновить сейчас', updPostpone: 'Позже', updIn: 'Программа перезапустится через {s} с. Ваш билд сохранён.', updWaiting: 'Перезапуск подождёт, пока вы закончите редактировать.', updDone: 'Программа обновлена до v{v}', testTip: 'Тестовая версия из кода на этом ПК. Игроки увидят изменения только после публикации.',
@@ -89,6 +92,8 @@ window.RQC_I18N = {
     codeTitle: 'Код билда', codeHelp: 'Скопируйте код, чтобы поделиться билдом, или вставьте чужой код и нажмите «Открыть».',
     copy: 'Копировать', copied: 'Скопировано', badCode: 'Код не распознан.', close: 'Закрыть', language: 'Язык',
     sourceTitle: 'Откуда бонус',
+    activeTalent: 'активный',
+    siteTitle: 'Калькулятор теперь есть на сайте', siteText: 'Открывайте его в браузере без установки и делитесь ссылкой с друзьями. «Сборки игроков» общие с программой.', siteOpen: 'Открыть сайт', siteClose: 'Понятно', siteLink: 'Онлайн-версия',
   },
   en: {
     updDownloading: 'Downloading update v{v}…', updReady: 'Update v{v} is ready', updLater: 'It installs by itself when you close the app.', updRestart: 'Restart and update', updNow: 'Update now', updPostpone: 'Later', updIn: 'The app restarts in {s} s. Your build is saved.', updWaiting: 'The restart waits until you finish editing.', updDone: 'Updated to v{v}', testTip: 'Test version from the source code on this PC. Players get the changes only after publishing.',
@@ -134,5 +139,8 @@ window.RQC_I18N = {
     codeTitle: 'Build code', codeHelp: 'Copy the code to share the build, or paste someone’s code and press “Open”.',
     copy: 'Copy', copied: 'Copied', badCode: 'Code not recognized.', close: 'Close', language: 'Language',
     sourceTitle: 'Bonus sources',
+    activeTalent: 'active',
+    srcNames: { 'Класс': 'Class', 'Печать': 'Stamp', 'Эликсир': 'Elixir', 'Гильдия': 'Guild', 'Аура': 'Aura', 'Бафф': 'Buff', 'Талант': 'Talent', 'Карта': 'Card', 'Коллекция': 'Collection', 'Без оружия': 'No weapon', 'Уровень': 'Level', 'Очки характеристик': 'Attribute points', 'База': 'Base', 'Снаряжение': 'Equipment' },
+    siteTitle: 'The calculator is now on the web', siteText: 'Open it in the browser without installing and share the link with friends. Public builds are shared with the app.', siteOpen: 'Open the site', siteClose: 'Got it', siteLink: 'Web version',
   },
 };
