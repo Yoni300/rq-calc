@@ -55,6 +55,33 @@ addBuff({ name: 'Кристалл четырёх стихий', classId: CLASS.W
 // 5. Разбойник — «Костёр»: +2098 defense around the campfire (value for 65 lvl)
 addBuff({ name: 'Костёр (65 ур.)', classId: CLASS.ROGUE, bonuses: [[T.DEF, 2098]] });
 
+// 6. Collection trophies have no pictures in the database: give each a fitting icon of a pet, mount,
+//    book, potion or item that is already in data/img (picked by the trophy's theme).
+const TROPHY_ICONS = {
+  'День победы': 57, 'Анатомия Гиома': 679, 'Секреты Древней улитки': 1704, 'Механика Железных жуж': 1680,
+  'Злобоглазу в глаз': 1674, 'Укрощённый Ирекс': 1886, 'Не дубовый Жёлудь': 1711, 'Кабан мясистый': 770,
+  'Дрова из Кленовых энтов': 684, 'Пугалом не испугаешь': 1707, 'Соната лунатиков': 1700, 'Мерцание Жуж': 1862,
+  'Травля Мохоедок': 1694, 'Небесный сбор с Остролитки': 60, 'Кто такие Песчанные Харриеры': 1882,
+  'Как устроены сопелки': 678, 'Полезное из Хлыстовика': 674, 'Задымление': 1175, 'За автографом к Алисе': 487,
+  'Кристаллоидов на крошку': 1685, 'Усмирение Малого пожирателя яда': 1976, 'Иссушение Малого пожирателя воды': 1703,
+  'Грызть Гранит Истины': 1675, 'Знакомство с Орками Шахтёрами': 852, 'Саламандра на десерт': 1697,
+  'Стихийное бедствие': 1097, 'Трансмутация оружия': 1679, 'Трансмутация экипировки': 1954, 'Морфология': 673,
+  'Энтомология': 670, 'Зоология': 676, 'Расщепитель': 1673, 'Рудокоп': 1906, 'Металлург': 766, 'Портной': 699,
+  'Кондитер': 56, 'Самогонщик': 59, 'Аптекарь': 2056, 'Буря в пустыне': 1695, 'Дары болот': 1678,
+  'Суровый набор': 1690, 'Пепелище': 1698, 'Предания ночного леса': 1696, 'Нечисть не просочится': 1682,
+  'Луговой сбор': 55, 'Снежная пора': 1688, 'Осенняя пора': 1676, 'Яркое настроение': 1705,
+  'Сердцу не прикажешь': 155, 'За небесными покупками': 225, 'Военное дело не хитрое': 1844,
+  'И кто тут БОСС?': 1687, 'Они сражались за Морру': 550, 'Тайны пирамид': 669, 'Кто в домике живёт': 1672,
+};
+let trophyIcons = 0;
+for (const t of D.Trophy || []) {
+  const img = TROPHY_ICONS[t.Name];
+  if (img != null && fs.existsSync(path.join(root, 'data', 'img', img + '.png')) && t.Image_Id !== img) { t.Image_Id = img; trophyIcons++; }
+}
+if (trophyIcons) patched.push(`іконки трофеїв: ${trophyIcons}`);
+const missing = (D.Trophy || []).filter(t => t.Image_Id == null).map(t => t.Name);
+if (missing.length) console.warn('trophies without an icon:', missing.join(', '));
+
 const js = `(function (d) { if (typeof module === 'object' && module.exports) module.exports = d; else window.RQDATA = d; })(${JSON.stringify(D)});\n`;
 fs.writeFileSync(dataFile, js);
 console.log(patched.length ? 'patched: ' + patched.join(', ') : 'nothing to patch');

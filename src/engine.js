@@ -407,7 +407,7 @@
     for (const c of T.CollectedItem || []) {
       const eq = c.Equipment_Id != null ? equipment.get(c.Equipment_Id) : null;
       const name = eq ? eq.name : c.Pet_Id != null ? pets.get(c.Pet_Id)?.Name : trophies.get(c.Trophy_Id)?.Name;
-      const imageId = eq ? eq.imageId : c.Pet_Id != null ? pets.get(c.Pet_Id)?.Image_Id : null;
+      const imageId = eq ? eq.imageId : c.Pet_Id != null ? pets.get(c.Pet_Id)?.Image_Id : trophies.get(c.Trophy_Id)?.Image_Id;
       collected.set(c.Id, { id: c.Id, groupId: c.Group_Id, name, imageId: imageId ?? null, genderId: eq ? eq.genderId : null, orderIndex: c.OrderIndex ?? 0, inVersion: inVersion(c), bonuses: collectedBonuses(c.Id) });
     }
 
