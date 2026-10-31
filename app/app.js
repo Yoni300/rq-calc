@@ -1353,7 +1353,7 @@ if (window.rqcApp && window.RQC_VERSION) {
 }
 
 // ---------- the web version (installed app only): told once, then a link under the results ----------
-const SITE_URL = 'https://yoni300.github.io/rq-calc/';
+const SITE_URL = 'https://rqcalc.com/';
 function showSiteNotice() {
   if (window.RQC_WEB || store.get('siteNoticeSeen', false)) return;
   const close = () => { store.set('siteNoticeSeen', true); el.remove(); };
