@@ -440,16 +440,27 @@ function eventHints() {
       h('span', null, on ? '✓ ' : '◇ '), h('b', null, item.name), ' — ', evt ? evt.Name : '');
   }));
 }
+// class picker: four columns (base class + its two specializations) with icons and level ranges
+function openClassPicker(anchor) {
+  closePopover();
+  const roots = [...ctx.classes.values()].filter(c => c.baseId == null);
+  const card = (c, sub) => h('div', {
+    class: 'cp-item' + (sub ? ' sub' : '') + (c.id === ch.classId ? ' on' : ''),
+    onclick: () => { closePopover(); if (c.id !== ch.classId) changed(() => setClass(c.id)); },
+  }, img(c.imageId), h('div', null, h('div', { class: 'cp-name' }, c.name), h('div', { class: 'cp-lv' }, `${T.lvl} ${c.minLevel}–${c.maxLevel}`)));
+  popover = h('div', { class: 'pop cp' }, h('div', { class: 'cp-grid' }, roots.map(r => h('div', { class: 'cp-col' },
+    card(r, false), h('div', { class: 'cp-subs' }, r.children.map(id => card(ctx.classes.get(id), true)))))));
+  document.body.append(popover);
+  const rc = anchor.getBoundingClientRect();
+  popover.style.left = Math.max(8, Math.min(rc.left, innerWidth - popover.offsetWidth - 8)) + 'px';
+  popover.style.top = rc.bottom + 6 + 'px';
+}
 function renderLeft() {
   const el = $('left'); el.innerHTML = '';
   const cls = ctx.classes.get(ch.classId);
 
-  const classSel = h('select', { onchange: e => changed(() => setClass(+e.target.value)) });
-  for (const root of [...ctx.classes.values()].filter(c => c.baseId == null)) {
-    const og = h('optgroup', { label: root.name });
-    for (const id of [root.id, ...root.children]) og.append(h('option', { value: id, selected: id === ch.classId }, ctx.classes.get(id).name));
-    classSel.append(og);
-  }
+  const classSel = h('button', { class: 'cls-btn', type: 'button', onclick: e => openClassPicker(e.currentTarget) },
+    img(cls.imageId), h('span', null, cls.name), h('span', { class: 'pb-arrow' }, '▾'));
   const lvlRange = h('input', { type: 'range', min: cls.minLevel, max: cls.maxLevel, value: ch.level });
   const lvlInp = h('input', { class: 'inp', type: 'number', min: cls.minLevel, max: cls.maxLevel, value: ch.level });
   const setLevel = v => changed(c => { c.level = clamp(+v || cls.minLevel, cls.minLevel, cls.maxLevel); if (c.auraId && !ctx.classAuras(c.classId, c.level).some(a => a.id === c.auraId)) c.auraId = null; pruneBuffs(); });

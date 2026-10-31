@@ -609,3 +609,23 @@ input[type=range] { accent-color: var(--gold-2); }
 .upd-s { font-size: 12px; color: var(--muted); margin-bottom: 9px; }
 .upd-bar { height: 6px; border-radius: 3px; background: rgba(0, 0, 0, .5); overflow: hidden; }
 .upd-bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--gold-2), var(--gold-hi)); transition: width .3s; }
+
+/* class picker */
+.cls-btn { width: 100%; display: flex; align-items: center; gap: 8px; padding: 4px 9px 4px 4px; background: rgba(0, 0, 0, .35); border: 1px solid var(--line); border-radius: 6px; cursor: pointer; text-align: left; box-shadow: inset 0 1px 3px rgba(0, 0, 0, .5); }
+.cls-btn:hover { border-color: var(--line-3); }
+.cls-btn img { width: 26px; height: 26px; border-radius: 5px; border: 1px solid var(--line-2); }
+.cls-btn span:nth-of-type(1) { flex: 1; font-weight: 600; }
+.pop.cp { padding: 12px; width: auto; }
+.cp-grid { display: grid; grid-template-columns: repeat(4, 200px); gap: 10px; }
+.cp-col { display: flex; flex-direction: column; gap: 6px; padding: 8px; border: 1px solid var(--line); border-radius: 8px; background: rgba(0, 0, 0, .2); }
+.cp-subs { display: flex; flex-direction: column; gap: 4px; padding-left: 12px; border-left: 1px solid var(--line-2); margin-left: 18px; }
+.cp-item { display: flex; align-items: center; gap: 9px; padding: 5px 7px; border-radius: 7px; cursor: pointer; border: 1px solid transparent; transition: background .12s, border-color .12s, transform .08s; }
+.cp-item:hover { background: var(--soft); border-color: var(--line-2); }
+.cp-item:active { transform: scale(.96); }
+.cp-item img { width: 40px; height: 40px; border-radius: 7px; border: 1px solid var(--line-3); background: radial-gradient(circle, #3a2d1a, #120f0b); flex: none; }
+.cp-item.sub img { width: 32px; height: 32px; }
+.cp-name { font-family: var(--f-display); font-weight: 700; font-size: 15px; color: var(--gold); }
+.cp-item.sub .cp-name { font-size: 13.5px; color: var(--fg); }
+.cp-lv { font-size: 11px; color: var(--dim); }
+.cp-item.on { background: linear-gradient(90deg, rgba(230, 184, 92, .2), rgba(230, 184, 92, .05)); border-color: var(--line-3); }
+.cp-item.on .cp-name { color: var(--gold-hi); }
