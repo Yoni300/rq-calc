@@ -488,15 +488,22 @@ function eventHints() {
   }));
 }
 // class picker: four columns (base class + its two specializations) with icons and level ranges
-function openClassPicker(anchor) {
+// Class list with icons. Used for the character's class and for the class filter of public builds
+// (opts.allLabel adds an "all classes" item that picks null).
+function openClassPicker(anchor, opts = {}) {
   if (!popoverToggle(anchor)) return;
+  const cur = 'current' in opts ? opts.current : ch.classId;
+  const pick = opts.onPick || (id => { if (id !== ch.classId) changed(() => setClass(id)); });
   const roots = [...ctx.classes.values()].filter(c => c.baseId == null);
   const card = (c, sub) => h('div', {
-    class: 'cp-item' + (sub ? ' sub' : '') + (c.id === ch.classId ? ' on' : ''),
-    onclick: () => { closePopover(); if (c.id !== ch.classId) changed(() => setClass(c.id)); },
-  }, img(c.imageId), h('div', null, h('div', { class: 'cp-name' }, c.name), h('div', { class: 'cp-lv' }, `${T.lvl} ${c.minLevel}–${c.maxLevel}`)));
-  popover = h('div', { class: 'pop cp' }, h('div', { class: 'cp-grid' }, roots.map(r => h('div', { class: 'cp-col' },
-    card(r, false), h('div', { class: 'cp-subs' }, r.children.map(id => card(ctx.classes.get(id), true)))))));
+    class: 'cp-item' + (sub ? ' sub' : '') + (c.id === cur ? ' on' : ''),
+    onclick: () => { closePopover(); pick(c.id); },
+  }, img(c.imageId), h('div', null, h('div', { class: 'cp-name' }, c.name), h('div', { class: 'cp-lv' }, opts.sub ? opts.sub(c) : `${T.lvl} ${c.minLevel}–${c.maxLevel}`)));
+  popover = h('div', { class: 'pop cp' },
+    opts.allLabel ? h('div', { class: 'cp-item cp-all' + (cur == null ? ' on' : ''), onclick: () => { closePopover(); pick(null); } },
+      h('span', { class: 'cp-all-ic' }, iconEl('globe')), h('div', { class: 'cp-name' }, opts.allLabel)) : null,
+    h('div', { class: 'cp-grid' }, roots.map(r => h('div', { class: 'cp-col' },
+      card(r, false), h('div', { class: 'cp-subs' }, r.children.map(id => card(ctx.classes.get(id), true)))))));
   document.body.append(popover);
   const rc = anchor.getBoundingClientRect();
   popover.style.left = Math.max(8, Math.min(rc.left, innerWidth - popover.offsetWidth - 8)) + 'px';

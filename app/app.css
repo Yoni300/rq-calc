@@ -695,3 +695,13 @@ input[type=range] { accent-color: var(--gold-2); }
 .lc.on .sw { background: linear-gradient(180deg, var(--gold-hi), var(--gold-2)); border-color: var(--gold-hi); }
 .lc.on .sw::after { transform: translateX(16px); background: #1a1206; }
 .lc:active .sw::after { width: 17px; }
+
+/* class filter of public builds */
+.pb-cls { display: inline-flex; align-items: center; gap: 7px; }
+.pb-cls img { width: 20px; height: 20px; border-radius: 4px; border: 1px solid var(--line-3); }
+.pb-cls .ic { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.pb-cls .ic:last-child { width: 12px; height: 12px; opacity: .7; }
+.pb-cls.on { color: var(--gold); border-color: var(--line-3); }
+.cp-all { margin-bottom: 10px; padding: 8px 10px; border: 1px solid var(--line); background: rgba(0, 0, 0, .2); }
+.cp-all-ic { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 7px; border: 1px solid var(--line-3); color: var(--gold); background: radial-gradient(circle, #3a2d1a, #120f0b); }
+.cp-all-ic .ic { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }

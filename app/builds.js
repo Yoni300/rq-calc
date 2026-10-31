@@ -2,7 +2,7 @@
 /* Public builds: shared between everyone who has the app, stored in Supabase (see server/supabase.sql).
    Uses globals from app.js at call time (ch, store, T, h, changed, …). */
 
-const PB = { list: [], loading: false, error: null, loaded: false, filter: 'all', sort: 'new', q: '', myHash: null };
+const PB = { list: [], loading: false, error: null, loaded: false, filter: null, sort: 'new', q: '', myHash: null };
 
 const sbConfigured = () => { const c = window.RQC_CONFIG || {}; return !!(c.supabaseUrl && c.supabaseKey); };
 async function sb(path, opts = {}) {
@@ -36,10 +36,12 @@ async function loadPublic() {
     await myHash();
     const order = PB.sort === 'top' ? 'likes.desc,created_at.desc' : 'created_at.desc';
     let q = `builds?select=id,created_at,name,author,description,class_id,level,likes,owner_hash,data&order=${order}&limit=200`;
-    if (PB.filter === 'class') q += `&class_id=eq.${ch.classId}`;
+    // class filter: the chosen class together with its professions (Стрелок → Охотник, Снайпер)
+    const ids = filterClassIds();
+    if (ids) q += `&class_id=in.(${ids.join(',')})`;
     // numbers, class and level are recomputed from the build itself (see verifyBuild)
     PB.list = (await sb(q) || []).map(b => { b.v = verifyBuild(b.data); delete b.data; return b; })
-      .filter(b => PB.filter !== 'class' || b.v?.classId === ch.classId);
+      .filter(b => !ids || ids.includes(b.v?.classId));
     PB.loaded = true;
     await syncLikes();
   } catch (e) { PB.error = e.message; }
@@ -165,6 +167,20 @@ function drawPublicList() {
   }
 }
 
+function filterClassIds() {
+  const c = PB.filter != null && ctx.classes.get(PB.filter);
+  return c ? [c.id, ...(c.children || [])] : null;
+}
+// button with the chosen class; opens the class list with icons
+function classFilterButton() {
+  const c = PB.filter != null ? ctx.classes.get(PB.filter) : null;
+  return h('button', { class: 'btn pb-cls' + (c ? ' on' : ''), type: 'button', title: T.pbClassFilter, onclick: e => openClassPicker(e.currentTarget, {
+    current: c ? c.id : null, allLabel: T.pbAll,
+    sub: x => (x.children || []).length ? T.pbWithProfs : '',
+    onPick: id => { PB.filter = id; renderCenter(); loadPublic(); },
+  }) }, c ? img(c.imageId) : iconEl('globe'), h('span', null, c ? c.name : T.pbAll), iconEl('down'));
+}
+
 function renderBuilds(el) {
   if (!sbConfigured()) {
     el.append(h('div', { class: 'box pb-setup' }, h('h3', null, T.publicBuilds), h('div', { style: 'white-space:pre-line;line-height:1.55' }, T.pbSetup)));
@@ -175,7 +191,7 @@ function renderBuilds(el) {
   const seg = (items, cur, on) => h('div', { class: 'seg' }, items.map(([v, label]) => h('button', { class: v === cur ? 'on' : '', onclick: () => on(v) }, label)));
   el.append(h('div', { class: 'pb-bar' },
     h('button', { class: 'btn primary', onclick: openPublish }, '⬆ ' + T.pbPublishBtn),
-    seg([['all', T.pbAll], ['class', ctx.classes.get(ch.classId).name]], PB.filter, v => { PB.filter = v; renderCenter(); loadPublic(); }),
+    classFilterButton(),
     seg([['new', T.pbNew], ['top', T.pbTop]], PB.sort, v => { PB.sort = v; renderCenter(); loadPublic(); }),
     search,
     h('button', { class: 'btn', title: T.pbRefresh, onclick: () => loadPublic() }, '⟳')));
