@@ -35,8 +35,9 @@ function createWindow() {
 }
 
 // ---------- automatic updates (GitHub Releases of Yoni300/rq-calc) ----------
-// The installed app checks for a new version at start and every 2 hours, downloads it in the background,
-// then offers "restart and update"; otherwise it installs when the app is closed.
+// The installed app checks for a new version at start, every 5 minutes and when its window gets focus,
+// downloads it in the background, then the page restarts it by itself after a short countdown
+// ("Later" postpones it; it also installs when the app is closed).
 let updateState = { status: 'idle' };
 function sendUpdate(state) {
   updateState = state;
@@ -51,11 +52,22 @@ function setupUpdates() {
   autoUpdater.on('update-available', info => sendUpdate({ status: 'downloading', version: info.version }));
   autoUpdater.on('download-progress', p => sendUpdate({ status: 'downloading', version: updateState.version, percent: Math.round(p.percent) }));
   autoUpdater.on('update-downloaded', info => sendUpdate({ status: 'ready', version: info.version }));
-  autoUpdater.on('error', err => console.error('update error', err && err.message));
-  ipcMain.on('rqc-install-update', () => autoUpdater.quitAndInstall(false, true));
-  const check = () => autoUpdater.checkForUpdates().catch(err => console.error('update check failed', err && err.message));
+  autoUpdater.on('error', err => {
+    console.error('update error', err && err.message);
+    // a failed download must not block the next checks
+    if (updateState.status === 'downloading') sendUpdate({ status: 'idle' });
+  });
+  ipcMain.on('rqc-install-update', () => autoUpdater.quitAndInstall(true, true));
+  let lastCheck = 0;
+  const check = () => {
+    if (updateState.status === 'downloading' || updateState.status === 'ready') return;
+    lastCheck = Date.now();
+    autoUpdater.checkForUpdates().catch(err => console.error('update check failed', err && err.message));
+  };
   check();
-  setInterval(check, 2 * 60 * 60 * 1000);
+  setInterval(check, 5 * 60 * 1000);
+  // coming back to the window: check again, but not more often than once a minute
+  app.on('browser-window-focus', () => { if (Date.now() - lastCheck > 60 * 1000) check(); });
 }
 ipcMain.handle('rqc-update-state', () => updateState);
 ipcMain.handle('rqc-app-version', () => app.getVersion());

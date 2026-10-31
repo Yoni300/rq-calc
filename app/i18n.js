@@ -1,7 +1,7 @@
 // Interface texts. Game texts (classes, items, stats, talents) stay as the game database has them.
 window.RQC_I18N = {
   uk: {
-    updDownloading: 'Завантажується оновлення v{v}…', updReady: 'Оновлення v{v} готове', updLater: 'Або воно встановиться саме, коли закриєте програму.', updRestart: 'Перезапустити й оновити',
+    updDownloading: 'Завантажується оновлення v{v}…', updReady: 'Оновлення v{v} готове', updLater: 'Встановиться саме, коли закриєте програму.', updRestart: 'Перезапустити й оновити', updNow: 'Оновити зараз', updPostpone: 'Пізніше', updIn: 'Програма перезапуститься через {s} с. Ваш білд збережено.', updWaiting: 'Перезапуск зачекає, поки ви закінчите редагувати.', updDone: 'Програму оновлено до v{v}',
     updated: 'Оновлено',
     author: 'Автор', copyContact: 'Натисніть, щоб скопіювати',
     yes: 'Так', cancel: 'Скасувати', pbUnlike: 'Прибрати лайк', pbDelAsk: 'Видалити збірку «{name}» для всіх гравців? Повернути її не вийде.', pbNeedUpdate: 'на сервері немає функції зняття лайка — виконай server/002-unlike.sql у Supabase.', pbTooMany: 'Забагато публікацій за добу (максимум 10). Спробуй завтра.', pbImpossible: 'Неможливий білд', pbBroken: 'Білд пошкоджений: його не вдалося прочитати', pbBadLevel: 'Рівень не підходить для класу', pbBadStats: 'Очок характеристик більше, ніж дає рівень', pbBadGear: 'Є речі, які не можна вдягти цьому класу або в цей слот', pbBadTalents: 'Талантів більше, ніж дозволено',
@@ -45,7 +45,7 @@ window.RQC_I18N = {
     sourceTitle: 'Звідки бонус',
   },
   ru: {
-    updDownloading: 'Загружается обновление v{v}…', updReady: 'Обновление v{v} готово', updLater: 'Или оно установится само, когда закроете программу.', updRestart: 'Перезапустить и обновить',
+    updDownloading: 'Загружается обновление v{v}…', updReady: 'Обновление v{v} готово', updLater: 'Установится само, когда закроете программу.', updRestart: 'Перезапустить и обновить', updNow: 'Обновить сейчас', updPostpone: 'Позже', updIn: 'Программа перезапустится через {s} с. Ваш билд сохранён.', updWaiting: 'Перезапуск подождёт, пока вы закончите редактировать.', updDone: 'Программа обновлена до v{v}',
     updated: 'Обновлено',
     author: 'Автор', copyContact: 'Нажмите, чтобы скопировать',
     yes: 'Да', cancel: 'Отмена', pbUnlike: 'Убрать лайк', pbDelAsk: 'Удалить сборку «{name}» для всех игроков? Вернуть её не получится.', pbNeedUpdate: 'на сервере нет функции снятия лайка — выполни server/002-unlike.sql в Supabase.', pbTooMany: 'Слишком много публикаций за сутки (максимум 10). Попробуй завтра.', pbImpossible: 'Невозможный билд', pbBroken: 'Билд повреждён: его не удалось прочитать', pbBadLevel: 'Уровень не подходит для класса', pbBadStats: 'Очков характеристик больше, чем даёт уровень', pbBadGear: 'Есть вещи, которые нельзя надеть этому классу или в этот слот', pbBadTalents: 'Талантов больше, чем разрешено',
@@ -89,7 +89,7 @@ window.RQC_I18N = {
     sourceTitle: 'Откуда бонус',
   },
   en: {
-    updDownloading: 'Downloading update v{v}…', updReady: 'Update v{v} is ready', updLater: 'Or it installs by itself when you close the app.', updRestart: 'Restart and update',
+    updDownloading: 'Downloading update v{v}…', updReady: 'Update v{v} is ready', updLater: 'It installs by itself when you close the app.', updRestart: 'Restart and update', updNow: 'Update now', updPostpone: 'Later', updIn: 'The app restarts in {s} s. Your build is saved.', updWaiting: 'The restart waits until you finish editing.', updDone: 'Updated to v{v}',
     updated: 'Updated',
     author: 'Author', copyContact: 'Click to copy',
     yes: 'Yes', cancel: 'Cancel', pbUnlike: 'Remove like', pbDelAsk: 'Delete the build “{name}” for everyone? This can’t be undone.', pbNeedUpdate: 'the server has no unlike function — run server/002-unlike.sql in Supabase.', pbTooMany: 'Too many builds published today (max 10). Try again tomorrow.', pbImpossible: 'Impossible build', pbBroken: 'The build is damaged and could not be read', pbBadLevel: 'Level does not fit the class', pbBadStats: 'More stat points than the level gives', pbBadGear: 'Has items this class or slot cannot wear', pbBadTalents: 'More talents than allowed',

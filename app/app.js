@@ -1270,6 +1270,14 @@ function renderRight() {
 function renderAll() { renderTop(); renderLeft(); renderCenter(); renderRight(); }
 
 // ---------- update banner (installed app only) ----------
+// A downloaded update restarts the app by itself after a countdown. The build is saved on every change, so nothing
+// is lost; the countdown waits while a dialog is open or the user is typing. "Later" leaves it for the next app start.
+const UPD_DELAY = 10;
+let updTimer = null, updLeft = UPD_DELAY, updPostponed = null;
+function updBusy() {
+  const a = document.activeElement;
+  return !$('modal').hidden || !!document.querySelector('.confirm-wrap, .pop') || (a && /^(INPUT|TEXTAREA)$/.test(a.tagName) && a.type !== 'range' && a.type !== 'checkbox');
+}
 function showUpdate(st) {
   let el = document.getElementById('updBanner');
   if (!st || (st.status !== 'downloading' && st.status !== 'ready')) { if (el) el.remove(); return; }
@@ -1278,13 +1286,31 @@ function showUpdate(st) {
   if (st.status === 'downloading') {
     el.append(h('div', { class: 'upd-t' }, fmtT(T.updDownloading, { v: st.version || '' })),
       h('div', { class: 'upd-bar' }, h('i', { style: `width:${st.percent || 3}%` })));
-  } else {
-    el.append(h('div', { class: 'upd-t' }, fmtT(T.updReady, { v: st.version || '' })),
-      h('div', { class: 'upd-s' }, T.updLater),
-      h('button', { class: 'btn primary small', onclick: () => window.rqcApp.installUpdate() }, T.updRestart));
+    return;
   }
+  const install = () => { clearInterval(updTimer); store.set('current', ch); window.rqcApp.installUpdate(); };
+  const later = updPostponed === st.version;
+  const sub = h('div', { class: 'upd-s' });
+  el.append(h('div', { class: 'upd-t' }, fmtT(T.updReady, { v: st.version || '' })), sub,
+    h('div', { class: 'upd-btns' },
+      later ? null : h('button', { class: 'btn small', onclick: () => { updPostponed = st.version; clearInterval(updTimer); updTimer = null; showUpdate(st); } }, T.updPostpone),
+      h('button', { class: 'btn primary small', onclick: install }, T.updNow)));
+  if (later) { sub.textContent = T.updLater; return; }
+  const tick = () => {
+    if (updBusy()) { updLeft = UPD_DELAY; sub.textContent = T.updWaiting; return; }
+    sub.textContent = fmtT(T.updIn, { s: updLeft });
+    if (updLeft-- <= 0) install();
+  };
+  if (!updTimer) { updLeft = UPD_DELAY; updTimer = setInterval(tick, 1000); }
+  tick();
 }
 if (window.rqcApp) { window.rqcApp.onUpdate(showUpdate); window.rqcApp.updateState().then(showUpdate); }
+// after an update: say so once
+if (window.rqcApp && window.RQC_VERSION) {
+  const v = window.RQC_VERSION.version, was = store.get('lastVersion', null);
+  if (was && was !== v) setTimeout(() => toast(fmtT(T.updDone, { v })), 800);
+  store.set('lastVersion', v);
+}
 
 recalc();
 renderAll();
