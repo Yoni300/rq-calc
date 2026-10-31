@@ -55,6 +55,14 @@ addBuff({ name: 'Кристалл четырёх стихий', classId: CLASS.W
 // 5. Разбойник — «Костёр»: +2098 defense around the campfire (value for 65 lvl)
 addBuff({ name: 'Костёр (65 ур.)', classId: CLASS.ROGUE, bonuses: [[T.DEF, 2098]] });
 
+// 5a. «Зеркальный шар», «Штандарт тьмы» and «Знамя света» stack in the game, but Anon's database put them
+// in one group, so turning one on turned the others off
+for (const b of D.Buff) {
+  if (['Зеркальный шар', 'Штандарт тьмы'].includes(b.Name) || b.Name.startsWith('Знамя света')) {
+    if (b.Group != null) { delete b.Group; patched.push(`${b.Name}: складається з іншими`); }
+  }
+}
+
 // 6. Collection trophies have no pictures in the database: give each a fitting icon of a pet, mount,
 //    book, potion or item that is already in data/img (picked by the trophy's theme).
 const TROPHY_ICONS = {
