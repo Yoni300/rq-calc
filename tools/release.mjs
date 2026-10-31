@@ -16,6 +16,11 @@ if (!remoteTags) {
   run('git push origin HEAD');
   run(`git push origin ${tag}`);
 }
+// Create the GitHub release first: electron-builder runs two upload jobs in parallel and, if the release
+// doesn't exist yet, both create one, splitting the files between two releases.
+let hasRelease = true;
+try { out(`gh release view ${tag} -R Yoni300/rq-calc --json tagName`); } catch { hasRelease = false; }
+if (!hasRelease) run(`gh release create ${tag} -R Yoni300/rq-calc --verify-tag --title "RQ Calc ${version}" --notes "RQ Calc ${version}"`);
 const env = { ...process.env, GH_TOKEN: process.env.GH_TOKEN || out('gh auth token') };
 delete env.ELECTRON_RUN_AS_NODE;
 run('node tools/write-version.mjs');
