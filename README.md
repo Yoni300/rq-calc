@@ -12,7 +12,7 @@ Windows може показати «Windows захистила ваш ПК» (п
 
 - Запуск з коду: `start.cmd`
 - Локальна збірка інсталятора: `npm run dist` → `dist/`
-- **Випуск оновлення:** підняти `version` у `package.json`, потім `GH_TOKEN=$(gh auth token) npm run release` — інсталятор і `latest.yml` викладаються в GitHub Releases, і всі встановлені копії оновляться самі.
+- **Випуск оновлення:** підняти `version` у `package.json`, закомітити й виконати `npm run release` — інсталятор і `latest.yml` викладаються в GitHub Releases, і всі встановлені копії оновляться самі.
 
 ## Звідки дані й формули
 

@@ -11,8 +11,7 @@
     "dist": "electron-builder --win",
     "update-stamps": "node tools/update-stamps-wiki.mjs",
     "predist": "node tools/write-version.mjs",
-    "prerelease": "node tools/write-version.mjs",
-    "release": "electron-builder --win --publish always"
+    "release": "node tools/release.mjs"
   },
   "devDependencies": {
     "electron": "^45.2.0",
