@@ -1,0 +1,74 @@
+{
+  "name": "rq-calc",
+  "version": "1.0.0",
+  "description": "Royal Quest character stat calculator",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "export-data": "node tools/export-data.mjs && node tools/update-stamps-wiki.mjs --offline && node tools/patch-data.mjs",
+    "test": "node test/smoke.js",
+    "dist": "electron-builder --win",
+    "update-stamps": "node tools/update-stamps-wiki.mjs",
+    "predist": "node tools/write-version.mjs",
+    "prerelease": "node tools/write-version.mjs",
+    "release": "electron-builder --win --publish always"
+  },
+  "devDependencies": {
+    "electron": "^45.2.0",
+    "electron-builder": "^26.18.0"
+  },
+  "productName": "RQ Calc",
+  "author": "Yoni300",
+  "build": {
+    "appId": "com.yoni300.rqcalc",
+    "productName": "RQ Calc",
+    "files": [
+      "main.js",
+      "preload.js",
+      "app/**",
+      "src/**",
+      "data/**",
+      "package.json",
+      "server/**"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "artifactName": "RQ-Calc-Setup-${version}.exe",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "RQ Calc",
+      "runAfterFinish": true
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "Yoni300",
+        "repo": "rq-calc",
+        "releaseType": "release"
+      }
+    ]
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.11"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Yoni300/rq-calc.git"
+  }
+}

@@ -1,0 +1,8 @@
+node_modules/
+dist/
+*.exe
+*.log
+.DS_Store
+Thumbs.db
+# Anon's original database (data/rqdata.js is exported from it)
+source/*.sqlite

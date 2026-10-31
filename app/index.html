@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://*.supabase.co">
+  <title>RQ Калькулятор</title>
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand"><span class="logo">◆</span> <span id="appTitle">RQ Калькулятор</span></div>
+    <input id="buildName" class="build-name" spellcheck="false">
+    <button id="btnSave" class="btn primary"></button>
+    <div class="dropdown">
+      <button id="btnBuilds" class="btn"></button>
+      <div id="buildsMenu" class="menu" hidden></div>
+    </div>
+    <button id="btnNew" class="btn"></button>
+    <button id="btnCode" class="btn"></button>
+    <button id="btnPublic" class="btn public"></button>
+    <div class="spacer"></div>
+    <div class="lang" id="langSwitch"></div>
+  </header>
+
+  <main class="layout">
+    <aside class="col left" id="left"></aside>
+    <section class="col center">
+      <nav class="tabs" id="tabs"></nav>
+      <div class="tab-body" id="center"></div>
+    </section>
+    <aside class="col right" id="right"></aside>
+  </main>
+
+  <div id="modal" class="modal" hidden></div>
+  <div id="tip" class="tip" hidden></div>
+
+  <script src="../data/rqdata.js"></script>
+  <script src="../src/engine.js"></script>
+  <script src="config.js"></script>
+  <script src="version.js"></script>
+  <script src="i18n.js"></script>
+  <script src="builds.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
