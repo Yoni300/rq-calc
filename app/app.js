@@ -349,7 +349,6 @@ const TOP_ICONS = {
   code: '<path d="M8 7l-5 5 5 5M16 7l5 5-5 5M13.5 5l-3 14"/>',
   globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.6 3.9 5.6 3.9 9s-1.3 6.4-3.9 9c-2.6-2.6-3.9-5.6-3.9-9S9.4 5.6 12 3z"/>',
   down: '<path d="M6 9l6 6 6-6"/>',
-  eye: '<path d="M2.5 12s3.5-6.5 9.5-6.5S21.5 12 21.5 12s-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/>',
   tag: '<path d="M3.5 12.2V4.5a1 1 0 0 1 1-1h7.7l8.3 8.3-8.7 8.7z"/><circle cx="8" cy="8" r="1.4"/>',
   // dizzy spiral with stars (crowd control)
   stun: '<path d="M12.5 12.2a1.6 1.6 0 1 1-1.4-2.2 3.4 3.4 0 1 1-3 4.6 5.2 5.2 0 1 1 9.4 1.6"/><path d="M5 4.5l.6 1.3 1.4.2-1 1 .2 1.4L5 7.7l-1.2.7.2-1.4-1-1 1.4-.2zM19 3.5l.5 1 1 .1-.7.7.2 1-1-.5-.9.5.2-1-.7-.7 1-.1z"/>',
@@ -674,45 +673,8 @@ function renderModel() {
       h('div', { class: 'mc-name' }, cls.name),
       h('div', { class: 'mc-sub' }, `${ch.level} ${T.level.toLowerCase()} · ${gender?.Name || ''}${ch.stateId === 2 && mount ? ' · ' + mount.name : ''}`),
       costume ? h('div', { class: 'mc-sub' }, costume.name) : null),
-    figure ? h('div', { class: 'fig' },
-      h('img', { class: 'model-fig' + (costumeImg ? '' : ' silhouette'), src: IMG(figure), draggable: 'false' }),
-      showFigGear ? figGear() : null) : null,
-    h('button', { class: 'fig-toggle' + (showFigGear ? ' on' : ''), type: 'button', tip: esc(showFigGear ? T.figGearHide : T.figGearShow),
-      onclick: ev => { ev.stopPropagation(); showFigGear = !showFigGear; store.set('figGear', showFigGear); renderCenter(); } }, iconEl('eye')),
+    figure ? h('img', { class: 'model-fig' + (costumeImg ? '' : ' silhouette'), src: IMG(figure), draggable: 'false' }) : null,
     h('div', { class: 'model-floor' }));
-}
-
-// Icons of worn items placed on the figure (head, neck, chest, hands, legs, feet). The figure pictures
-// (gender silhouettes and costumes) are all 210×284 with the same framing, so one set of points fits all.
-let showFigGear = store.get('figGear', true);
-const FIG_POINTS = {
-  '1:0': [50, 4.5],  // head
-  '2:0': [57, 14.5], // face
-  '12:0': [50, 25.5],  // amulet on the neck
-  '3:0': [50, 38],   // armor on the chest
-  '4:0': [27, 53],   // gloves on the hand
-  '7:0': [15, 43],   // shield / orb / off-hand weapon
-  '21:0': [77, 51],  // weapon in the other hand
-  '22:0': [86, 31],  // spear (mounted)
-  '5:0': [50, 66],   // legs
-  '6:0': [50, 90],   // boots
-};
-function figGear() {
-  const sets = allowedSets(ch);
-  const out = [];
-  for (const [key, [x, y]] of Object.entries(FIG_POINTS)) {
-    const e = ch.equipment[key];
-    const item = e && ctx.equipment.get(e.itemId);
-    const slot = ctx.slots.get(+key.split(':')[0]);
-    if (!item || !slot || !sets.get(key)?.has(item.id) || slotLockedByTwoHander(ch, key)) continue;
-    if (slot.stateId != null && slot.stateId !== ch.stateId) continue; // e.g. the spear only when mounted
-    const stampV = e.stampVariantId && ctx.stampVariants.get(e.stampVariantId);
-    out.push(h('div', {
-      class: 'fig-gear' + J('slot:' + key), style: `left:${x}%;top:${y}%` + (stampV?.color ? `;--sc:${stampV.color.Argb}` : ''),
-      tip: () => itemTip(item, e), onclick: ev => { ev.stopPropagation(); openEditor(key); },
-    }, h('img', { src: IMG(item.imageId), draggable: 'false' })));
-  }
-  return out;
 }
 function renderGear(el) {
   const sets = allowedSets(ch);
