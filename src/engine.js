@@ -411,6 +411,45 @@
       collected.set(c.Id, { id: c.Id, groupId: c.Group_Id, name, imageId: imageId ?? null, genderId: eq ? eq.genderId : null, orderIndex: c.OrderIndex ?? 0, inVersion: inVersion(c), bonuses: collectedBonuses(c.Id) });
     }
 
+    // Guild talents: one talent per branch, points 1..MaxPoints; a branch opens only when the previous ones are maxed.
+    const guildVarRows = group(T.GuildTalentVariable, 'Talent_Id');
+    const guildBonusRows = group(T.GuildTalentBonus, 'Talent_Id');
+    const guildBonusVarRows = group(T.GuildTalentBonusVariable, 'GuildTalentBonus_Id');
+    const guildTalents = new Map();
+    const guildBranches = (T.GuildTalentBranch || []).slice().sort((a, b) => a.Id - b.Id).map(br => ({ id: br.Id, name: br.Name, maxPoints: br.MaxPoints, talents: [] }));
+    for (const t of (T.GuildTalent || []).slice().sort((a, b) => (a.OrderIndex ?? 0) - (b.OrderIndex ?? 0))) {
+      const gt = {
+        id: t.Id, branchId: t.Branch_Id, name: t.Name, description: t.Description || '', active: !!t.Active, imageId: t.Image_Id ?? null, grayImageId: t.GrayImage_Id ?? null,
+        // value of variable `index` at `points`
+        value: (index, points) => g(guildVarRows, t.Id).find(v => v.Index === index && v.Points === points)?.Value ?? 0,
+        bonusRows: g(guildBonusRows, t.Id).map(b => ({ typeId: b.Type_Id, vars: g(guildBonusVarRows, b.Id) })),
+      };
+      gt.bonuses = points => gt.bonusRows.map(b => {
+        const vars = [];
+        for (const v of b.vars) vars[v.Index] = gt.value(v.TalentVariableIndex, points);
+        return { typeId: b.typeId, vars: Array.from(vars, x => x ?? 0) };
+      });
+      guildTalents.set(t.Id, gt);
+      guildBranches.find(br => br.id === t.Branch_Id)?.talents.push(gt);
+    }
+
+    // Aura bonuses (port of AuraExtensions.GetBonuses). shared = what party members get (SharedValue ?? Value).
+    // Talent bonuses for the aura override the aura's own bonus of the same type.
+    const auraTalentBonuses = new Map([...auras.keys()].map(id => [id, [...talents.values()].flatMap(t => t.bonuses).filter(b => b.auraId === id)]));
+    const nonZero = b => bonusTypes.get(b.typeId).stats.some(s => (b.vars[s.varIndex] ?? 0) !== 0);
+    function auraBonuses(aura, shared, talentBonuses) {
+      const expand = b => shared ? { typeId: b.typeId, vars: [b.sharedValue ?? b.vars[0]] } : b;
+      const m = new Map();
+      const add = (list, p) => { for (const b of list.map(expand).filter(nonZero)) { const cur = m.get(b.typeId); if (!cur || p > cur.p) m.set(b.typeId, { b, p }); } };
+      add(aura.bonuses.filter(b => b.inVersion), 0);
+      add(talentBonuses.filter(b => b.auraId === aura.id), 1);
+      return [...m.values()].map(x => x.b);
+    }
+    // auras a party member can share with you: base bonuses and with the owner's talents
+    const sharedAuras = [...auras.values()].filter(a => a.inVersion)
+      .map(a => ({ aura: a, base: auraBonuses(a, true, []), withTalents: auraBonuses(a, true, auraTalentBonuses.get(a.id)) }))
+      .filter(x => x.base.length || x.withTalents.length);
+
     const ctx = {
       settings, lastVersion, formulaWarnings, StatType,
       stats, bonusTypes, classes, slots, eqTypes, equipment, cards, stamps, stampVariants, stampColors, talentBranches, talents,
@@ -426,7 +465,26 @@
     ctx.freeStats = ch => (ch.level - 1) * settings.statsPerLevel - editStatIds(ch.classId).reduce((s, id) => s + ((ch.stats[id] || 1) - 1), 0);
     ctx.talentPoints = ch => Math.floor(Math.min(ch.level, lastVersion.MaxTalentLevel) / settings.talentLevelMultiplicity) + classes.get(ch.classId).bonusTalentCount;
     ctx.classBranches = classId => classes.get(classId).parents.slice().reverse().flatMap(cid => [...talentBranches.values()].filter(b => b.classId === cid).sort((a, b) => a.orderIndex - b.orderIndex));
-    ctx.classAuras = (classId, level) => classes.get(classId).parents.flatMap(cid => [...auras.values()].filter(a => a.classId === cid)).reverse().filter(a => a.level <= level && a.inVersion);
+    // own auras; skip ones that give the owner nothing (e.g. the second «Фортуна» that only gives the party +Hit)
+    ctx.classAuras = (classId, level) => classes.get(classId).parents.flatMap(cid => [...auras.values()].filter(a => a.classId === cid)).reverse()
+      .filter(a => a.level <= level && a.inVersion && auraBonuses(a, false, auraTalentBonuses.get(a.id)).length);
+    ctx.sharedAuras = sharedAuras;
+    ctx.guildBranches = guildBranches;
+    ctx.guildTalents = guildTalents;
+    ctx.guildPointsTotal = guildBranches.reduce((s, b) => s + b.maxPoints, 0);
+    // drops talents that break the rules (wrong points, two in a branch, a branch opened before the previous is maxed)
+    ctx.validGuildTalents = gts => {
+      const out = {};
+      for (const br of guildBranches) {
+        const picked = br.talents.filter(t => (gts || {})[t.id] > 0);
+        if (picked.length !== 1) break;
+        const pts = Math.min(gts[picked[0].id], br.maxPoints);
+        out[picked[0].id] = pts;
+        if (pts < br.maxPoints) break;
+      }
+      return out;
+    };
+    ctx.auraBonuses = auraBonuses;
     ctx.maxUpgrade = item => equipmentClassOf(item).MaxUpgradeLevel ?? settings.maxUpgradeLevel;
     ctx.cardCount = item => { const s = slots.get(eqTypes.get(item.typeId).slotId); return s.isWeapon === true ? settings.weaponCardCount : s.isWeapon === false ? settings.equipmentCardCount : 0; };
     ctx.formatBonus = formatBonus;
@@ -481,7 +539,7 @@
         if (b.classId != null) return isSubsetOf(ch.classId, b.classId) && b.level <= ch.level && (b.talentId == null || (ch.talents || []).includes(b.talentId));
         if (b.cardId != null) return eqCards.has(b.cardId);
         if (b.stampId != null) return eqStamps.has(b.stampId);
-        if (b.guildTalentId != null) return false; // guild talents are not supported yet
+        if (b.guildTalentId != null) return (ch.guildTalents || {})[b.guildTalentId] > 0;
         return true;
       });
     };
@@ -490,7 +548,7 @@
       const classId = [...classes.keys()].sort((a, b) => a - b)[0];
       const ch = {
         classId, level: 1, genderId: ctx.genders[0]?.Id ?? 1, stateId: ctx.states[0]?.Id ?? 1, eventId: null, lostControl: false,
-        stats: {}, equipment: {}, talents: [], enableTalents: true, auraId: null, enableAura: true,
+        stats: {}, equipment: {}, talents: [], enableTalents: true, guildTalents: {}, enableGuildTalents: true, auraId: null, sharedAuras: {}, enableAura: true,
         buffs: {}, enableBuffs: true, elixirId: null, enableElixir: true, consumables: [], enableConsumables: true,
         collected: [], enableCollecting: true,
       };
@@ -673,14 +731,26 @@
         }
         if (ch.enableElixir && ch.elixirId && elixirs.has(ch.elixirId)) elixirs.get(ch.elixirId).bonuses.forEach(b => push(b, 'Эликсир'));
         if (ch.enableConsumables) for (const id of ch.consumables || []) consumables.get(id)?.bonuses.forEach(b => push(b, consumables.get(id).name));
+        if (ch.enableGuildTalents) for (const [idStr, pts] of Object.entries(ch.guildTalents || {})) {
+          const gt = guildTalents.get(+idStr);
+          if (gt && pts > 0) gt.bonuses(pts).forEach(b => push(b, 'Гильдия: ' + gt.name));
+        }
         const chosenTalents = (ch.talents || []).map(id => talents.get(id)).filter(Boolean);
-        if (ch.enableAura && ch.auraId && auras.has(ch.auraId)) {
-          const aura = auras.get(ch.auraId);
-          const cand = [
-            ...aura.bonuses.filter(b => b.inVersion).map(b => ({ b, p: 0 })),
-            ...(ch.enableTalents ? chosenTalents.flatMap(t => t.bonuses).filter(b => b.auraId === aura.id).map(b => ({ b, p: 1 })) : []),
-          ].filter(({ b }) => bonusTypes.get(b.typeId).stats.some(s => (b.vars[s.varIndex] ?? 0) !== 0));
-          pickByPriority(cand).forEach(b => push(b, 'Аура: ' + aura.name));
+        if (ch.enableAura) {
+          // own aura + auras of party members; the same aura doesn't stack: max per bonus type
+          const list = [];
+          if (ch.auraId && auras.has(ch.auraId)) list.push({ aura: auras.get(ch.auraId), bonuses: auraBonuses(auras.get(ch.auraId), false, ch.enableTalents ? chosenTalents.flatMap(t => t.bonuses) : []) });
+          for (const [idStr, withTal] of Object.entries(ch.sharedAuras || {})) {
+            const aura = auras.get(+idStr);
+            if (aura && aura.inVersion) list.push({ aura, bonuses: auraBonuses(aura, true, withTal ? auraTalentBonuses.get(aura.id) : []) });
+          }
+          const merged = new Map();
+          for (const { aura, bonuses } of list) for (const b of bonuses) {
+            const key = aura.id + ':' + b.typeId, cur = merged.get(key);
+            if (!cur) merged.set(key, { aura, b: { typeId: b.typeId, vars: b.vars.slice() } });
+            else cur.b.vars = cur.b.vars.map((v, i) => Math.max(v, b.vars[i] ?? v));
+          }
+          for (const { aura, b } of merged.values()) push(b, 'Аура: ' + aura.name);
         }
         if (ch.enableBuffs) {
           for (const [idStr, stacks] of Object.entries(ch.buffs || {})) {

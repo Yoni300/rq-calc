@@ -629,3 +629,30 @@ input[type=range] { accent-color: var(--gold-2); }
 .cp-lv { font-size: 11px; color: var(--dim); }
 .cp-item.on { background: linear-gradient(90deg, rgba(230, 184, 92, .2), rgba(230, 184, 92, .05)); border-color: var(--line-3); }
 .cp-item.on .cp-name { color: var(--gold-hi); }
+
+/* party auras */
+.party-h { margin-top: 18px; }
+.party-h + .hint { margin: -2px 0 6px; }
+.opt .cls-of { font-weight: 400; color: var(--dim); font-size: 11.5px; }
+.tal-chip { font: inherit; font-size: 10.5px; font-weight: 700; padding: 3px 7px; border-radius: 10px; cursor: pointer; white-space: nowrap;
+  color: var(--dim); background: transparent; border: 1px solid #4a3920; transition: background .15s, color .15s, border-color .15s; }
+.tal-chip:hover { color: var(--fg); border-color: var(--line-3); }
+.tal-chip.on { color: var(--on-gold); background: linear-gradient(180deg, var(--gold-hi), var(--gold-2)); border-color: var(--gold-hi); }
+
+/* guild talents */
+.guildwin { margin-top: 16px; }
+.gw-title { font-family: var(--f-display); font-size: 17px; font-weight: 700; color: var(--gold); letter-spacing: .02em; }
+.gt-branch { grid-template-columns: 150px auto 1fr; }
+.gt-branch .tal-cols { gap: 12px; }
+.gt-locked .tal-name { opacity: .5; }
+.tal .gt-pts { position: absolute; right: -4px; bottom: -4px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px; font-size: 11px; font-weight: 800;
+  line-height: 18px; text-align: center; color: var(--on-gold); background: var(--gold-2); border: 1px solid #000; }
+.tal:has(.gt-pts) { overflow: visible; }
+.gt-step { justify-self: end; display: flex; align-items: center; gap: 6px; }
+.gt-step span { min-width: 34px; text-align: center; font-weight: 700; font-size: 13px; color: var(--fg); font-variant-numeric: tabular-nums; }
+.gt-step.off span { color: var(--dim); }
+.gt-step button { width: 24px; height: 24px; border-radius: 5px; border: 1px solid var(--line-3); background: var(--raise); color: var(--gold); font: inherit; font-weight: 800; cursor: pointer; line-height: 1; }
+.gt-step button:hover:not(:disabled) { background: var(--raise-2); border-color: var(--gold-2); }
+.gt-step button:active:not(:disabled) { transform: scale(.9); }
+.gt-step button:disabled { opacity: .35; cursor: default; }
+.tal:has(.gt-pts) img { border-radius: inherit; }

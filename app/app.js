@@ -71,6 +71,8 @@ function normalize(c) {
   const out = Object.assign(base, c);
   out.stats = Object.assign({}, c.stats);
   for (const id of ctx.editStatIds(out.classId)) if (!out.stats[id]) out.stats[id] = 1;
+  out.guildTalents = ctx.validGuildTalents(out.guildTalents);
+  out.sharedAuras = Object.assign({}, out.sharedAuras);
   return out;
 }
 
@@ -442,7 +444,7 @@ function eventHints() {
 }
 // class picker: four columns (base class + its two specializations) with icons and level ranges
 function openClassPicker(anchor) {
-  closePopover();
+  if (!popoverToggle(anchor)) return;
   const roots = [...ctx.classes.values()].filter(c => c.baseId == null);
   const card = (c, sub) => h('div', {
     class: 'cp-item' + (sub ? ' sub' : '') + (c.id === ch.classId ? ' on' : ''),
@@ -492,7 +494,7 @@ function renderTabs() {
   const el = $('tabs'); el.innerHTML = '';
   const eqCount = Object.keys(ch.equipment).length;
   const talCount = validTalents(ch).length;
-  const effCount = Object.keys(ch.buffs).length + (ch.auraId ? 1 : 0) + (ch.elixirId ? 1 : 0) + ch.consumables.length;
+  const effCount = Object.keys(ch.buffs).length + (ch.auraId ? 1 : 0) + Object.keys(ch.sharedAuras || {}).length + (ch.elixirId ? 1 : 0) + ch.consumables.length;
   for (const [k, label, n] of [['gear', T.tabGear, eqCount], ['talents', T.tabTalents, talCount], ['effects', T.tabEffects, effCount], ['collection', T.tabCollection, ch.collected.length]]) {
     el.append(h('button', { class: 'tab' + (tab === k ? ' on' : ''), onclick: () => { if (tab === k) return; tab = k; store.set('tab', k); renderCenter(); animateEnter($('center')); renderTop(); } }, label, n ? h('span', { class: 'n' }, n) : null));
   }
@@ -743,10 +745,18 @@ function pickerButton(cur, onOpen, flashKey) {
   if (onOpen) btn.addEventListener('click', () => onOpen(btn));
   return btn;
 }
-let popover = null;
-function closePopover() { if (popover) { popover.remove(); popover = null; } }
+let popover = null, popAnchor = null, popToggledOff = null;
+function closePopover() { if (popover) { popover.remove(); popover = null; popAnchor = null; } }
+// A second click on the button that opened the popover closes it instead of reopening it.
+function popoverToggle(anchor) {
+  const off = popToggledOff === anchor;
+  popToggledOff = null;
+  if (off) return false;
+  closePopover(); popAnchor = anchor;
+  return true;
+}
 function openPopover(anchor, options, curId, onPick) {
-  closePopover();
+  if (!popoverToggle(anchor)) return;
   const search = h('input', { class: 'inp', placeholder: T.search, spellcheck: false });
   const list = h('div', { class: 'pop-list' });
   const pick = id => { closePopover(); onPick(id); };
@@ -778,7 +788,12 @@ function openPopover(anchor, options, curId, onPick) {
   search.focus();
   list.querySelector('.pop-opt.on')?.scrollIntoView({ block: 'center' });
 }
-document.addEventListener('mousedown', e => { if (popover && !popover.contains(e.target)) closePopover(); }, true);
+document.addEventListener('mousedown', e => {
+  popToggledOff = null;
+  if (!popover || popover.contains(e.target)) return;
+  if (popAnchor?.contains(e.target)) popToggledOff = popAnchor;
+  closePopover();
+}, true);
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && popover) { closePopover(); e.stopImmediatePropagation(); } }, true);
 
 // checkbox for an effect that a card or stamp triggers (e.g. «Пружинка»: chance to get +attack)
@@ -932,6 +947,61 @@ function renderTalents(el) {
     h('label', { class: 'check' }, h('input', { type: 'checkbox', checked: ch.enableTalents, onchange: e => changed(c => { c.enableTalents = e.target.checked; }) }), T.useTalents),
     h('button', { class: 'btn', onclick: () => changed(c => { c.talents = []; pruneBuffs(); }) }, T.clearTalents)));
   el.append(win);
+  el.append(renderGuildTalents());
+}
+
+// guild talents: one talent per branch; the next branch opens when the previous one is maxed
+function renderGuildTalents() {
+  const gts = ch.guildTalents || {};
+  const used = Object.values(gts).reduce((s, n) => s + n, 0);
+  const setGuild = mut => changed(c => { const g = { ...c.guildTalents }; mut(g); c.guildTalents = ctx.validGuildTalents(g); pruneBuffs(); });
+  const win = h('div', { class: 'talwin guildwin' + (ch.enableGuildTalents ? '' : ' disabled-section') },
+    h('div', { class: 'gw-title' }, T.guildTalents));
+  let open = true; // all previous branches are maxed
+  for (const br of ctx.guildBranches) {
+    const cur = br.talents.find(t => gts[t.id] > 0);
+    const pts = cur ? gts[cur.id] : 0;
+    const rowOpen = open;
+    const icons = h('div', { class: 'tal-cols' });
+    for (const t of br.talents) {
+      const on = cur === t;
+      icons.append(h('div', {
+        class: 'tal' + (t.active ? ' active' : '') + J('gt:' + t.id) + (on ? ' on' : '') + (rowOpen ? ' can' : ' locked'),
+        tip: () => guildTalentText(t, on ? pts : 0, br.maxPoints),
+        onclick: () => {
+          if (!rowOpen) return;
+          flash = 'gt:' + t.id;
+          setGuild(g => {
+            for (const x of br.talents) delete g[x.id];
+            if (!on) g[t.id] = pts || br.maxPoints;
+          });
+        },
+      }, h('img', { src: IMG(t.imageId), draggable: 'false' }), on && br.maxPoints > 1 ? h('span', { class: 'gt-pts' }, pts) : null));
+    }
+    const step = d => () => setGuild(g => { const n = pts + d; if (n <= 0) delete g[cur.id]; else g[cur.id] = Math.min(n, br.maxPoints); });
+    const stepper = br.maxPoints > 1 ? h('div', { class: 'gt-step' + (cur ? '' : ' off') },
+      h('button', { type: 'button', disabled: !cur, onclick: step(-1) }, '−'),
+      h('span', null, `${pts}/${br.maxPoints}`),
+      h('button', { type: 'button', disabled: !cur || pts >= br.maxPoints, onclick: step(1) }, '+')) : h('div');
+    win.append(h('div', { class: 'tal-branch gt-branch' + (rowOpen ? '' : ' gt-locked') },
+      h('div', { class: 'tal-name', style: '--bc:var(--gold-3)' }, h('span', null, br.name)), icons, stepper));
+    open = open && pts === br.maxPoints;
+  }
+  win.append(h('div', { class: 'tal-foot' },
+    h('div', { class: 'tal-free' }, `${T.guildFree}: ${ctx.guildPointsTotal - used}`),
+    h('label', { class: 'check' }, h('input', { type: 'checkbox', checked: ch.enableGuildTalents, onchange: e => changed(c => { c.enableGuildTalents = e.target.checked; }) }), T.useGuild),
+    h('button', { class: 'btn', onclick: () => changed(c => { c.guildTalents = {}; pruneBuffs(); }) }, T.clearTalents)));
+  return win;
+}
+function guildTalentText(t, pts, max) {
+  const shown = pts || 1;
+  const desc = t.description.replace(/\{(\d+)\}/g, (_, n) => t.value(+n, shown));
+  const bon = t.bonuses(shown).map(bonusText).join('\n');
+  let s = `<b>${esc(t.name)}</b>${t.active ? ' <span class="m">(активный)</span>' : ''}`;
+  if (max > 1) s += `\n<span class="m">${T.guildLevel}: ${pts}/${max}</span>`;
+  if (desc) s += `\n${esc(desc)}`;
+  if (bon) s += `\n<span class="g">${esc(bon)}</span>`;
+  return s;
 }
 
 function renderEffects(el) {
@@ -947,6 +1017,26 @@ function renderEffects(el) {
   for (const a of auras) {
     auraList.append(h('label', { class: 'opt' }, h('input', { type: 'radio', name: 'aura', checked: ch.auraId === a.id, onchange: () => changed(c => { c.auraId = a.id; }) }),
       img(a.imageId), h('div', null, h('div', { class: 't' }, a.name), h('div', { class: 's' }, bonusesText(a.bonuses.filter(b => b.inVersion))))));
+  }
+  // auras of other party members (they get the aura's "shared" value)
+  auraList.append(h('h4', { class: 'party-h' }, T.partyAuras), h('div', { class: 'hint' }, T.partyAurasHint));
+  for (const { aura: a, base, withTalents } of ctx.sharedAuras) {
+    const on = ch.sharedAuras && a.id in ch.sharedAuras, tal = on && ch.sharedAuras[a.id];
+    const canTal = bonusesText(base) !== bonusesText(withTalents);
+    const chip = canTal ? h('button', { class: 'tal-chip' + (tal ? ' on' : ''), type: 'button', title: T.withTalentsTip, onclick: e => {
+      e.preventDefault(); e.stopPropagation();
+      changed(c => { c.sharedAuras = { ...c.sharedAuras, [a.id]: !tal }; });
+    } }, T.withTalents) : h('div');
+    auraList.append(h('label', { class: 'opt' },
+      h('input', { type: 'checkbox', checked: on, onchange: e => changed(c => {
+        const s = { ...c.sharedAuras };
+        if (e.target.checked) s[a.id] = false; else delete s[a.id];
+        c.sharedAuras = s;
+      }) }),
+      img(a.imageId),
+      h('div', null, h('div', { class: 't' }, a.name.trim(), h('span', { class: 'cls-of' }, ' · ' + ctx.classes.get(a.classId).name)),
+        h('div', { class: 's' }, bonusesText(tal ? withTalents : base))),
+      chip));
   }
   auraBox.append(auraList);
 
@@ -979,7 +1069,8 @@ function renderEffects(el) {
   const sections = [
     [T.buffsClass, avail.filter(b => b.classId != null)],
     [T.buffsGear, avail.filter(b => b.cardId != null || b.stampId != null)],
-    [T.buffsCommon, avail.filter(b => b.classId == null && b.cardId == null && b.stampId == null && !b.isNegate)],
+    [T.buffsGuild, avail.filter(b => b.guildTalentId != null)],
+    [T.buffsCommon, avail.filter(b => b.classId == null && b.cardId == null && b.stampId == null && b.guildTalentId == null && !b.isNegate)],
     [T.buffsNeg, avail.filter(b => b.classId == null && b.cardId == null && b.stampId == null && b.isNegate)],
   ];
   const buffWrap = h('div', { class: ch.enableBuffs ? '' : 'disabled-section' });
