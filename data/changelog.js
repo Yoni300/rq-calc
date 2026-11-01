@@ -1,6 +1,10 @@
 // "What's new" under the bell in the top bar (app/news.js). Newest first. Add an entry for every change players see.
 // at: ISO time in UTC (shown in each viewer's own time zone); text: ru / uk / en.
 window.RQ_CHANGELOG = [
+  { at: '2026-11-01T22:53Z',
+    ru: 'Новый инструмент «База» (меню «RQ Tools»): 777 монстров с портретами, уровнем, жизнями, стихией, локациями и дропом, всё снаряжение, карты, печати, локации и добыча. Всё связано: из монстра — в предмет, из предмета — кто его дропает, предмет можно сразу надеть в калькуляторе, добычу — посмотреть на рынке.',
+    uk: 'Новий інструмент «База» (меню «RQ Tools»): 777 монстрів із портретами, рівнем, життям, стихією, локаціями й дропом, усе спорядження, карти, печатки, локації й видобуток. Усе пов\x27язане: з монстра — у предмет, з предмета — хто його дропає, предмет можна одразу вдягнути в калькуляторі, видобуток — подивитися на ринку.',
+    en: 'New «Database» tool (the «RQ Tools» menu): 777 monsters with portraits, level, health, element, locations and drops, all gear, cards, stamps, locations and loot. Everything is linked: from a monster to an item, from an item to who drops it; put an item on in the calculator, check loot on the market.' },
   { at: '2026-11-01T22:19Z',
     ru: 'Два оружия (Вор, Разбойник, Ассасин): урон в секунду больше не завышен вдвое — скорость атаки теперь средняя по двум оружиям, а не сумма. Спасибо Maestor с форума.',
     uk: 'Дві зброї (Вор, Разбойник, Ассасин): урон у секунду більше не завищений удвічі — швидкість атаки тепер середня за двома зброями, а не сума. Дякую Maestor з форуму.',
