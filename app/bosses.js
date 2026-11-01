@@ -30,7 +30,8 @@ function fmtLeft(ms) {
   const s = Math.max(0, Math.ceil(ms / 1000)), hh = Math.floor(s / 3600), mm = Math.floor(s / 60) % 60, ss = s % 60;
   return (hh ? hh + ':' + String(mm).padStart(2, '0') : String(mm)) + ':' + String(ss).padStart(2, '0');
 }
-const fmtAgo = ms => (ms < 60e3 ? T.bossNow.toLowerCase() : fmtResp(Math.floor(ms / 60e3)));
+// "12 хв тому", or "щойно" for the first minute (without "тому")
+const fmtAgo = ms => (ms < 60e3 ? T.bossNow.toLowerCase() : fmtT(T.bossAgoD, { d: fmtResp(Math.floor(ms / 60e3)) }));
 
 // state of one timer: none (unknown) / wait (counting down) / up (should be alive)
 function bossState(b, now = Date.now()) {
