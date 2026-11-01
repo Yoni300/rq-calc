@@ -1,6 +1,10 @@
 // "What's new" under the bell in the top bar (app/news.js). Newest first. Add an entry for every change players see.
 // at: ISO time in UTC (shown in each viewer's own time zone); text: ru / uk / en.
 window.RQ_CHANGELOG = [
+  { at: '2026-11-01T21:53Z',
+    ru: '«Печать молота боли» теперь можно ставить на топоры и Разбойнику.',
+    uk: '«Печать молота боли» тепер можна ставити на топори й Розбійнику.',
+    en: '«Печать молота боли» can now be put on axes by a Rogue too.' },
   { at: '2026-11-01T21:50Z',
     ru: 'Колокольчик «Что нового» вверху: здесь видно, что и когда изменилось.',
     uk: 'Дзвіночок «Що нового» вгорі: тут видно, що і коли змінилося.',

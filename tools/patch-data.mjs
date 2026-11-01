@@ -72,6 +72,13 @@ if (faith) {
   if (D.TalentBonus.length < before) patched.push('Вера: без +15% урону ядом');
 }
 
+// 5c. «Молота боли» can be put on an axe of a Разбойник too (players' report; the wiki lists only the warrior line)
+const painHammer = D.Stamp.find(s => s.Name === 'Молота боли');
+if (painHammer && D.StampClass.some(c => c.Stamp_Id === painHammer.Id) && !D.StampClass.some(c => c.Stamp_Id === painHammer.Id && c.Class_Id === CLASS.ROGUE)) {
+  D.StampClass.push({ Stamp_Id: painHammer.Id, Class_Id: CLASS.ROGUE });
+  patched.push('Молота боли: і для Розбійника');
+}
+
 // 6. Collection trophies have no pictures in the database: give each a fitting icon of a pet, mount,
 //    book, potion or item that is already in data/img (picked by the trophy's theme).
 const TROPHY_ICONS = {
