@@ -266,7 +266,7 @@ function drawBaseList() {
 
 // ---------- pieces of a page ----------
 const bsec = (title, ...kids) => h('div', { class: 'bs-sec' }, h('h4', null, title), kids);
-const bfacts = rows => h('div', { class: 'bs-facts' }, rows.filter(([, v]) => v != null && v !== '').map(([k, v]) => h('div', null, h('span', null, k), h('b', null, String(v)))));
+const bfacts = rows => h('div', { class: 'bs-facts' }, rows.filter(([, v]) => v != null && v !== '').map(([k, v]) => h('div', null, h('span', null, k), h('b', null, v instanceof Node ? v : String(v)))));
 function bchip(name, link, { count, extra, icon } = {}) {
   if (link === undefined) link = linkOfName(name);
   const f = link && findEntry(link.kind, link.key);
@@ -288,7 +288,7 @@ function whereBlocks(name) {
   const parts = [];
   if (s.drop) parts.push(bsec(t.src.drop, chips(s.drop.slice().sort((a, b) => (a.level ?? 999) - (b.level ?? 999)), mchip)));
   if (s.node) parts.push(bsec(t.src.node, chips(s.node, n => bchip(n.name, { kind: 'res', key: n.name }, { extra: t.nodeKind[n.kind] }))));
-  if (s.shop) parts.push(bsec(t.src.shop, chips(s.shop, x => bchip(x.npc.name, { kind: 'npc', key: x.npc.name }, { extra: x.price }))));
+  if (s.shop) parts.push(bsec(t.src.shop, chips(s.shop, x => bchip(x.npc.name, { kind: 'npc', key: x.npc.name }, { extra: priceEl(x.price) }))));
   if (s.quest) parts.push(bsec(t.src.quest, chips(s.quest, qchip)));
   if (s.craft) parts.push(bsec(t.src.craft, chips(s.craft, r => bchip(r.name.replace(/^Рецепт:\s*/, ''), { kind: 'recipe', key: r.name }, { extra: `${r.chance ?? '?'}%` }))));
   out.push(h('div', { class: 'bs-group' }, h('h3', null, t.whereGet), parts.length ? parts : h('div', { class: 'hint' }, t.nobody)));
@@ -313,7 +313,7 @@ function markTip(m) {
     const img = n && n.img ? `<img class="bs-tt-img" src="../data/npcs/${n.img}">` : '';
     let body = '';
     if (qs.length) body += `<div class="bs-tt-s">${esc(t.gives)}</div>` + qs.slice(0, 6).map(q => `<div>${q.level != null ? `<span class="m">${t.lvl} ${q.level}</span> ` : ''}${esc(q.name)}</div>`).join('') + (qs.length > 6 ? `<div class="m">${esc(fmtT(t.andMore, { n: qs.length - 6 }))}</div>` : '');
-    if (n && (n.shop || []).length) body += `<div class="bs-tt-s">${esc(t.shop)}</div>` + n.shop.slice(0, 5).map(s => `<div>${esc(s.n)} <span class="m">${esc(s.p)}</span></div>`).join('') + (n.shop.length > 5 ? `<div class="m">${esc(fmtT(t.andMore, { n: n.shop.length - 5 }))}</div>` : '');
+    if (n && (n.shop || []).length) body += `<div class="bs-tt-s">${esc(t.shop)}</div>` + n.shop.slice(0, 5).map(s => `<div>${esc(s.n)} <span class="m">${priceHtml(s.p)}</span></div>`).join('') + (n.shop.length > 5 ? `<div class="m">${esc(fmtT(t.andMore, { n: n.shop.length - 5 }))}</div>` : '');
     return `<div class="bs-tt">${img}<div>${title}${body}</div></div>`;
   }
   if (k === 'exit') {
@@ -395,12 +395,12 @@ function drawBaseDetail() {
     if (gives.length) el.append(bsec(`${t.gives} (${gives.length})`, chips(gives, qchip)));
     if (takes.length) el.append(bsec(`${t.takes} (${takes.length})`, chips(takes, qchip)));
     if ((x.shop || []).length) {
-      el.append(bsec(`${t.shop} (${x.shop.length})`, h('div', { class: 'bs-shop' }, x.shop.map(s => h('div', null, bchip(s.n), h('span', { class: 'bs-price' }, s.p))))));
+      el.append(bsec(`${t.shop} (${x.shop.length})`, h('div', { class: 'bs-shop' }, x.shop.map(s => h('div', null, bchip(s.n), h('span', { class: 'bs-price' }, priceEl(s.p)))))));
     }
     el.append(h('div', { class: 'bs-foot' }, wikiLink(x.name)));
   } else if (e.kind === 'quest') {
     el.append(bfacts([[t.level, x.level], [t.type, x.type], [t.event, x.event], [t.chain, x.chain ? `${x.chain}${x.num ? ` · №${x.num}` : ''}` : ''], [t.cls, (x.cls || []).join(', ')],
-      [t.exp, x.exp ? fmtNum(x.exp) : null], [t.gold, x.gold ? fmtNum(x.gold) : null]]));
+      [t.exp, x.exp ? fmtNum(x.exp) : null], [t.gold, x.gold ? priceEl(x.gold) : null]]));
     const npcLink = n => bchip(n, X.npcBy.has(bnorm(n)) ? { kind: 'npc', key: X.npcBy.get(bnorm(n)).name } : null);
     el.append(h('div', { class: 'bs-pair' }, x.from ? bsec(t.from, npcLink(x.from)) : null, x.to ? bsec(t.to, npcLink(x.to)) : null));
     const prev = (x.prev || []).map(p => X.questBy.get(bnorm(p))).filter(Boolean);
@@ -425,7 +425,7 @@ function drawBaseDetail() {
     const s = sourcesOf(x.name);
     const parts = [];
     if (s.drop) parts.push(bsec(t.src.drop, chips(s.drop, mchip)));
-    if (s.shop) parts.push(bsec(t.src.shop, chips(s.shop, y => bchip(y.npc.name, { kind: 'npc', key: y.npc.name }, { extra: y.price }))));
+    if (s.shop) parts.push(bsec(t.src.shop, chips(s.shop, y => bchip(y.npc.name, { kind: 'npc', key: y.npc.name }, { extra: priceEl(y.price) }))));
     if (s.quest) parts.push(bsec(t.src.quest, chips(s.quest, qchip)));
     if (x.from) parts.push(bsec(t.from, chips([x.from], n => bchip(n))));
     el.append(h('div', { class: 'bs-group' }, h('h3', null, t.recipeFrom), parts.length ? parts : h('div', { class: 'hint' }, t.nobody)));
@@ -468,7 +468,7 @@ function drawBaseDetail() {
   } else if (e.kind === 'loot' || e.kind === 'thing') {
     const mi = e.kind === 'loot' ? x : X.lootBy.get(bnorm(x));
     if (mi) {
-      el.append(bfacts([[t.npc, mi.npc != null ? fmtNum(mi.npc) : null], [t.event, mi.event]]));
+      el.append(bfacts([[t.npc, mi.npc != null ? priceEl(mi.npc) : null], [t.event, mi.event]]));
       el.append(h('button', { class: 'btn small bs-act', onclick: () => { MK.sel = mi.id; store.set('marketSel', mi.id); switchTool('market'); } }, iconEl('coins'), t.market));
     }
     el.append(...whereBlocks(e.kind === 'loot' ? x.name : x));

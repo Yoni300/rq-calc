@@ -101,7 +101,7 @@ function drawMarketScan() {
         if (!on) { S.pages = 0; S.sent = 0; S.last = null; }
       } }, on ? t.scanOff : t.scanOn)),
     on ? null : h('div', { class: 'note' }, t.scanHelp),
-    S.last ? h('div', { class: 'mk-last' }, S.last.rows.map(r => h('span', null, h('img', { src: MI_IMG(r.id), draggable: 'false' }), r.name, ' ', h('b', null, gold(r.price))))) : null].filter(Boolean));
+    S.last ? h('div', { class: 'mk-last' }, S.last.rows.map(r => h('span', null, h('img', { src: MI_IMG(r.id), draggable: 'false' }), r.name, ' ', h('b', null, priceEl(r.price))))) : null].filter(Boolean));
 }
 
 function drawMarketList() {
@@ -124,7 +124,7 @@ function drawMarketList() {
     el.append(h('div', { class: 'mk-row' + (MK.sel === i.id ? ' on' : '') + (d ? '' : ' none'), onclick: () => { MK.sel = i.id; store.set('marketSel', i.id); drawMarketList(); drawMarketDetail(); } },
       h('img', { class: 'mk-ic', src: MI_IMG(i.id), loading: 'lazy', draggable: 'false' }),
       h('div', { class: 'mk-name' }, i.name, h('small', null, t.cats[i.cat] + (d ? ' · ' + fmtAgo(now - new Date(d.cur_at)) : ''))),
-      h('div', { class: 'mk-price' }, d ? h('b', null, gold(d.cur)) : h('span', { class: 'mk-na' }, '—'), d && d.med7 ? h('small', null, '≈ ' + gold(d.med7)) : null)));
+      h('div', { class: 'mk-price' }, d ? h('b', null, priceEl(d.cur)) : h('span', { class: 'mk-na' }, '—'), d && d.med7 ? h('small', null, '≈ ', priceEl(d.med7)) : null)));
   }
 }
 
@@ -138,9 +138,9 @@ async function drawMarketDetail() {
   el.append(h('div', { class: 'mk-head' }, h('img', { class: 'mk-big', src: MI_IMG(i.id), draggable: 'false' }),
     h('div', null, h('h3', null, i.name), h('div', { class: 'mk-type' }, [t.cats[i.cat], i.type, i.event].filter(Boolean).join(' · ')))));
   el.append(h('div', { class: 'mk-kv' },
-    h('div', null, h('small', null, t.now), h('b', { class: 'gold' }, d ? gold(d.cur) : '—'), d ? h('small', null, t.updated + ' ' + fmtAgo(Date.now() - new Date(d.cur_at))) : h('small', null, t.noData)),
-    h('div', null, h('small', null, t.usual), h('b', null, d && d.med7 ? gold(d.med7) : '—'), d && d.n7 ? h('small', null, d.n7 + ' ' + t.prices) : null),
-    h('div', null, h('small', null, t.npc), h('b', null, i.npc ? gold(i.npc) : '—'))));
+    h('div', null, h('small', null, t.now), h('b', { class: 'gold' }, d ? priceEl(d.cur) : '—'), d ? h('small', null, t.updated + ' ' + fmtAgo(Date.now() - new Date(d.cur_at))) : h('small', null, t.noData)),
+    h('div', null, h('small', null, t.usual), h('b', null, d && d.med7 ? priceEl(d.med7) : '—'), d && d.n7 ? h('small', null, d.n7 + ' ' + t.prices) : null),
+    h('div', null, h('small', null, t.npc), h('b', null, i.npc ? priceEl(i.npc) : '—'))));
   const chart = h('div', { class: 'mk-chart' });
   el.append(h('h4', null, t.history), chart);
   if (!d) return;

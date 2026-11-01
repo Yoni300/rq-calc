@@ -53,6 +53,17 @@ function fmtNum(v, digits) {
   const [i, f] = s.split('.');
   return i.replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + (f ? '.' + f : '');
 }
+// a price in gold with a coin after it; other currencies ("12 АР") are shown as they are
+function goldNum(v) {
+  if (typeof v === 'number') return isFinite(v) ? v : null;
+  const s = String(v ?? '').trim();
+  return /^[\d\s  ]+$/.test(s) && /\d/.test(s) ? +s.replace(/[\s  ]/g, '') : null;
+}
+function priceEl(v) {
+  const n = goldNum(v);
+  return n == null ? h('span', { class: 'price' }, String(v ?? '')) : h('span', { class: 'price' }, fmtNum(n), h('i', { class: 'coin', title: T.goldWord || '' }));
+}
+const priceHtml = v => { const n = goldNum(v); return n == null ? esc(v) : `${fmtNum(n)}<i class="coin"></i>`; };
 function fmtStat(s, v) {
   const d = s.roundDigits ?? (Math.abs(v - Math.round(v)) < 1e-9 ? 0 : 2);
   return fmtNum(v, d) + (s.isPercent ? '%' : '');
