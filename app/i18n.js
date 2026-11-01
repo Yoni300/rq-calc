@@ -48,7 +48,7 @@ window.RQC_I18N = {
     copy: 'Копіювати', copied: 'Скопійовано', badCode: 'Код не розпізнано.', close: 'Закрити', language: 'Мова',
     sourceTitle: 'Звідки бонус',
     activeTalent: 'активний', attackRange: 'Дальність атаки', stampsLegacy: 'Старі печатки (немає на вікі)',
-    srcNames: { 'Класс': 'Клас', 'Печать': 'Печатка', 'Эликсир': 'Еліксир', 'Гильдия': 'Гільдія', 'Аура': 'Аура', 'Бафф': 'Бафф', 'Талант': 'Талант', 'Карта': 'Карта', 'Коллекция': 'Колекція', 'Без оружия': 'Без зброї', 'Уровень': 'Рівень', 'Очки характеристик': 'Очки характеристик', 'База': 'База', 'Снаряжение': 'Спорядження' },
+    srcNames: { 'Оружие': 'Зброя', 'Класс': 'Клас', 'Печать': 'Печатка', 'Эликсир': 'Еліксир', 'Гильдия': 'Гільдія', 'Аура': 'Аура', 'Бафф': 'Бафф', 'Талант': 'Талант', 'Карта': 'Карта', 'Коллекция': 'Колекція', 'Без оружия': 'Без зброї', 'Уровень': 'Рівень', 'Очки характеристик': 'Очки характеристик', 'База': 'База', 'Снаряжение': 'Спорядження' },
     siteTitle: 'Калькулятор тепер є на сайті', siteText: 'Відкривайте його в браузері без встановлення й діліться посиланням з друзями. «Збірки гравців» спільні з програмою.', siteOpen: 'Відкрити сайт', siteClose: 'Зрозуміло', siteLink: 'Онлайн-версія',
   },
   ru: {
@@ -149,7 +149,7 @@ window.RQC_I18N = {
     copy: 'Copy', copied: 'Copied', badCode: 'Code not recognized.', close: 'Close', language: 'Language',
     sourceTitle: 'Bonus sources',
     activeTalent: 'active', attackRange: 'Attack range', stampsLegacy: 'Old stamps (not on the wiki)',
-    srcNames: { 'Класс': 'Class', 'Печать': 'Stamp', 'Эликсир': 'Elixir', 'Гильдия': 'Guild', 'Аура': 'Aura', 'Бафф': 'Buff', 'Талант': 'Talent', 'Карта': 'Card', 'Коллекция': 'Collection', 'Без оружия': 'No weapon', 'Уровень': 'Level', 'Очки характеристик': 'Attribute points', 'База': 'Base', 'Снаряжение': 'Equipment' },
+    srcNames: { 'Оружие': 'Weapon', 'Класс': 'Class', 'Печать': 'Stamp', 'Эликсир': 'Elixir', 'Гильдия': 'Guild', 'Аура': 'Aura', 'Бафф': 'Buff', 'Талант': 'Talent', 'Карта': 'Card', 'Коллекция': 'Collection', 'Без оружия': 'No weapon', 'Уровень': 'Level', 'Очки характеристик': 'Attribute points', 'База': 'Base', 'Снаряжение': 'Equipment' },
     siteTitle: 'The calculator is now on the web', siteText: 'Open it in the browser without installing and share the link with friends. Public builds are shared with the app.', siteOpen: 'Open the site', siteClose: 'Got it', siteLink: 'Web version',
   },
 };

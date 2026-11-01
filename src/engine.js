@@ -723,7 +723,8 @@
         for (const en of entries) {
           if (!allowed(en)) continue;
           for (const b of en.item.bonuses) if (b.activate == null || b.activate === en.active) push(b, en.item.name);
-          for (const b of eqTypes.get(en.item.typeId).bonuses) push(b, en.item.name);
+          // the weapon type's own bonus (standard range of bows, rifles…), not the item's
+          for (const b of eqTypes.get(en.item.typeId).bonuses) push(b, 'Оружие: ' + eqTypes.get(en.item.typeId).name);
         }
         for (const en of entries) {
           if (!en.stampVariant || !allowed(en)) continue;
