@@ -361,6 +361,7 @@ const TOP_ICONS = {
   skull: '<path d="M12 3a7.5 7.5 0 0 0-7.5 7.5c0 2.6 1.3 4.6 3 5.8V19a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1v-2.7c1.7-1.2 3-3.2 3-5.8A7.5 7.5 0 0 0 12 3z"/><circle cx="9.2" cy="11" r="1.6"/><circle cx="14.8" cy="11" r="1.6"/><path d="M10.5 20v-2.5M13.5 20v-2.5M11.2 14.8l.8-1.3.8 1.3"/>',
   group: '<circle cx="9" cy="8.5" r="3"/><path d="M3.5 19.5c.4-3.2 2.6-5 5.5-5s5.1 1.8 5.5 5"/><circle cx="16.5" cy="9" r="2.4"/><path d="M15.5 14.6c2.6-.3 4.6 1.3 5 4.4"/>',
   lock: '<rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/>',
+  calc: '<rect x="5" y="2.5" width="14" height="19" rx="2"/><rect x="7.5" y="5" width="9" height="4" rx=".8"/><path d="M8.5 12.5h.01M12 12.5h.01M15.5 12.5h.01M8.5 15.5h.01M12 15.5h.01M15.5 15.5h.01M8.5 18.5h.01M12 18.5h.01M15.5 18.5h.01" stroke-width="2.4"/>',
   // settings (cog)
   cog: '<circle cx="12" cy="12" r="3"/><path d="M12 2.8l1.5 2.3 2.7-.6.6 2.7 2.3 1.5-1.2 2.5 1.2 2.5-2.3 1.5-.6 2.7-2.7-.6L12 21.2l-1.5-2.3-2.7.6-.6-2.7-2.3-1.5L6.1 12.8 4.9 10.3l2.3-1.5.6-2.7 2.7.6z"/>',
 };
@@ -384,8 +385,12 @@ function renderTop() {
   topButton('btnCode', 'code', T.code);
   topButton('btnPublic', 'globe', T.publicBuilds);
   $('btnPublic').classList.toggle('on', tab === 'builds');
-  topButton('btnBosses', 'skull', T.tabBosses);
-  $('btnBosses').classList.toggle('on', tab === 'bosses');
+  // tools: the brand opens the list (calculator, boss timer, …); the timer hides the calculator's buttons
+  if (!$('brandBtn').querySelector('.caret')) $('brandBtn').insertAdjacentHTML('beforeend', svgIcon('down', 'ic caret'));
+  $('brandBtn').title = T.toolsTip;
+  document.body.classList.toggle('tool-timer', tab === 'bosses');
+  $('toolName').hidden = tab !== 'bosses';
+  $('toolName').innerHTML = svgIcon('skull') + `<span>${esc(T.toolTimer)}</span>`;
   $('btnSettings').innerHTML = svgIcon('cog'); $('btnSettings').title = T.settings;
   if (settingsLang !== lang) { settingsLang = lang; applySettings(); } // tray menu texts follow the language
   const ls = $('langSwitch'); ls.innerHTML = ''; ls.title = T.language;
@@ -410,11 +415,35 @@ $('btnPublic').addEventListener('click', () => {
 // settings (app/settings.js)
 let settingsLang = null;
 $('btnSettings').addEventListener('click', () => openSettings());
-// boss timer (app/bosses.js), also in the center area
-$('btnBosses').addEventListener('click', () => {
-  tab = tab === 'bosses' ? 'gear' : 'bosses'; store.set('tab', tab);
+// ---------- tools (the brand menu): the calculator and the boss timer; more can be added to TOOLS ----------
+const TOOLS = [
+  { id: 'calc', icon: 'calc', name: () => T.toolCalc, sub: () => T.toolCalcSub },
+  { id: 'timer', icon: 'skull', name: () => T.toolTimer, sub: () => T.toolTimerSub },
+];
+const curTool = () => (tab === 'bosses' ? 'timer' : 'calc');
+function switchTool(id) {
+  if (id === curTool()) return;
+  if (id === 'timer') { store.set('calcTab', tab); tab = 'bosses'; }
+  else { tab = store.get('calcTab', 'gear'); if (tab === 'bosses') tab = 'gear'; }
+  store.set('tab', tab);
   renderCenter(); animateEnter($('center')); renderTop();
+}
+$('brandBtn').addEventListener('click', e => {
+  e.stopPropagation();
+  const menu = $('toolsMenu');
+  if (!menu.hidden) { menu.hidden = true; $('brandBtn').classList.remove('open'); return; }
+  menu.innerHTML = '';
+  for (const t of TOOLS) {
+    const on = t.id === curTool();
+    menu.append(h('button', { class: 'tool-item' + (on ? ' on' : ''), onclick: () => { menu.hidden = true; $('brandBtn').classList.remove('open'); switchTool(t.id); } },
+      h('span', { class: 'tool-ic' }, iconEl(t.icon)),
+      h('span', { class: 'tool-txt' }, h('b', null, t.name()), h('small', null, t.sub())),
+      on ? h('span', { class: 'tool-on' }, '✓') : null));
+  }
+  menu.append(h('div', { class: 'tool-more' }, T.toolMore));
+  menu.hidden = false; $('brandBtn').classList.add('open');
 });
+document.addEventListener('click', e => { const m = $('toolsMenu'); if (!m.hidden && !m.contains(e.target)) { m.hidden = true; $('brandBtn').classList.remove('open'); } });
 $('btnNew').addEventListener('click', async () => {
   if (!await confirmBox(T.newAsk, { ok: T.newBuild })) return;
   ch = ctx.defaultCharacter(); buildName = ''; store.set('currentName', ''); baseline = null; previous = null; lastResult = null;

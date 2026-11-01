@@ -8,17 +8,20 @@
 </head>
 <body>
   <header class="top">
-    <div class="brand"><span class="logo">◆</span> <span id="appTitle">RQ Tools</span></div>
-    <input id="buildName" class="build-name" spellcheck="false">
-    <button id="btnSave" class="btn primary"></button>
     <div class="dropdown">
+      <button id="brandBtn" class="brand"><span class="logo">◆</span> <span id="appTitle">RQ Tools</span></button>
+      <div id="toolsMenu" class="menu tools-menu" hidden></div>
+    </div>
+    <span id="toolName" class="tool-name" hidden></span>
+    <input id="buildName" class="build-name calc-only" spellcheck="false">
+    <button id="btnSave" class="btn primary calc-only"></button>
+    <div class="dropdown calc-only">
       <button id="btnBuilds" class="btn"></button>
       <div id="buildsMenu" class="menu" hidden></div>
     </div>
-    <button id="btnNew" class="btn"></button>
-    <button id="btnCode" class="btn"></button>
-    <button id="btnPublic" class="btn public"></button>
-    <button id="btnBosses" class="btn bosses"></button>
+    <button id="btnNew" class="btn calc-only"></button>
+    <button id="btnCode" class="btn calc-only"></button>
+    <button id="btnPublic" class="btn public calc-only"></button>
     <div class="spacer"></div>
     <div class="lang" id="langSwitch"></div>
     <button id="btnSettings" class="btn icon-only"></button>

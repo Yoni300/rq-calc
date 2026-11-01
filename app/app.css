@@ -842,3 +842,23 @@ input[type=range] { accent-color: var(--gold-2); }
 .set-sw input:checked + span::after { transform: translateX(17px); background: var(--gold-hi); }
 .set-sw input:focus-visible + span { outline: 2px solid var(--gold-2); outline-offset: 2px; }
 .set-foot { display: flex; align-items: center; gap: 8px; padding: 10px 18px; border-top: 1px solid var(--line-2); background: rgba(0, 0, 0, .2); }
+
+/* ---------- tools menu (the brand) ---------- */
+button.brand { display: inline-flex; align-items: center; gap: 6px; background: none; border: 1px solid transparent; border-radius: 8px; padding: 4px 8px 4px 6px; margin-left: -6px; cursor: pointer; font: inherit; font-family: var(--f-display); font-weight: 700; font-size: 19px; color: var(--gold); }
+button.brand:hover, button.brand.open { border-color: var(--line-2); background: rgba(var(--gold-rgb), .06); }
+button.brand .caret { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; opacity: .6; transition: transform .15s; }
+button.brand.open .caret { transform: rotate(180deg); }
+.tools-menu { min-width: 380px; padding: 6px; }
+.tool-item { display: flex; align-items: center; gap: 12px; width: 100%; padding: 9px 10px; border: 1px solid transparent; border-radius: 7px; background: none; color: var(--fg); cursor: pointer; text-align: left; }
+.tool-item:hover { background: var(--soft); border-color: var(--line); }
+.tool-item.on { background: rgba(var(--gold-rgb), .08); border-color: var(--line-2); }
+.tool-ic { width: 36px; height: 36px; flex: none; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid var(--line-2); background: radial-gradient(circle, #3a2d1a, #120f0b); color: var(--gold); }
+.tool-ic .ic { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.tool-txt { flex: 1; min-width: 0; }
+.tool-txt b { display: block; font-family: var(--f-display); font-size: 15px; color: var(--gold); }
+.tool-txt small { display: block; font-size: 11.5px; color: var(--muted); margin-top: 1px; }
+.tool-on { color: var(--gold-hi); font-weight: 700; }
+.tool-more { padding: 7px 10px 3px; font-size: 11px; color: var(--dim); text-align: center; }
+.tool-name { display: inline-flex; align-items: center; gap: 7px; font-family: var(--f-display); font-size: 16px; font-weight: 700; color: var(--fg); padding-left: 12px; border-left: 1px solid var(--line-2); }
+.tool-name .ic { width: 18px; height: 18px; fill: none; stroke: var(--gold); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+body.tool-timer .calc-only { display: none !important; }

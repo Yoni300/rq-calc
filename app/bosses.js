@@ -269,7 +269,7 @@ function primeAlerts() {
 }
 
 // ---------- view ----------
-function openBosses() { tab = 'bosses'; store.set('tab', tab); renderCenter(); animateEnter($('center')); renderTop(); }
+function openBosses() { switchTool('timer'); }
 
 function renderBosses(el) {
   const seg = (items, cur, on) => h('div', { class: 'seg' }, items.map(([v, label]) => h('button', { class: v === cur ? 'on' : '', onclick: () => on(v) }, label)));
