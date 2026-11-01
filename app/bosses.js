@@ -190,10 +190,12 @@ function alertBoss(b, kind, left) {
   } catch { /* ignore */ }
   toast(title);
 }
-// "listen": both sounds and both messages, on a favourite (or Деструктор) as the example
+// "listen": both sounds and both messages. Example: the boss that comes next, else a favourite, else no name.
 async function testAlert() {
   try { if (window.Notification && Notification.permission === 'default') await Notification.requestPermission(); } catch { /* ignore */ }
-  const b = BOSSES.find(x => BT.fav.has(x.name)) || BOSSES.find(x => x.name === 'Деструктор') || BOSSES[0];
+  const now = Date.now();
+  const next = BOSSES.map(b => ({ b, st: bossState(b, now) })).filter(x => x.st.s === 'wait').sort((x, y) => x.st.spawn - y.st.spawn)[0];
+  const b = next ? next.b : BOSSES.find(x => BT.fav.has(x.name)) || { name: T.bossTestName, loc: '' };
   alertBoss(b, 'soon', SOON);
   setTimeout(() => alertBoss(b, 'up'), 2200);
 }
