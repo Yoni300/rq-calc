@@ -915,3 +915,15 @@ body.tool-timer .calc-only { display: none !important; }
 .mk-last img { width: 20px; height: 20px; border-radius: 3px; }
 .mk-last b { color: var(--gold); }
 @media (max-width: 900px) { .mk-wrap { grid-template-columns: 1fr; } .mk-detail { position: static; } }
+
+/* what's new (app/news.js) */
+.news-btn { position: relative; }
+.news-badge { position: absolute; top: -5px; right: -5px; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 9px; background: var(--bad); color: #fff;
+  font-size: 10.5px; font-weight: 700; line-height: 17px; text-align: center; box-shadow: 0 0 0 2px var(--bg, #15110d); }
+.news-menu { right: 0; left: auto; width: min(420px, calc(100vw - 30px)); max-height: 70vh; overflow: auto; padding: 6px 0 10px; }
+.news-head { padding: 6px 14px 8px; font-family: var(--f-display); color: var(--gold); font-size: 15px; border-bottom: 1px solid var(--line-2); }
+.news-day { padding: 10px 14px 4px; color: var(--dim); font-size: 11.5px; text-transform: uppercase; letter-spacing: .04em; }
+.news-item { display: grid; grid-template-columns: 44px 1fr; gap: 8px; padding: 5px 14px; font-size: 12.5px; line-height: 1.4; }
+.news-item.new { background: rgba(var(--gold-rgb), .07); box-shadow: inset 2px 0 0 var(--gold); }
+.news-time { color: var(--dim); font-variant-numeric: tabular-nums; }
+.news-empty { padding: 14px; color: var(--dim); }

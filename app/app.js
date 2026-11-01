@@ -375,6 +375,7 @@ const TOP_ICONS = {
   effects: '<path d="M9.5 3h5M10.5 3v5.6L5.4 17.4A2.4 2.4 0 0 0 7.5 21h9a2.4 2.4 0 0 0 2.1-3.6l-5.1-8.8V3"/><path d="M7.4 14.5h9.2"/>',
   collection: '<path d="M7.5 4h9v5.5a4.5 4.5 0 0 1-9 0z"/><path d="M7.5 6.5H5a2.8 2.8 0 0 0 3 3.6M16.5 6.5H19a2.8 2.8 0 0 1-3 3.6M12 14v3.5M8.5 20.5h7M9.5 17.5h5v3h-5z"/>',
   // boss timer
+  bell: '<path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/><path d="M12 3v2"/>',
   bug: '<rect x="7.5" y="7" width="9" height="12" rx="4.5"/><path d="M12 11v8M9 4.5l1.5 2.5M15 4.5l-1.5 2.5M7.5 11H4M7.5 15H4.5M16.5 11H20M16.5 15h3M7.8 18.5 5 20.5M16.2 18.5l2.8 2"/>',
   coins: '<ellipse cx="9" cy="7" rx="5.5" ry="2.5"/><path d="M3.5 7v3.5c0 1.4 2.5 2.5 5.5 2.5s5.5-1.1 5.5-2.5V7"/><path d="M3.5 10.5V14c0 1.4 2.5 2.5 5.5 2.5"/><ellipse cx="15" cy="14" rx="5.5" ry="2.5"/><path d="M9.5 14v3.5c0 1.4 2.5 2.5 5.5 2.5s5.5-1.1 5.5-2.5V14"/>',
   skull: '<path d="M12 3a7.5 7.5 0 0 0-7.5 7.5c0 2.6 1.3 4.6 3 5.8V19a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1v-2.7c1.7-1.2 3-3.2 3-5.8A7.5 7.5 0 0 0 12 3z"/><circle cx="9.2" cy="11" r="1.6"/><circle cx="14.8" cy="11" r="1.6"/><path d="M10.5 20v-2.5M13.5 20v-2.5M11.2 14.8l.8-1.3.8 1.3"/>',
@@ -413,6 +414,7 @@ function renderTop() {
   if (tool) $('toolName').innerHTML = svgIcon(tool.icon) + `<span>${esc(tool.name())}</span>`;
   $('btnSettings').innerHTML = svgIcon('cog'); $('btnSettings').title = T.settings;
   $('btnBug').innerHTML = svgIcon('bug'); $('btnBug').title = RT().btn;
+  drawNewsBell();
   if (settingsLang !== lang) { settingsLang = lang; applySettings(); } // tray menu texts follow the language
   const ls = $('langSwitch'); ls.innerHTML = ''; ls.title = T.language;
   for (const [k, label] of [['uk', 'УКР'], ['ru', 'РУС'], ['en', 'ENG']]) {
@@ -437,6 +439,7 @@ $('btnPublic').addEventListener('click', () => {
 let settingsLang = null;
 $('btnSettings').addEventListener('click', () => openSettings());
 $('btnBug').addEventListener('click', () => openReport());
+$('btnNews').addEventListener('click', e => { e.stopPropagation(); openNews(); });
 // ---------- tools (the brand menu): the calculator and the boss timer; more can be added to TOOLS ----------
 // a tool other than the calculator owns one `tab` value and takes the whole window
 const TOOLS = [
