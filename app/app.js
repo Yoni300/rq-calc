@@ -966,9 +966,10 @@ function renderEditorDetail() {
   if (stamps.length) {
     const curV = e.stampVariantId ? ctx.stampVariants.get(e.stampVariantId) : null;
     const variantFor = s => (curV && s.variants.find(v => v.colorId === curV.colorId)) || s.variants[s.variants.length - 1];
-    const options = stamps.filter(s => !s.isLegacy || (curV && curV.stampId === s.id)).map(s => {
+    // stamps the wiki no longer lists go last, under their own heading (values from Anon's older database)
+    const options = [...stamps.filter(s => !s.isLegacy), ...stamps.filter(s => s.isLegacy)].map(s => {
       const v = variantFor(s);
-      return { id: s.id, name: s.name, dot: v.color?.Argb, sub: ctx.stampBonuses(v.id, item).map(bonusText).join('\n') };
+      return { id: s.id, name: s.name, dot: v.color?.Argb, sub: ctx.stampBonuses(v.id, item).map(bonusText).join('\n'), group: s.isLegacy ? T.stampsLegacy : null };
     });
     const cur = curV ? options.find(o => o.id === curV.stampId) : null;
     el.append(h('h4', null, T.stamp), pickerButton(cur ? { ...cur, dot: curV.color?.Argb, sub: ctx.stampBonuses(curV.id, item).map(bonusText).join('\n') } : null,
