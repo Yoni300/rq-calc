@@ -13,10 +13,11 @@ const D = require(path.join(root, 'data', 'rqdata.js'));
 const M = require(path.join(root, 'data', 'base-monsters.js'));
 const W = require(path.join(root, 'data', 'base-world.js'));
 const MI = require(path.join(root, 'data', 'market-items.js'));
+const G = require(path.join(root, 'data', 'base-goods.js'));
 
 const bnorm = (s) => String(s || '').toLowerCase().replace(/ё/g, 'е').replace(/\s+/g, ' ').trim();
 // the same as bstrip in app/base.js
-const bstrip = (s) => String(s || '').replace(/\s+\d+\s+слот(а|ов)?\s*$/i, '').replace(/\s*\d\s*сл\.?$/i, '').replace(/\s+к\.\s*\S+$/i, '').trim();
+const bstrip = (s) => String(s || '').replace(/\s+\d+\s+слот(а|ов)?\s*$/i, '').replace(/\s*\d\s*сл\.?$/i, '').replace(/\s+к\.\s*\S+$/i, '').replace(/\s+Э[А-ЯЁ]{1,2}\d?$/, '').trim();
 const have = new Set([...D.Equipment.map((i) => bnorm(i.Name)), ...D.Card.map((c) => bnorm(c.Name)), ...MI.map((i) => bnorm(i.name))]);
 
 const names = new Set();
@@ -26,19 +27,22 @@ for (const q of W.quests) for (const k of ['reward', 'choice', 'need', 'use']) f
 for (const n of W.npcs) for (const s of n.shop || []) add(s.n);
 for (const r of W.recipes) { add(r.result); for (const x of r.res || []) add(x.n); }
 for (const n of W.nodes) { for (const d of n.drops || []) add(d.n); for (const b of n.bait || []) add(b); }
+for (const g of G) { add(g.name); for (const k of ['Дроп', 'ДопДроп', 'Подарок', 'Получается', 'Требуется']) for (const x of (g.lists || {})[k] || []) add(x.n); }
 const want = [...names].filter((n) => !have.has(bnorm(n)) && !have.has(bnorm(bstrip(n))));
 
 const dir = path.join(root, 'data', 'icons');
 fs.mkdirSync(dir, { recursive: true });
 const idxFile = path.join(dir, 'index.json');
 const idx = fs.existsSync(idxFile) ? JSON.parse(fs.readFileSync(idxFile, 'utf8')) : {}; // name -> file
-const todo = want.filter((n) => !(n in idx));
-// the file is named after the item, without the slot suffix
+// names tried before without a picture are tried again: a second file name is now tried too
+const todo = want.filter((n) => !idx[n]);
+// the file is named after the item, without the slot suffix; «Жаба (питомец)» may be just «Жаба»
 const fileOf = (n) => `Файл:${bstrip(n).replace(/:/g, '')}.png`;
-const urls = await imageUrls([...new Set(todo.map(fileOf))], 40);
+const fileOf2 = (n) => `Файл:${bstrip(n).replace(/\s*\([^)]*\)\s*$/, '').replace(/:/g, '')}.png`;
+const urls = await imageUrls([...new Set(todo.flatMap((n) => [fileOf(n), fileOf2(n)]))], 40);
 let k = Object.values(idx).filter(Boolean).length, got = 0;
 for (const n of todo) {
-  const u = urls[fileOf(n)];
+  const u = urls[fileOf(n)] || urls[fileOf2(n)];
   if (!u) { idx[n] = null; continue; }
   const file = `${k++}.png`;
   fs.writeFileSync(path.join(dir, file), await download(u));

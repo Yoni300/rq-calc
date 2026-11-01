@@ -1023,3 +1023,8 @@ body.tool-timer .calc-only { display: none !important; }
 .coin::after { content: ''; position: absolute; inset: 22%; border-radius: 50%; border: 1px solid rgba(120, 75, 10, .55); }
 .bs-chip { text-align: left; }
 .bs-ic.cover, .bs-big.cover { object-fit: cover; }
+.bs-subs { display: flex; flex-wrap: wrap; gap: 4px; }
+.bs-sub { padding: 3px 9px; border-radius: 12px; border: 1px solid var(--line); background: rgba(0, 0, 0, .25); color: var(--muted); cursor: pointer; font-size: 11.5px; }
+.bs-sub small { color: var(--dim); }
+.bs-sub:hover { color: var(--fg); border-color: var(--line-3); }
+.bs-sub.on { color: var(--gold-hi); border-color: var(--gold); background: rgba(var(--gold-rgb), .1); }
