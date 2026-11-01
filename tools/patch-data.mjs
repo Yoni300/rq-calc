@@ -63,6 +63,15 @@ for (const b of D.Buff) {
   }
 }
 
+// 5b. Крестоносец — «Вера» gives «Защищённость» after «Великий крест» (−40% damage taken for 5 s, wiki),
+// not +15% poison damage as Anon's database has it
+const faith = D.Talent.find(t => t.Name === 'Вера' && D.TalentBranch.find(b => b.Id === t.Branch_Id)?.Class_Id === CLASS.CRUSADER);
+if (faith) {
+  const before = D.TalentBonus.length;
+  D.TalentBonus = D.TalentBonus.filter(b => !(b.Talent_Id === faith.Id && b.Type_Id === 51));
+  if (D.TalentBonus.length < before) patched.push('Вера: без +15% урону ядом');
+}
+
 // 6. Collection trophies have no pictures in the database: give each a fitting icon of a pet, mount,
 //    book, potion or item that is already in data/img (picked by the trophy's theme).
 const TROPHY_ICONS = {
