@@ -1,6 +1,10 @@
 // "What's new" under the bell in the top bar (app/news.js). Newest first. Add an entry for every change players see.
 // at: ISO time in UTC (shown in each viewer's own time zone); text: ru / uk / en.
 window.RQ_CHANGELOG = [
+  { at: '2026-11-01T22:02Z',
+    ru: 'Билдом можно поделиться ссылкой и выложить на форум: «Код» → «Ссылка» копирует ссылку, по которой билд откроется на сайте, а «Для форума» — готовое сообщение для royalquest.net (класс, урон, здоровье, EHP, снаряжение и ссылка на билд).',
+    uk: 'Білдом можна поділитися посиланням і викласти на форум: «Код» → «Посилання» копіює посилання, за яким білд відкриється на сайті, а «Для форуму» — готове повідомлення для royalquest.net (клас, урон, здоров\x27я, EHP, спорядження і посилання на білд).',
+    en: 'Share a build by link or post it on the forum: «Code» → «Link» copies a link that opens the build on the site, «For the forum» copies a ready post for royalquest.net (class, damage, health, EHP, gear and the build link).' },
   { at: '2026-11-01T21:53Z',
     ru: '«Печать молота боли» теперь можно ставить на топоры и Разбойнику.',
     uk: '«Печать молота боли» тепер можна ставити на топори й Розбійнику.',
