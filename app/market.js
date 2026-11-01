@@ -77,6 +77,7 @@ function renderMarket(el) {
     search,
     h('button', { class: 'btn', title: t.refresh, onclick: () => loadMarket(true) }, '⟳')));
   if (window.rqcApp && window.rqcApp.marketScan) el.append(h('div', { id: 'marketScan' }));
+  else el.append(h('div', { class: 'note mk-web' }, t.webOnly)); // the site only shows what the app's scanners collected
   el.append(h('div', { class: 'mk-wrap' }, h('div', { class: 'mk-list', id: 'marketList' }), h('div', { class: 'mk-detail', id: 'marketDetail' })));
   el.append(h('div', { class: 'note bt-src' }, MI.length + ' · royalquest.info'));
   drawMarketScan(); drawMarketList(); drawMarketDetail();
