@@ -373,6 +373,8 @@ const TOP_ICONS = {
   effects: '<path d="M9.5 3h5M10.5 3v5.6L5.4 17.4A2.4 2.4 0 0 0 7.5 21h9a2.4 2.4 0 0 0 2.1-3.6l-5.1-8.8V3"/><path d="M7.4 14.5h9.2"/>',
   collection: '<path d="M7.5 4h9v5.5a4.5 4.5 0 0 1-9 0z"/><path d="M7.5 6.5H5a2.8 2.8 0 0 0 3 3.6M16.5 6.5H19a2.8 2.8 0 0 1-3 3.6M12 14v3.5M8.5 20.5h7M9.5 17.5h5v3h-5z"/>',
   // boss timer
+  bug: '<rect x="7.5" y="7" width="9" height="12" rx="4.5"/><path d="M12 11v8M9 4.5l1.5 2.5M15 4.5l-1.5 2.5M7.5 11H4M7.5 15H4.5M16.5 11H20M16.5 15h3M7.8 18.5 5 20.5M16.2 18.5l2.8 2"/>',
+  anvil: '<path d="M3 8h13a4 4 0 0 1-4 4h-1v2.5l2 1.5v2H7v-2l2-1.5V12H7A4 4 0 0 1 3 8z"/><path d="M16 8h3.5a1.5 1.5 0 0 1 0 3H16"/><path d="M8 5l1-2M12 5V2.5M16 5l-1-2"/>',
   skull: '<path d="M12 3a7.5 7.5 0 0 0-7.5 7.5c0 2.6 1.3 4.6 3 5.8V19a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1v-2.7c1.7-1.2 3-3.2 3-5.8A7.5 7.5 0 0 0 12 3z"/><circle cx="9.2" cy="11" r="1.6"/><circle cx="14.8" cy="11" r="1.6"/><path d="M10.5 20v-2.5M13.5 20v-2.5M11.2 14.8l.8-1.3.8 1.3"/>',
   group: '<circle cx="9" cy="8.5" r="3"/><path d="M3.5 19.5c.4-3.2 2.6-5 5.5-5s5.1 1.8 5.5 5"/><circle cx="16.5" cy="9" r="2.4"/><path d="M15.5 14.6c2.6-.3 4.6 1.3 5 4.4"/>',
   lock: '<rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/>',
@@ -403,10 +405,12 @@ function renderTop() {
   // tools: the brand opens the list (calculator, boss timer, …); the timer hides the calculator's buttons
   if (!$('brandBtn').querySelector('.caret')) $('brandBtn').insertAdjacentHTML('beforeend', svgIcon('down', 'ic caret'));
   $('brandBtn').title = T.toolsTip;
-  document.body.classList.toggle('tool-timer', tab === 'bosses');
-  $('toolName').hidden = tab !== 'bosses';
-  $('toolName').innerHTML = svgIcon('skull') + `<span>${esc(T.toolTimer)}</span>`;
+  const tool = toolOfTab(tab);
+  document.body.classList.toggle('tool-timer', !!tool); // hides the calculator's buttons
+  $('toolName').hidden = !tool;
+  if (tool) $('toolName').innerHTML = svgIcon(tool.icon) + `<span>${esc(tool.name())}</span>`;
   $('btnSettings').innerHTML = svgIcon('cog'); $('btnSettings').title = T.settings;
+  $('btnBug').innerHTML = svgIcon('bug'); $('btnBug').title = RT().btn;
   if (settingsLang !== lang) { settingsLang = lang; applySettings(); } // tray menu texts follow the language
   const ls = $('langSwitch'); ls.innerHTML = ''; ls.title = T.language;
   for (const [k, label] of [['uk', 'УКР'], ['ru', 'РУС'], ['en', 'ENG']]) {
@@ -430,16 +434,22 @@ $('btnPublic').addEventListener('click', () => {
 // settings (app/settings.js)
 let settingsLang = null;
 $('btnSettings').addEventListener('click', () => openSettings());
+$('btnBug').addEventListener('click', () => openReport());
 // ---------- tools (the brand menu): the calculator and the boss timer; more can be added to TOOLS ----------
+// a tool other than the calculator owns one `tab` value and takes the whole window
 const TOOLS = [
   { id: 'calc', icon: 'calc', name: () => T.toolCalc, sub: () => T.toolCalcSub },
-  { id: 'timer', icon: 'skull', name: () => T.toolTimer, sub: () => T.toolTimerSub },
+  { id: 'timer', tab: 'bosses', icon: 'skull', name: () => T.toolTimer, sub: () => T.toolTimerSub },
+  { id: 'forge', tab: 'forge', icon: 'anvil', name: () => FT().title, sub: () => T.toolForgeSub },
 ];
-const curTool = () => (tab === 'bosses' ? 'timer' : 'calc');
+const toolOfTab = t => TOOLS.find(x => x.tab && x.tab === t);
+const curTool = () => toolOfTab(tab)?.id || 'calc';
 function switchTool(id) {
   if (id === curTool()) return;
-  if (id === 'timer') { store.set('calcTab', tab); tab = 'bosses'; }
-  else { tab = store.get('calcTab', 'gear'); if (tab === 'bosses') tab = 'gear'; }
+  const tool = TOOLS.find(x => x.id === id);
+  if (!toolOfTab(tab)) store.set('calcTab', tab);
+  if (tool.tab) tab = tool.tab;
+  else { tab = store.get('calcTab', 'gear'); if (toolOfTab(tab)) tab = 'gear'; }
   store.set('tab', tab);
   renderCenter(); animateEnter($('center')); renderTop();
 }
@@ -626,7 +636,7 @@ function animateEnter(el) {
 }
 function renderCenter() {
   // the boss timer has nothing to do with the character: it takes the whole window
-  document.querySelector('.layout').classList.toggle('wide', tab === 'bosses');
+  document.querySelector('.layout').classList.toggle('wide', !!toolOfTab(tab));
   renderTabs();
   const el = $('center'); const scroll = el.scrollTop; el.innerHTML = '';
   if (tab === 'gear') renderGear(el);
@@ -634,6 +644,7 @@ function renderCenter() {
   else if (tab === 'effects') renderEffects(el);
   else if (tab === 'builds') renderBuilds(el);
   else if (tab === 'bosses') renderBosses(el);
+  else if (tab === 'forge') renderForge(el);
   else renderCollection(el);
   el.scrollTop = scroll;
 }
