@@ -574,6 +574,8 @@ function animateEnter(el) {
   setTimeout(() => el.classList.remove('enter'), 250);
 }
 function renderCenter() {
+  // the boss timer has nothing to do with the character: it takes the whole window
+  document.querySelector('.layout').classList.toggle('wide', tab === 'bosses');
   renderTabs();
   const el = $('center'); const scroll = el.scrollTop; el.innerHTML = '';
   if (tab === 'gear') renderGear(el);

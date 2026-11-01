@@ -792,3 +792,9 @@ input[type=range] { accent-color: var(--gold-2); }
   .bt-pic { width: 44px; height: 44px; }
   .bt-act { grid-column: 2 / -1; justify-content: flex-end; }
 }
+/* boss timer tab: no character panels, the list fills the window in two columns */
+.layout.wide { grid-template-columns: minmax(0, 1fr); }
+.layout.wide > .left, .layout.wide > .right, .layout.wide .tabs { display: none; }
+.layout.wide .tab-body { padding: 16px 22px; }
+.layout.wide .bt-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(520px, 1fr)); gap: 8px; }
+.layout.wide .bt-list .pb-msg { grid-column: 1 / -1; }
