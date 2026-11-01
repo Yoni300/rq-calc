@@ -520,6 +520,57 @@ function decodeBuild(code) {
   if (!m) return null;
   try { const o = JSON.parse(decodeURIComponent(escape(atob(m[1])))); const c = normalize(o.c); return c ? { name: o.n || '', ch: c } : null; } catch { return null; }
 }
+// build links: https://rqcalc.com/#b=<the build as JSON, deflated, base64url> — the site opens that build
+const b64url = bytes => {
+  let s = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+};
+async function buildLink() {
+  const json = JSON.stringify({ n: buildName, c: JSON.parse(JSON.stringify(ch)) });
+  const z = new Uint8Array(await new Response(new Blob([json]).stream().pipeThrough(new CompressionStream('deflate-raw'))).arrayBuffer());
+  return SITE_URL + '#b=' + b64url(z);
+}
+async function readBuildLink(hash) {
+  const m = String(hash || '').match(/#b=([A-Za-z0-9_-]+)/);
+  if (!m) return null;
+  try {
+    const bytes = Uint8Array.from(atob(m[1].replace(/-/g, '+').replace(/_/g, '/')), x => x.charCodeAt(0));
+    const o = JSON.parse(await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).text());
+    const c = normalize(o.c);
+    return c ? { name: o.n || '', ch: c } : null;
+  } catch { return null; }
+}
+
+// "for the forum": the build as a BBCode post (royalquest.net is SMF 2.1: b, color, size, list, url) with its link
+async function forumPost() {
+  const r = recalc();
+  const val = id => { const s = ctx.stats.get(id), v = r.stats.get(id); return s && v != null ? fmtStat(s, v) : '—'; };
+  const sname = id => ctx.stats.get(id)?.name || '';
+  const cls = ctx.classes.get(ch.classId);
+  const name = (buildName || '').trim() || `${cls.name} ${ch.level}`;
+  const order = k => { const i = SLOT_ORDER.indexOf(k); return i < 0 ? 99 : i; };
+  const gear = Object.keys(ch.equipment).sort((a, b) => order(a) - order(b)).map(key => {
+    const e = ch.equipment[key], item = e && ctx.equipment.get(e.itemId);
+    if (!item || slotLockedByTwoHander(ch, key)) return null;
+    const slot = ctx.slots.get(+key.split(':')[0])?.name || '';
+    const sv = e.stampVariantId && ctx.stampVariants.get(e.stampVariantId);
+    const stamp = sv && ctx.stamps.get(sv.stampId)?.name;
+    const cards = (e.cards || []).map(id => id && ctx.cards.get(id)?.name).filter(Boolean);
+    return `[li]${slot}: [b]${e.upgrade ? `+${e.upgrade} ` : ''}${item.name}[/b]${stamp ? ` · ${T.stamp.toLowerCase()}: ${stamp}` : ''}${cards.length ? ` · ${T.cards.toLowerCase()}: ${cards.join(', ')}` : ''}[/li]`;
+  }).filter(Boolean);
+  const main = [[75, true], [ctx.ids.HP], [76], [ctx.ids.ATTACK], [ctx.ids.DEFENSE]]
+    .map(([id, hero]) => `${sname(id)}: ${hero ? '[color=#e6b85c]' : ''}[b]${val(id)}[/b]${hero ? '[/color]' : ''}`).join(' · ');
+  return [
+    `[size=14pt][b]${name}[/b][/size]`,
+    `${cls.name}, ${T.level.toLowerCase()} ${ch.level}`,
+    main,
+    gear.length ? `[list]${gear.join('')}[/list]` : '',
+    `[url=${await buildLink()}]${T.forumOpen}[/url]`,
+  ].filter(Boolean).join('\n');
+}
+const copyText = (text, msg) => navigator.clipboard.writeText(text).then(() => toast(msg), () => toast(T.copyFailed));
+
 $('btnCode').addEventListener('click', () => {
   const area = h('textarea', { class: 'code-area', spellcheck: false, readOnly: false });
   area.value = encodeBuild();
@@ -529,6 +580,9 @@ $('btnCode').addEventListener('click', () => {
     h('div', { class: 'dialog-body' }, h('div', { class: 'hint', style: 'margin:0 0 8px' }, T.codeHelp), area, err),
     h('div', { class: 'dialog-foot' },
       h('button', { class: 'btn', onclick: () => { navigator.clipboard.writeText(area.value).then(() => toast(T.copied)); } }, T.copy),
+      h('button', { class: 'btn', title: T.linkTip, onclick: async () => copyText(await buildLink(), T.linkCopied) }, T.copyLink),
+      h('button', { class: 'btn', title: T.forumTip, onclick: async () => copyText(await forumPost(), T.forumCopied) }, T.forBtn),
+      h('div', { class: 'spacer' }),
       h('button', { class: 'btn primary', onclick: () => {
         const b = decodeBuild(area.value);
         if (!b) { err.textContent = T.badCode; return; }
@@ -1493,3 +1547,18 @@ applyGameLang();
 recalc();
 renderAll();
 showSiteNotice();
+
+// a build link (rqcalc.com/#b=…): open that build (asking first if there is a build of one's own), then clean the address
+async function openLinkedBuild() {
+  if (!/^#b=/.test(location.hash)) return;
+  const b = await readBuildLink(location.hash);
+  history.replaceState(null, '', location.pathname + location.search);
+  if (!b) { toast(T.badLink); return; }
+  const name = b.name || `${ctx.classes.get(b.ch.classId)?.name || ''} ${b.ch.level}`;
+  if (store.get('current', null) && !await confirmBox(fmtT(T.linkAsk, { name }), { ok: T.load })) return;
+  if (tab === 'bosses') switchTool('calc');
+  loadBuild({ name: b.name, ch: b.ch });
+  toast(T.linkOpened);
+}
+openLinkedBuild();
+window.addEventListener('hashchange', openLinkedBuild);
