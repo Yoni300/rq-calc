@@ -264,7 +264,15 @@ function itemBonusLines(item) {
     const bb = t.hasDynamic ? ctx.evaluateDynamicBonus(b, calcInput(ch)) : b;
     const ev = EVENT_OF_TYPE.get(b.typeId);
     return { text: bonusText(bb) + (b.activate != null ? ' *' : ''), off: ev != null && ev !== ch.eventId };
-  }).concat(ctx.eqTypes.get(item.typeId).bonuses.map(b => ({ text: bonusText(b), off: false })));
+  }).concat(ctx.eqTypes.get(item.typeId).bonuses.filter(b => b.typeId !== RANGE_BONUS).map(b => ({ text: bonusText(b), off: false })));
+}
+// ranged weapons: the standard range of the weapon type is shown with the weapon's stats, not as a bonus;
+// the item's own extra range is added next to it
+const RANGE_BONUS = 22; // "{0} к Дальности дистанционной атаки"
+function weaponRange(item) {
+  const sum = list => list.filter(b => b.typeId === RANGE_BONUS).reduce((s, b) => s + (b.vars?.[0] || 0), 0);
+  const base = sum(ctx.eqTypes.get(item.typeId).bonuses);
+  return base ? { base, extra: sum(item.bonuses) } : null;
 }
 // item name takes the color of its stamp, like in the game
 const stampColorOf = e => {
@@ -291,6 +299,8 @@ function itemTip(item, e) {
     if (item.info.attack) s += stat(T.attack, item.info.attack, up?.attack);
     if (item.info.defense) s += stat(T.defense, item.info.defense, up?.defense);
     if (item.info.attackSpeed) s += `<div>${esc(T.atkSpeed)}: ${item.info.attackSpeed} ${esc(T.perSec)}</div>`;
+    const range = weaponRange(item);
+    if (range) s += stat(T.attackRange, range.base, range.extra);
     if (up?.hp) s += `<div>${esc(ctx.stats.get(ctx.ids.HP).name)}: <span class="tt-up">+${up.hp}</span></div>`;
     if (up?.allStat) s += `<div><span class="tt-up">+${up.allStat}</span> ${esc(T.allStats)}</div>`;
     parts.push(`<div class="tt-sec">${s}</div>`);
@@ -322,6 +332,11 @@ function cardBonusVarsForDisplay(cb) {
   if (cb.upgrade) { const m = cb.variables[0]; [m.value, cb.upgrade.step, cb.upgrade.condition].forEach((v, i) => { vars[m.index + i] = v; }); }
   else cb.variables.forEach(v => { vars[v.index] = v.value; });
   for (let i = 0; i < vars.length; i++) if (vars[i] == null) vars[i] = 0;
+  // cards that change other cards (two П'атаг cards turn Рогоножка's minuses into pluses): same rule as the engine,
+  // counted over everything the character wears
+  const worn = id => Object.values(ch.equipment || {}).reduce((n, e) => n + ((e && e.cards) || []).filter(c => c === id).length, 0);
+  if (cb.multiplyEffectCardId != null) { const n = worn(cb.multiplyEffectCardId); return vars.map(v => v * n); }
+  if (cb.negateCardId != null) { const n = worn(cb.negateCardId); return vars.map(v => v * (1 - n)); }
   return vars;
 }
 function cardTip(card) {
@@ -946,6 +961,7 @@ function renderEditorDetail() {
       item.info.attack ? h('div', null, T.attack, h('b', null, item.info.attack, plus(u?.attack))) : null,
       item.info.defense ? h('div', null, T.defense, h('b', null, item.info.defense, plus(u?.defense))) : null,
       item.info.attackSpeed ? h('div', null, T.speed, h('b', null, item.info.attackSpeed)) : null,
+      weaponRange(item) ? h('div', null, T.attackRange, h('b', null, weaponRange(item).base, plus(weaponRange(item).extra))) : null,
       u?.hp ? h('div', null, ctx.stats.get(ctx.ids.HP).name, h('b', null, '+' + u.hp)) : null));
   }
   const bl = itemBonusLines(item);
