@@ -97,6 +97,10 @@ for (const p of nodePages) {
   const fsh = templateFields(p.text, 'Рыбное угодье');
   if (fsh) nodes.push(prune({ name: p.title, kind: 'fish', bait: numbered(fsh, 'Наживка'), drops: counted(fsh, 'Улов').map(({ n, c }) => prune({ n, c: c > 1 ? c : null })) }));
 }
+// a page can sit in two categories (Ресурсы and Рудные месторождения): keep one, the ore vein when it is both
+const seenNode = new Map();
+for (const n of nodes) { const o = seenNode.get(n.name); if (!o || (o.kind !== 'ore' && n.kind === 'ore')) seenNode.set(n.name, n); }
+nodes.length = 0; nodes.push(...seenNode.values());
 nodes.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
 // fishing spots stand on the maps as markers: their location is the map they are on
 for (const l of locs) for (const m of l.marks || []) if (m.t === 'Рыбалка') { const n = nodes.find((x) => x.name === m.n); if (n) (n.locs ||= []).includes(l.name) || n.locs.push(l.name); }
