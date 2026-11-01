@@ -190,6 +190,13 @@ function alertBoss(b, kind, left) {
   } catch { /* ignore */ }
   toast(title);
 }
+// "listen": both sounds and both messages, on a favourite (or Деструктор) as the example
+async function testAlert() {
+  try { if (window.Notification && Notification.permission === 'default') await Notification.requestPermission(); } catch { /* ignore */ }
+  const b = BOSSES.find(x => BT.fav.has(x.name)) || BOSSES.find(x => x.name === 'Деструктор') || BOSSES[0];
+  alertBoss(b, 'soon', SOON);
+  setTimeout(() => alertBoss(b, 'up'), 2200);
+}
 // with favourites, only they make noise
 function checkAlerts(now) {
   if (!BT.notify) return;
@@ -238,7 +245,8 @@ function renderBosses(el) {
       v => { BT.filter = v; store.set('bossFilter', v); renderCenter(); }),
     search,
     h('button', { class: 'btn bt-bell' + (BT.notify ? ' on' : ''), title: T.bossNotify,
-      onclick: () => { BT.notify = !BT.notify; store.set('bossNotify', BT.notify); if (BT.notify) askNotify(); renderCenter(); } }, BT.notify ? '🔔' : '🔕')));
+      onclick: () => { BT.notify = !BT.notify; store.set('bossNotify', BT.notify); if (BT.notify) askNotify(); renderCenter(); } }, BT.notify ? '🔔' : '🔕'),
+    h('button', { class: 'btn', title: T.bossTestTip, onclick: testAlert }, '▶ ' + T.bossTest)));
   el.append(h('div', { class: 'bt-list', id: 'bossList' }));
   el.append(h('div', { class: 'note bt-src' }, T.bossSource));
   drawBossList();
