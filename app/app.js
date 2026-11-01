@@ -361,6 +361,8 @@ const TOP_ICONS = {
   skull: '<path d="M12 3a7.5 7.5 0 0 0-7.5 7.5c0 2.6 1.3 4.6 3 5.8V19a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1v-2.7c1.7-1.2 3-3.2 3-5.8A7.5 7.5 0 0 0 12 3z"/><circle cx="9.2" cy="11" r="1.6"/><circle cx="14.8" cy="11" r="1.6"/><path d="M10.5 20v-2.5M13.5 20v-2.5M11.2 14.8l.8-1.3.8 1.3"/>',
   group: '<circle cx="9" cy="8.5" r="3"/><path d="M3.5 19.5c.4-3.2 2.6-5 5.5-5s5.1 1.8 5.5 5"/><circle cx="16.5" cy="9" r="2.4"/><path d="M15.5 14.6c2.6-.3 4.6 1.3 5 4.4"/>',
   lock: '<rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/>',
+  // settings (cog)
+  cog: '<circle cx="12" cy="12" r="3"/><path d="M12 2.8l1.5 2.3 2.7-.6.6 2.7 2.3 1.5-1.2 2.5 1.2 2.5-2.3 1.5-.6 2.7-2.7-.6L12 21.2l-1.5-2.3-2.7.6-.6-2.7-2.3-1.5L6.1 12.8 4.9 10.3l2.3-1.5.6-2.7 2.7.6z"/>',
 };
 // the same icons as DOM elements, for h(...)
 function iconEl(name) { const t = document.createElement('template'); t.innerHTML = svgIcon(name); return t.content.firstChild; }
@@ -384,6 +386,8 @@ function renderTop() {
   $('btnPublic').classList.toggle('on', tab === 'builds');
   topButton('btnBosses', 'skull', T.tabBosses);
   $('btnBosses').classList.toggle('on', tab === 'bosses');
+  $('btnSettings').innerHTML = svgIcon('cog'); $('btnSettings').title = T.settings;
+  if (settingsLang !== lang) { settingsLang = lang; applySettings(); } // tray menu texts follow the language
   const ls = $('langSwitch'); ls.innerHTML = ''; ls.title = T.language;
   for (const [k, label] of [['uk', 'УКР'], ['ru', 'РУС'], ['en', 'ENG']]) {
     ls.append(h('button', { class: k === lang ? 'on' : '', onclick: () => { lang = k; T = RQC_I18N[k]; store.set('lang', k); applyGameLang(); recalc(); renderAll(); } }, label));
@@ -403,6 +407,9 @@ $('btnPublic').addEventListener('click', () => {
   tab = tab === 'builds' ? 'gear' : 'builds'; store.set('tab', tab);
   renderCenter(); animateEnter($('center')); renderTop();
 });
+// settings (app/settings.js)
+let settingsLang = null;
+$('btnSettings').addEventListener('click', () => openSettings());
 // boss timer (app/bosses.js), also in the center area
 $('btnBosses').addEventListener('click', () => {
   tab = tab === 'bosses' ? 'gear' : 'bosses'; store.set('tab', tab);

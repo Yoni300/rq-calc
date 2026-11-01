@@ -19,7 +19,6 @@ const BT = {
   warned: {},                               // key -> { t: kill time, kind: 'soon' | 'up' } already announced
   rows: new Map(),                          // key -> elements updated every second
 };
-const SOON = 5 * 60e3;                      // warn this long before the respawn
 const STALE = 24 * 3600e3;                  // a respawn this old says nothing any more
 
 const kills = () => (BT.room ? BT.remote : BT.local);
@@ -163,17 +162,30 @@ function editResp(b) {
 
 // ---------- alerts ----------
 let audio = null;
+// melodies (settings → sound): wave, notes for "soon" and "up", note length and gap in seconds
+const MELODIES = {
+  bell: { wave: 'triangle', soon: [660, 880], up: [660, 880, 1175], len: 0.16, gap: 0.17 },
+  soft: { wave: 'sine', soon: [523, 659], up: [523, 659, 784], len: 0.32, gap: 0.26 },
+  chime: { wave: 'sine', soon: [1319, 1047], up: [1047, 1319, 1568, 2093], len: 0.55, gap: 0.14 },
+  horn: { wave: 'sawtooth', soon: [392, 523], up: [392, 523, 659], len: 0.3, gap: 0.24, filter: 1400 },
+};
 // the browser starts sound only after a click and resuming takes a moment: wait for it, then play
 async function beep(kind) {
+  const set = SETTINGS; // app/settings.js
+  const peak = 0.4 * (set.volume ?? 70) / 100;
+  if (peak <= 0) return;
+  const m = MELODIES[set.sound] || MELODIES.bell;
   try {
     audio = audio || new AudioContext();
     if (audio.state !== 'running') await audio.resume();
     const start = audio.currentTime + 0.05;
-    (kind === 'up' ? [660, 880, 1175] : [660, 880]).forEach((f, i) => {
-      const o = audio.createOscillator(), g = audio.createGain(), t0 = start + i * 0.17;
-      o.type = 'triangle'; o.frequency.value = f;
-      g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.3, t0 + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.16);
-      o.connect(g).connect(audio.destination); o.start(t0); o.stop(t0 + 0.17);
+    (kind === 'up' ? m.up : m.soon).forEach((f, i) => {
+      const o = audio.createOscillator(), g = audio.createGain(), t0 = start + i * m.gap;
+      o.type = m.wave; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(peak, t0 + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t0 + m.len);
+      let out = o.connect(g);
+      if (m.filter) { const lp = audio.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = m.filter; out = out.connect(lp); }
+      out.connect(audio.destination); o.start(t0); o.stop(t0 + m.len + 0.02);
     });
   } catch { /* no sound */ }
 }
@@ -197,8 +209,9 @@ function alertBoss(b, kind, left, test = false) {
   const title = kind === 'up' ? fmtT(T.bossUpN, { n: b.name }) : fmtT(T.bossSoonN, { n: b.name, m: Math.max(1, Math.ceil(left / 60e3)) });
   beep(kind);
   // the app: its own message in the screen corner, above the game (main.js, app/alert.html)
-  if (window.rqcApp && window.rqcApp.bossAlert) {
-    window.rqcApp.bossAlert({ key: test ? 'test' : b.key, kind, title, sub: b.loc || '', img: b.img ? `../data/bosses/${b.img}` : '' });
+  if (window.rqcApp && window.rqcApp.bossAlert && SETTINGS.popup) {
+    window.rqcApp.bossAlert({ key: test ? 'test' : b.key, kind, title, sub: b.loc || '', img: b.img ? `../data/bosses/${b.img}` : '',
+      corner: SETTINGS.corner, ms: (POPUP_MS[SETTINGS.popupTime] || POPUP_MS.normal)[kind] });
     return;
   }
   let shown = false;
@@ -223,7 +236,7 @@ async function testAlert(e) {
   const now = Date.now();
   const next = BOSSES.map(b => ({ b, st: bossState(b, now) })).filter(x => x.st.s === 'wait').sort((x, y) => x.st.spawn - y.st.spawn)[0];
   const b = next ? next.b : BOSSES.find(x => BT.fav.has(x.name)) || { name: T.bossTestName, loc: '' };
-  alertBoss(b, 'soon', SOON, true);
+  alertBoss(b, 'soon', (SETTINGS.warnMin || 5) * 60e3, true);
   setTimeout(() => alertBoss(b, 'up', 0, true), 2200);
   setTimeout(() => { testing = false; if (btn) btn.disabled = false; }, 3200);
 }
@@ -231,17 +244,18 @@ async function testAlert(e) {
 function checkAlerts(now) {
   if (!BT.notify) return;
   const onlyFav = BT.fav.size > 0;
+  const soon = SETTINGS.warnMin * 60e3; // settings: 0 = no early warning
   for (const b of BOSSES) {
     if (onlyFav && !BT.fav.has(b.name)) continue;
     const st = bossState(b, now);
     if (st.s === 'none') continue;
     const w = BT.warned[b.key], done = w && w.t === st.k.t ? w.kind : null; // a new kill starts over
-    if (st.s === 'wait' && st.left <= SOON && !done) {
+    if (st.s === 'wait' && soon && st.left <= soon && !done) {
       BT.warned[b.key] = { t: st.k.t, kind: 'soon' };
       if (claimAlert(`${b.key}|${st.k.t}|soon`)) alertBoss(b, 'soon', st.left);
     } else if (st.s === 'up' && now - st.spawn < 2 * 60e3 && done !== 'up') {
       BT.warned[b.key] = { t: st.k.t, kind: 'up' };
-      if (claimAlert(`${b.key}|${st.k.t}|up`)) alertBoss(b, 'up');
+      if (SETTINGS.alertUp && claimAlert(`${b.key}|${st.k.t}|up`)) alertBoss(b, 'up');
     }
   }
 }
@@ -363,7 +377,22 @@ setInterval(() => {
     if (moved) drawBossList();
   }
   if (BT.room && ++bossPoll >= (tab === 'bosses' && !document.hidden ? 15 : 60)) { bossPoll = 0; loadRoom(); }
+  titleTimer(now);
 }, 1000);
+// settings: the next boss in the window / tab title ("Воко 3:12 · RQ Tools"), seen in the taskbar while playing
+function titleTimer(now) {
+  const base = T.title + (IS_TEST ? ' — ТЕСТ' : '');
+  let next = null;
+  if (SETTINGS.titleTimer) {
+    for (const b of BOSSES) {
+      if (BT.fav.size && !BT.fav.has(b.name)) continue;
+      const st = bossState(b, now);
+      if (st.s === 'wait' && (!next || st.spawn < next.st.spawn)) next = { b, st };
+    }
+  }
+  const title = next ? `${next.b.name} ${fmtLeft(next.st.left)} · ${base}` : base;
+  if (document.title !== title) document.title = title;
+}
 primeAlerts();
 if (BT.room) loadRoom().then(primeAlerts);
 // a click on a corner message brings the app forward on the timer

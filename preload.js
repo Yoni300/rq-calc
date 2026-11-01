@@ -9,6 +9,8 @@ contextBridge.exposeInMainWorld('rqcApp', {
   // boss timer: a message in the screen corner, above all windows (main.js → app/alert.html)
   bossAlert: a => ipcRenderer.send('rqc-boss-alert', a),
   onOpenBosses: cb => ipcRenderer.on('rqc-open-bosses', () => cb()),
+  // settings only the app has: tray, start with Windows
+  appSettings: s => ipcRenderer.send('rqc-app-settings', s),
 });
 
 // used only by app/alert.html (the corner window)

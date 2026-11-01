@@ -36,7 +36,7 @@ window.rqcAlert.onAlert(a => {
   x.addEventListener('click', e => { e.stopPropagation(); close(card); });
   const bar = document.createElement('i');
   bar.className = 'bar';
-  const ms = SHOW_FOR[a.kind] || 15000;
+  const ms = a.ms || SHOW_FOR[a.kind] || 15000;
   bar.style.animationDuration = ms + 'ms';
   card.append(pic, text, x, bar);
   card.addEventListener('click', () => { window.rqcAlert.open(); close(card); });
