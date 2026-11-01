@@ -1,4 +1,4 @@
-const { app, BrowserWindow, shell, ipcMain } = require('electron');
+const { app, BrowserWindow, shell, ipcMain, screen } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
@@ -23,7 +23,8 @@ function createWindow() {
     width: 1480, height: 920, minWidth: 1150, minHeight: 680,
     backgroundColor: '#0b0a08', autoHideMenuBar: true, show: false,
     icon: path.join(__dirname, 'build', 'icon.png'),
-    webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true, preload: path.join(__dirname, 'preload.js') },
+    // backgroundThrottling off: the boss timer must tick on time while the window is minimized behind the game
+    webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true, backgroundThrottling: false, preload: path.join(__dirname, 'preload.js') },
   });
   win.loadFile(path.join(__dirname, 'app', 'index.html'), IS_TEST ? { query: { test: '1' } } : undefined);
   win.once('ready-to-show', () => win.show());
@@ -44,6 +45,49 @@ function createWindow() {
     });
   }
 }
+
+// ---------- boss alerts: a small window in the screen corner, above all windows ----------
+// It never takes the focus (the game keeps it) and is shown on the screen where the mouse is.
+// Works over windowed / borderless games; an exclusive full-screen game hides everything on top of it.
+let alertWin = null, alertReady = false, alertQueue = [];
+function bossAlert(a) {
+  if (alertWin && !alertWin.isDestroyed()) {
+    if (alertReady) alertWin.webContents.send('rqc-alert-show', a); else alertQueue.push(a); // still loading
+    return;
+  }
+  alertReady = false; alertQueue = [a];
+  alertWin = new BrowserWindow({
+    width: 380, height: 10, show: false, frame: false, transparent: true, resizable: false, movable: false,
+    minimizable: false, maximizable: false, fullscreenable: false, skipTaskbar: true, focusable: false, hasShadow: false,
+    alwaysOnTop: true, backgroundColor: '#00000000',
+    webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true, backgroundThrottling: false, preload: path.join(__dirname, 'preload.js') },
+  });
+  alertWin.setAlwaysOnTop(true, 'screen-saver');
+  alertWin.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+  alertWin.loadFile(path.join(__dirname, 'app', 'alert.html'));
+  alertWin.webContents.once('did-finish-load', () => {
+    alertReady = true;
+    for (const q of alertQueue.splice(0)) alertWin.webContents.send('rqc-alert-show', q);
+  });
+  alertWin.on('closed', () => { alertWin = null; alertReady = false; });
+}
+ipcMain.on('rqc-boss-alert', (_e, a) => bossAlert(a));
+// the alert page tells how much room its messages need; 0 = nothing left to show
+ipcMain.on('rqc-alert-size', (_e, w, h) => {
+  if (!alertWin || alertWin.isDestroyed()) return;
+  if (!h) { alertWin.hide(); return; }
+  const area = screen.getDisplayNearestPoint(screen.getCursorScreenPoint()).workArea;
+  alertWin.setBounds({ x: area.x + area.width - w - 12, y: area.y + area.height - h - 12, width: w, height: h });
+  if (!alertWin.isVisible()) alertWin.showInactive();
+  alertWin.setAlwaysOnTop(true, 'screen-saver');
+});
+// a click on a message opens the timer
+ipcMain.on('rqc-alert-open', () => {
+  if (!win || win.isDestroyed()) return;
+  if (win.isMinimized()) win.restore();
+  win.show(); win.focus();
+  win.webContents.send('rqc-open-bosses');
+});
 
 // TEST client: reload the page when the app, engine or data change (main.js/preload.js need a restart)
 function watchForChanges() {

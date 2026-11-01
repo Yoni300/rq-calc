@@ -196,6 +196,11 @@ function claimAlert(id) {
 function alertBoss(b, kind, left, test = false) {
   const title = kind === 'up' ? fmtT(T.bossUpN, { n: b.name }) : fmtT(T.bossSoonN, { n: b.name, m: Math.max(1, Math.ceil(left / 60e3)) });
   beep(kind);
+  // the app: its own message in the screen corner, above the game (main.js, app/alert.html)
+  if (window.rqcApp && window.rqcApp.bossAlert) {
+    window.rqcApp.bossAlert({ key: test ? 'test' : b.key, kind, title, sub: b.loc || '', img: b.img ? `../data/bosses/${b.img}` : '' });
+    return;
+  }
   let shown = false;
   try {
     if (window.Notification && Notification.permission === 'granted') {
@@ -361,3 +366,5 @@ setInterval(() => {
 }, 1000);
 primeAlerts();
 if (BT.room) loadRoom().then(primeAlerts);
+// a click on a corner message brings the app forward on the timer
+if (window.rqcApp && window.rqcApp.onOpenBosses) window.rqcApp.onOpenBosses(() => { if (tab !== 'bosses') openBosses(); });
