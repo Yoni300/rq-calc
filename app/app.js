@@ -19,7 +19,7 @@ let ch = normalize(store.get('current', null)) || ctx.defaultCharacter();
 let buildName = store.get('currentName', '');
 let tab = store.get('tab', 'gear');
 // a tab that no longer exists (e.g. a removed tool) opens the gear instead
-if (!['gear', 'talents', 'effects', 'builds', 'collection', 'bosses'].includes(tab)) tab = 'gear';
+if (!['gear', 'talents', 'effects', 'builds', 'collection', 'bosses', 'market'].includes(tab)) tab = 'gear';
 let baseline = null;      // pinned stats (Map) or null
 let previous = null;      // stats before the last change
 let lastResult = null;
@@ -376,6 +376,7 @@ const TOP_ICONS = {
   collection: '<path d="M7.5 4h9v5.5a4.5 4.5 0 0 1-9 0z"/><path d="M7.5 6.5H5a2.8 2.8 0 0 0 3 3.6M16.5 6.5H19a2.8 2.8 0 0 1-3 3.6M12 14v3.5M8.5 20.5h7M9.5 17.5h5v3h-5z"/>',
   // boss timer
   bug: '<rect x="7.5" y="7" width="9" height="12" rx="4.5"/><path d="M12 11v8M9 4.5l1.5 2.5M15 4.5l-1.5 2.5M7.5 11H4M7.5 15H4.5M16.5 11H20M16.5 15h3M7.8 18.5 5 20.5M16.2 18.5l2.8 2"/>',
+  coins: '<ellipse cx="9" cy="7" rx="5.5" ry="2.5"/><path d="M3.5 7v3.5c0 1.4 2.5 2.5 5.5 2.5s5.5-1.1 5.5-2.5V7"/><path d="M3.5 10.5V14c0 1.4 2.5 2.5 5.5 2.5"/><ellipse cx="15" cy="14" rx="5.5" ry="2.5"/><path d="M9.5 14v3.5c0 1.4 2.5 2.5 5.5 2.5s5.5-1.1 5.5-2.5V14"/>',
   skull: '<path d="M12 3a7.5 7.5 0 0 0-7.5 7.5c0 2.6 1.3 4.6 3 5.8V19a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1v-2.7c1.7-1.2 3-3.2 3-5.8A7.5 7.5 0 0 0 12 3z"/><circle cx="9.2" cy="11" r="1.6"/><circle cx="14.8" cy="11" r="1.6"/><path d="M10.5 20v-2.5M13.5 20v-2.5M11.2 14.8l.8-1.3.8 1.3"/>',
   group: '<circle cx="9" cy="8.5" r="3"/><path d="M3.5 19.5c.4-3.2 2.6-5 5.5-5s5.1 1.8 5.5 5"/><circle cx="16.5" cy="9" r="2.4"/><path d="M15.5 14.6c2.6-.3 4.6 1.3 5 4.4"/>',
   lock: '<rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/>',
@@ -441,6 +442,7 @@ $('btnBug').addEventListener('click', () => openReport());
 const TOOLS = [
   { id: 'calc', icon: 'calc', name: () => T.toolCalc, sub: () => T.toolCalcSub },
   { id: 'timer', tab: 'bosses', icon: 'skull', name: () => T.toolTimer, sub: () => T.toolTimerSub },
+  { id: 'market', tab: 'market', icon: 'coins', name: () => MT().title, sub: () => MT().sub },
 ];
 const toolOfTab = t => TOOLS.find(x => x.tab && x.tab === t);
 const curTool = () => toolOfTab(tab)?.id || 'calc';
@@ -644,6 +646,7 @@ function renderCenter() {
   else if (tab === 'effects') renderEffects(el);
   else if (tab === 'builds') renderBuilds(el);
   else if (tab === 'bosses') renderBosses(el);
+  else if (tab === 'market') renderMarket(el);
   else renderCollection(el);
   el.scrollTop = scroll;
 }
