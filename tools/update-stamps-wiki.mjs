@@ -67,6 +67,30 @@ const coefAt = (type, level) => {
   const step = (type.StampQualityMaxCoef - type.StampQualityMinCoef) / (qualityMax - 10);
   return type.StampQualityMinCoef + step * Math.max(0, level - 10);
 };
+// The value the game shows for a quality at a level (same rounding as math.stampValue in src/engine.js).
+const shownAt = (quality, coef) => {
+  const raw = Math.round(coef * quality * 1e9) / 1e9, up = Math.ceil(raw);
+  return up - raw < 0.98 ? up : Math.trunc(raw);
+};
+// The wiki shows values at level 65 already rounded, so value / coef is a little off (13 / 1.05 = 12.38 instead of 12,
+// and then a level 59 item shows 13 instead of 12). In the game the quality is a whole number (all 1142 in Anon's
+// database are), so take the smallest whole number that gives exactly the wiki value (when several do, Anon's
+// database usually has the smallest one). If Anon's database (source/rqdata.sqlite) has this stamp with a quality
+// that also gives the wiki value, that one is used: it is the real one and it matters on lower-level items.
+const anonQuality = new Map(); // "stampId:colorId:typeId" → quality
+try {
+  const { DatabaseSync } = await import('node:sqlite');
+  const db = new DatabaseSync(path.join(root, 'source', 'rqdata.sqlite'), { readOnly: true });
+  for (const r of db.prepare('SELECT v.Stamp_Id s, v.Color_Id c, b.Type_Id t, b.QualityValue q FROM StampVariant v JOIN StampVariantBonus b ON b.StampVariant_Id = v.Id').all()) anonQuality.set(`${r.s}:${r.c}:${r.t}`, r.q);
+} catch { console.warn('source/rqdata.sqlite not found: stamp qualities are worked out from the wiki values only'); }
+function qualityFor(type, value, level, anonKey) {
+  const coef = coefAt(type, level);
+  if (!coef) return value;
+  const anon = anonQuality.get(anonKey);
+  if (anon != null && shownAt(anon, coef) === value) return anon;
+  for (let q = 1; q <= Math.ceil(value / coef) + 1; q++) if (shownAt(q, coef) === value) return q;
+  return Math.round(value / coef * 1e6) / 1e6;
+}
 
 const oldStamps = new Map(D.Stamp.map(s => [norm(s.Name), s]));
 let nextStampId = Math.max(...D.Stamp.map(s => s.Id)) + 1;
@@ -110,8 +134,7 @@ for (const p of pages.sort((a, b) => a.title.localeCompare(b.title, 'ru'))) {
       const value = parseFloat((valStr || '').replace(',', '.'));
       if (!raw) return; // empty field on the wiki page
       if (!typeId || !isFinite(value)) { problems.push(`${p.title}: bad bonus "${raw}"`); return; }
-      const coef = coefAt(bonusTypes.get(typeId), level);
-      StampVariantBonus.push({ StampVariant_Id: variantId, Type_Id: typeId, Value: value, OrderIndex: order, QualityValue: coef ? Math.round(value / coef * 1e6) / 1e6 : value });
+      StampVariantBonus.push({ StampVariant_Id: variantId, Type_Id: typeId, Value: value, OrderIndex: order, QualityValue: qualityFor(bonusTypes.get(typeId), value, level, `${stampId}:${colorId}:${typeId}`) });
     });
   }
 }
