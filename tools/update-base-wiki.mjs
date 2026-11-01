@@ -7,6 +7,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { templateFields } from './wiki-fetch.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const cacheFile = path.join(root, 'source', 'wiki-monsters.json');
@@ -39,14 +40,8 @@ async function download() {
   return pages;
 }
 
-const clean = (s) => String(s || '').replace(/\[\[(?:[^|\]]*\|)?([^\]]*)\]\]/g, '$1').replace(/<[^>]+>/g, '').replace(/'''?/g, '').trim();
-function fields(text) {
-  const m = text.match(/\{\{Монстр([\s\S]*?)\n\}\}/);
-  if (!m) return null;
-  const f = {};
-  for (const x of m[1].matchAll(/^\|\s*\|?\s*([^=\n]+?)\s*=\s*(.*)$/gm)) f[x[1]] = clean(x[2]);
-  return f;
-}
+// the template's fields, split on top-level pipes (a line can hold several: «|Карта1=|Лока1=Марагорн»)
+const fields = (text) => templateFields(text, 'Монстр');
 const list = (f, key) => {
   const out = [];
   for (let n = 1; n <= 60; n++) { const v = f[key + n]; if (v) out.push(v); }

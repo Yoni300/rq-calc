@@ -86,8 +86,8 @@ const BCATS = ['monster', 'loc', 'npc', 'quest', 'recipe', 'res', 'item', 'card'
 
 // ---------- the index (built on first use) ----------
 const bnorm = s => String(s || '').toLowerCase().replace(/ё/g, 'е').replace(/\s+/g, ' ').trim();
-// "Ледяная коса к.вд2сл", "Брюки ловца 1 слот" → the item itself
-const bstrip = s => String(s || '').replace(/\s+\d+\s+слот(а|ов)?\s*$/i, '').replace(/\s+к\.\s*\S+$/i, '').trim();
+// "Ледяная коса к.вд2сл", "Брюки ловца 1 слот", "Перчатки лучника 1СЛ", "Кинжал новичка ЭОГ" → the item itself
+const bstrip = s => String(s || '').replace(/\s+\d+\s+слот(а|ов)?\s*$/i, '').replace(/\s*\d\s*сл\.?$/i, '').replace(/\s+к\.\s*\S+$/i, '').replace(/\s+Э(ОГ|ВД|ВЗ|ЗМ)$/, '').trim();
 let BX = null;
 function baseIndex() {
   if (BX) return BX;
@@ -124,7 +124,7 @@ function baseIndex() {
   const src = new Map(), use = new Map();
   const put = (map, name, kind, v) => { const k = bnorm(name); if (!k) return; if (!map.has(k)) map.set(k, {}); const o = map.get(k); (o[kind] ||= []).includes(v) || o[kind].push(v); };
   for (const m of monsters) {
-    for (const x of m.equip || []) put(src, bstrip(x), 'drop', m);
+    for (const x of m.equip || []) { put(src, bstrip(x), 'drop', m); put(src, 'Рецепт: ' + bstrip(x), 'drop', m); }
     for (const k of ['cards', 'drop', 'cons', 'questDrop', 'recipes']) for (const x of m[k] || []) put(src, x, 'drop', m);
   }
   for (const n of W.nodes) for (const d of n.drops || []) put(src, d.n, 'node', n);
@@ -154,7 +154,9 @@ function iconOfName(name) {
   const it = X.itemBy.get(k); if (it) return IMG(it.imageId);
   const c = X.cardBy.get(bnorm(name)); if (c) return IMG(c.imageId);
   const l = X.lootBy.get(bnorm(name)); if (l) return MI_IMG(l.id);
-  return null;
+  const W = window.RQ_BASE_ICONS || {};
+  const f = W[name] || W[bstrip(name)];
+  return f ? `../data/icons/${f}` : null;
 }
 function entryOf(kind, x) {
   const t = BTX();
@@ -164,13 +166,13 @@ function entryOf(kind, x) {
     case 'item': return { kind, key: x.id, name: x.name, icon: IMG(x.imageId), meta: `${ctx.eqTypes.get(x.typeId)?.name || ''} · ${t.lvl} ${x.level}` };
     case 'card': return { kind, key: x.id, name: x.name, icon: IMG(x.imageId), meta: cardTypeLabel(x) };
     case 'stamp': return { kind, key: x.id, name: `${T.stampWord} ${x.name}`, icon: IMG(x.variants[x.variants.length - 1]?.color?.Image_Id), meta: `${x.variants.length} · ${t.variants.toLowerCase()}` };
-    case 'loc': return { kind, key: x.name, name: x.name, icon: null, meta: [(x.type || [])[0], x.min != null ? `${t.lvl} ${x.min === x.max ? x.min : `${x.min}–${x.max}`}` : ''].filter(Boolean).join(' · ') };
+    case 'loc': return { kind, key: x.name, name: x.name, icon: x.map ? `../data/maps/${x.map}` : null, cover: true, meta: [(x.type || [])[0], x.min != null ? `${t.lvl} ${x.min === x.max ? x.min : `${x.min}–${x.max}`}` : ''].filter(Boolean).join(' · ') };
     case 'loot': return { kind, key: x.id, name: x.name, icon: MI_IMG(x.id), meta: x.type || '' };
     case 'npc': return { kind, key: x.name, name: x.name, icon: x.img ? `../data/npcs/${x.img}` : null, round: true,
       meta: [(x.locs || [])[0], (baseIndex().questsFrom.get(x.name) || []).length ? fmtT(t.questsN, { n: baseIndex().questsFrom.get(x.name).length }) : '', (x.shop || []).length ? fmtT(t.sellsN, { n: x.shop.length }) : ''].filter(Boolean).join(' · ') };
-    case 'quest': return { kind, key: x.name, name: x.name, icon: null, meta: [x.level != null ? `${t.lvl} ${x.level}` : '', x.from, x.type].filter(Boolean).join(' · ') };
+    case 'quest': return { kind, key: x.name, name: x.name, icon: (n => n && n.img ? `../data/npcs/${n.img}` : null)(baseIndex().npcBy.get(bnorm(x.from))), round: true, meta: [x.level != null ? `${t.lvl} ${x.level}` : '', x.from, x.type].filter(Boolean).join(' · ') };
     case 'recipe': return { kind, key: x.name, name: x.name.replace(/^Рецепт:\s*/, ''), icon: iconOfName(x.result), meta: [`${t.chance} ${x.chance ?? '?'}%`, `${(x.res || []).length} ${t.ingredients.toLowerCase()}`].join(' · ') };
-    case 'res': return { kind, key: x.name, name: x.name, icon: null, meta: [t.nodeKind[x.kind], (x.locs || []).length ? `${t.locsOf.toLowerCase()}: ${x.locs.length}` : ''].filter(Boolean).join(' · ') };
+    case 'res': return { kind, key: x.name, name: x.name, icon: (x.drops || []).map(d => iconOfName(d.n)).find(Boolean) || null, meta: [t.nodeKind[x.kind], (x.locs || []).length ? `${t.locsOf.toLowerCase()}: ${x.locs.length}` : ''].filter(Boolean).join(' · ') };
     case 'thing': return { kind, key: x, name: x, icon: iconOfName(x), meta: '' };
   }
   return null;
@@ -247,7 +249,7 @@ function renderBase(el) {
 function baseRow(e, showCat, onclick) {
   const on = BS.sel && BS.sel.kind === e.kind && BS.sel.key === e.key;
   return h('div', { class: 'bs-row' + (on ? ' on' : ''), onclick: onclick || (() => openBase(e.kind, e.key, { push: false })) },
-    e.icon ? h('img', { class: 'bs-ic' + (e.round ? ' round' : ''), src: e.icon, loading: 'lazy', draggable: 'false' }) : h('span', { class: 'bs-ic ph' }, iconEl(ph(e.kind))),
+    e.icon ? h('img', { class: 'bs-ic' + (e.round ? ' round' : '') + (e.cover ? ' cover' : ''), src: e.icon, loading: 'lazy', draggable: 'false' }) : h('span', { class: 'bs-ic ph' }, iconEl(ph(e.kind))),
     h('div', { class: 'bs-name' }, e.name, h('small', null, (showCat ? BTX().cats[e.kind] + ' · ' : '') + (e.meta || ''))));
 }
 
@@ -357,7 +359,7 @@ function drawBaseDetail() {
   const { e, x } = f;
   if (BS.back.length) el.append(h('button', { class: 'btn small ghost bs-back', onclick: () => { const p = BS.back.pop(); if (p) openBase(p.kind, p.key, { push: false }); } }, '← ' + t.back));
   el.append(h('div', { class: 'bs-head' },
-    e.icon ? h('img', { class: 'bs-big' + (e.round ? ' round' : ''), src: e.icon, draggable: 'false' }) : h('span', { class: 'bs-big ph' }, iconEl(ph(e.kind))),
+    e.icon ? h('img', { class: 'bs-big' + (e.round ? ' round' : '') + (e.cover ? ' cover' : ''), src: e.icon, draggable: 'false' }) : h('span', { class: 'bs-big ph' }, iconEl(ph(e.kind))),
     h('div', { class: 'bs-title' }, h('h2', null, e.name), h('div', { class: 'bs-meta' }, t.cats[e.kind] + (e.meta ? ' · ' + e.meta : '')))));
 
   if (e.kind === 'monster') {
