@@ -163,12 +163,14 @@ function editResp(b) {
 
 // ---------- alerts ----------
 let audio = null;
-function beep(kind) {
+// the browser starts sound only after a click and resuming takes a moment: wait for it, then play
+async function beep(kind) {
   try {
     audio = audio || new AudioContext();
-    if (audio.state === 'suspended') audio.resume();
+    if (audio.state !== 'running') await audio.resume();
+    const start = audio.currentTime + 0.05;
     (kind === 'up' ? [660, 880, 1175] : [660, 880]).forEach((f, i) => {
-      const o = audio.createOscillator(), g = audio.createGain(), t0 = audio.currentTime + i * 0.17;
+      const o = audio.createOscillator(), g = audio.createGain(), t0 = start + i * 0.17;
       o.type = 'triangle'; o.frequency.value = f;
       g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.3, t0 + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.16);
       o.connect(g).connect(audio.destination); o.start(t0); o.stop(t0 + 0.17);
@@ -179,25 +181,46 @@ function askNotify() {
   try { if (window.Notification && Notification.permission === 'default') Notification.requestPermission(); } catch { /* ignore */ }
   try { audio = audio || new AudioContext(); audio.resume(); } catch { /* ignore */ }
 }
-function alertBoss(b, kind, left) {
+// The site may be open in several tabs: the first tab to announce a respawn takes it, the others stay quiet
+function claimAlert(id) {
+  try {
+    const now = Date.now(), seen = JSON.parse(localStorage.getItem('rqc.bossAlerted') || '{}');
+    if (seen[id]) return false;
+    for (const k in seen) if (now - seen[k] > 86400e3) delete seen[k];
+    seen[id] = now;
+    localStorage.setItem('rqc.bossAlerted', JSON.stringify(seen));
+  } catch { /* no storage: just announce */ }
+  return true;
+}
+// one message per alert: the system notification, or (when it is not allowed) a message inside the page
+function alertBoss(b, kind, left, test = false) {
   const title = kind === 'up' ? fmtT(T.bossUpN, { n: b.name }) : fmtT(T.bossSoonN, { n: b.name, m: Math.max(1, Math.ceil(left / 60e3)) });
   beep(kind);
+  let shown = false;
   try {
     if (window.Notification && Notification.permission === 'granted') {
-      const n = new Notification(title, { body: b.loc, icon: b.img ? `../data/bosses/${b.img}` : undefined, silent: true });
-      n.onclick = () => { window.focus(); if (tab !== 'bosses') openBosses(); };
+      // the same tag replaces an older message about the same boss instead of adding another one
+      const n = new Notification(title, { body: b.loc || '', tag: test ? 'rqc-test' : `rqc-${b.key}`, renotify: true, silent: true,
+        icon: b.img ? `../data/bosses/${b.img}` : undefined });
+      n.onclick = () => { window.focus(); if (tab !== 'bosses') openBosses(); n.close(); };
+      shown = true;
     }
   } catch { /* ignore */ }
-  toast(title);
+  if (!shown) toast(title);
 }
 // "listen": both sounds and both messages. Example: the boss that comes next, else a favourite, else no name.
-async function testAlert() {
+let testing = false;
+async function testAlert(e) {
+  if (testing) return; // a second click while it plays would mix the sounds
+  testing = true;
+  const btn = e && e.currentTarget; if (btn) btn.disabled = true;
   try { if (window.Notification && Notification.permission === 'default') await Notification.requestPermission(); } catch { /* ignore */ }
   const now = Date.now();
   const next = BOSSES.map(b => ({ b, st: bossState(b, now) })).filter(x => x.st.s === 'wait').sort((x, y) => x.st.spawn - y.st.spawn)[0];
   const b = next ? next.b : BOSSES.find(x => BT.fav.has(x.name)) || { name: T.bossTestName, loc: '' };
-  alertBoss(b, 'soon', SOON);
-  setTimeout(() => alertBoss(b, 'up'), 2200);
+  alertBoss(b, 'soon', SOON, true);
+  setTimeout(() => alertBoss(b, 'up', 0, true), 2200);
+  setTimeout(() => { testing = false; if (btn) btn.disabled = false; }, 3200);
 }
 // with favourites, only they make noise
 function checkAlerts(now) {
@@ -208,8 +231,13 @@ function checkAlerts(now) {
     const st = bossState(b, now);
     if (st.s === 'none') continue;
     const w = BT.warned[b.key], done = w && w.t === st.k.t ? w.kind : null; // a new kill starts over
-    if (st.s === 'wait' && st.left <= SOON && !done) { BT.warned[b.key] = { t: st.k.t, kind: 'soon' }; alertBoss(b, 'soon', st.left); }
-    else if (st.s === 'up' && now - st.spawn < 2 * 60e3 && done !== 'up') { BT.warned[b.key] = { t: st.k.t, kind: 'up' }; alertBoss(b, 'up'); }
+    if (st.s === 'wait' && st.left <= SOON && !done) {
+      BT.warned[b.key] = { t: st.k.t, kind: 'soon' };
+      if (claimAlert(`${b.key}|${st.k.t}|soon`)) alertBoss(b, 'soon', st.left);
+    } else if (st.s === 'up' && now - st.spawn < 2 * 60e3 && done !== 'up') {
+      BT.warned[b.key] = { t: st.k.t, kind: 'up' };
+      if (claimAlert(`${b.key}|${st.k.t}|up`)) alertBoss(b, 'up');
+    }
   }
 }
 // opening the app must not announce respawns that happened long ago

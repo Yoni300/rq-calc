@@ -798,3 +798,4 @@ input[type=range] { accent-color: var(--gold-2); }
 .layout.wide .tab-body { padding: 16px 22px; }
 .layout.wide .bt-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(520px, 1fr)); gap: 8px; }
 .layout.wide .bt-list .pb-msg { grid-column: 1 / -1; }
+.btn:disabled { opacity: .5; cursor: default; }
