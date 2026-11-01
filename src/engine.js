@@ -634,9 +634,10 @@
         return !!r && slotIsWeapon(r.item);
       };
 
-      // current weapon (two weapons: attack averaged, speed summed — as in the original)
+      // current weapon. Two weapons (Вор, Разбойник, Ассасин): attack AND speed averaged. The original RQ Calc summed
+      // the speeds, which doubled the DPS of every dual-wield build (2026-11-02: players report the game does not).
       const weapons = entries.slice().sort((a, b) => isExtra(a) - isExtra(b)).filter(allowed).filter(en => en.item.info && en.item.info.kind !== 'armor').map(en => en.item.info);
-      const weaponInfo = weapons.length ? { Attack: idiv(weapons.reduce((s, w) => s + w.attack, 0), weapons.length), AttackSpeed: weapons.reduce((s, w) => s + w.attackSpeed, 0) } : null;
+      const weaponInfo = weapons.length ? { Attack: idiv(weapons.reduce((s, w) => s + w.attack, 0), weapons.length), AttackSpeed: weapons.reduce((s, w) => s + w.attackSpeed, 0) / weapons.length } : null;
 
       const allCards = entries.flatMap(en => en.cards).filter(Boolean);
       const cardCount = pred => allCards.filter(pred).length;
