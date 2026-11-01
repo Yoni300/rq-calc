@@ -2,10 +2,16 @@
 # tools/release.mjs starts it on main after pushing a release tag; it always builds the site from the latest v* tag,
 # so the site has the same version as the app. (Pages only lets main deploy, so it doesn't run on the tag itself.)
 # Run it by hand (Actions → Website → Run workflow) to rebuild the site from the latest release.
+# "from main" puts the newest code on the site before the app gets it: gh workflow run pages.yml -f from=main
 name: Website
 
 on:
   workflow_dispatch:
+    inputs:
+      from:
+        description: 'Build from: empty = the latest release, "main" = the newest code (the app is not updated)'
+        required: false
+        default: ''
 
 permissions:
   contents: read
@@ -28,14 +34,18 @@ jobs:
           fetch-depth: 0
 
       - name: Build the site from the latest release
+        env:
+          FROM: ${{ inputs.from }}
         run: |
-          if [ "$GITHUB_REF_TYPE" = tag ]; then TAG="$GITHUB_REF_NAME"; else TAG=$(git tag -l 'v*' --sort=-v:refname | head -n1); fi
+          if [ -n "$FROM" ]; then TAG="$FROM"; elif [ "$GITHUB_REF_TYPE" = tag ]; then TAG="$GITHUB_REF_NAME"; else TAG=$(git tag -l 'v*' --sort=-v:refname | head -n1); fi
+          git rev-parse --verify -q "$TAG^{commit}" >/dev/null || TAG="origin/$TAG"
           SHA=$(git rev-parse --short "$TAG^{commit}")
           echo "Site from $TAG ($SHA)"
           mkdir _site
           git archive "$TAG" app src data | tar -x -C _site
           cp web/web.js web/favicon.png web/apple-touch-icon.png _site/app/
-          echo "{\"build\":\"$SHA\",\"version\":\"${TAG#v}\"}" > _site/app/build.json
+          VERSION=$(git show "$TAG:package.json" | sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' | head -n1)
+          echo "{\"build\":\"$SHA\",\"version\":\"$VERSION\"}" > _site/app/build.json
           # the page lives at the site root but keeps its paths relative to app/; tab icon = the app's icon;
           # web.js goes right after i18n.js; ?v=<build> makes browsers load new files after an update
           sed -e 's|<meta charset="utf-8">|&\n  <base href="app/">\n  <link rel="icon" type="image/png" href="favicon.png">\n  <link rel="apple-touch-icon" href="apple-touch-icon.png">|' \

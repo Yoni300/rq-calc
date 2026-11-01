@@ -93,5 +93,7 @@ ipcMain.handle('rqc-update-state', () => updateState);
 ipcMain.handle('rqc-app-version', () => app.getVersion());
 
 app.on('second-instance', () => { if (win) { if (win.isMinimized()) win.restore(); win.focus(); } });
+// Windows shows notifications (boss timer) only for an app with this id; the installer uses the same one
+if (process.platform === 'win32') app.setAppUserModelId(IS_TEST ? process.execPath : 'com.yoni300.rqcalc');
 app.whenReady().then(() => { createWindow(); setupUpdates(); });
 app.on('window-all-closed', () => app.quit());

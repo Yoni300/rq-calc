@@ -357,6 +357,10 @@ const TOP_ICONS = {
   talents: '<path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.8-5.2 2.8 1-5.8-4.3-4.1 5.9-.9z"/>',
   effects: '<path d="M9.5 3h5M10.5 3v5.6L5.4 17.4A2.4 2.4 0 0 0 7.5 21h9a2.4 2.4 0 0 0 2.1-3.6l-5.1-8.8V3"/><path d="M7.4 14.5h9.2"/>',
   collection: '<path d="M7.5 4h9v5.5a4.5 4.5 0 0 1-9 0z"/><path d="M7.5 6.5H5a2.8 2.8 0 0 0 3 3.6M16.5 6.5H19a2.8 2.8 0 0 1-3 3.6M12 14v3.5M8.5 20.5h7M9.5 17.5h5v3h-5z"/>',
+  // boss timer
+  skull: '<path d="M12 3a7.5 7.5 0 0 0-7.5 7.5c0 2.6 1.3 4.6 3 5.8V19a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1v-2.7c1.7-1.2 3-3.2 3-5.8A7.5 7.5 0 0 0 12 3z"/><circle cx="9.2" cy="11" r="1.6"/><circle cx="14.8" cy="11" r="1.6"/><path d="M10.5 20v-2.5M13.5 20v-2.5M11.2 14.8l.8-1.3.8 1.3"/>',
+  group: '<circle cx="9" cy="8.5" r="3"/><path d="M3.5 19.5c.4-3.2 2.6-5 5.5-5s5.1 1.8 5.5 5"/><circle cx="16.5" cy="9" r="2.4"/><path d="M15.5 14.6c2.6-.3 4.6 1.3 5 4.4"/>',
+  lock: '<rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/>',
 };
 // the same icons as DOM elements, for h(...)
 function iconEl(name) { const t = document.createElement('template'); t.innerHTML = svgIcon(name); return t.content.firstChild; }
@@ -378,6 +382,8 @@ function renderTop() {
   topButton('btnCode', 'code', T.code);
   topButton('btnPublic', 'globe', T.publicBuilds);
   $('btnPublic').classList.toggle('on', tab === 'builds');
+  topButton('btnBosses', 'skull', T.tabBosses);
+  $('btnBosses').classList.toggle('on', tab === 'bosses');
   const ls = $('langSwitch'); ls.innerHTML = ''; ls.title = T.language;
   for (const [k, label] of [['uk', 'УКР'], ['ru', 'РУС'], ['en', 'ENG']]) {
     ls.append(h('button', { class: k === lang ? 'on' : '', onclick: () => { lang = k; T = RQC_I18N[k]; store.set('lang', k); applyGameLang(); recalc(); renderAll(); } }, label));
@@ -395,6 +401,11 @@ $('btnSave').addEventListener('click', () => {
 // community builds open in the center area
 $('btnPublic').addEventListener('click', () => {
   tab = tab === 'builds' ? 'gear' : 'builds'; store.set('tab', tab);
+  renderCenter(); animateEnter($('center')); renderTop();
+});
+// boss timer (app/bosses.js), also in the center area
+$('btnBosses').addEventListener('click', () => {
+  tab = tab === 'bosses' ? 'gear' : 'bosses'; store.set('tab', tab);
   renderCenter(); animateEnter($('center')); renderTop();
 });
 $('btnNew').addEventListener('click', async () => {
@@ -569,6 +580,7 @@ function renderCenter() {
   else if (tab === 'talents') renderTalents(el);
   else if (tab === 'effects') renderEffects(el);
   else if (tab === 'builds') renderBuilds(el);
+  else if (tab === 'bosses') renderBosses(el);
   else renderCollection(el);
   el.scrollTop = scroll;
 }
