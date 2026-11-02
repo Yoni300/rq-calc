@@ -1,6 +1,10 @@
 // "What's new" under the bell in the top bar (app/news.js). Newest first. Add an entry for every change players see.
 // at: ISO time in UTC (shown in each viewer's own time zone); text: ru / uk / en.
 window.RQ_CHANGELOG = [
+  { at: '2026-11-02T20:40Z',
+    ru: 'Программа RQ Tools обновлена до 1.0.9: таймер боссов с оповещением в углу экрана поверх игры, «База», «Рынок» со сканером цен, настройки, работа в трее и автозапуск с Windows.',
+    uk: 'Програму RQ Tools оновлено до 1.0.9: таймер босів зі сповіщенням у куті екрана поверх гри, «База», «Ринок» зі сканером цін, налаштування, робота в треї й автозапуск з Windows.',
+    en: 'The RQ Tools app is updated to 1.0.9: the boss timer with corner alerts over the game, «Base», «Market» with the price scanner, settings, tray and start with Windows.' },
   { at: '2026-11-02T20:25Z',
     ru: 'Телефон: подсказки больше не выскакивают и не висят после касания — чтобы увидеть подсказку, задержите палец на полсекунды.',
     uk: 'Телефон: підказки більше не вискакують і не висять після дотику — щоб побачити підказку, затримайте палець на пів секунди.',
