@@ -1068,7 +1068,7 @@ body.tool-timer .calc-only { display: none !important; }
 .sn-body hr { border: 0; border-top: 1px solid var(--line); margin: 12px 0; }
 .sn-body mark { background: #000; color: #000; border-radius: 3px; } .sn-body mark:hover { color: var(--fg); }
 /* events in «База» */
-.bs-banner { display: block; width: 100%; max-width: 760px; border-radius: 8px; border: 1px solid var(--line); margin-bottom: 12px; }
+.bs-banner { display: block; width: 100%; max-width: 620px; border-radius: 8px; border: 1px solid var(--line); margin-bottom: 12px; }
 .bs-live { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 8px 12px; margin: 10px 0 4px; border: 1px solid rgba(var(--gold-rgb), .45); border-radius: 8px; background: rgba(var(--gold-rgb), .08); color: var(--gold); }
 .bs-live .btn { margin-left: auto; }
 .bs-how { margin: 0; padding-left: 20px; line-height: 1.5; max-width: 760px; }
