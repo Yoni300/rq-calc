@@ -79,6 +79,13 @@ if (painHammer && D.StampClass.some(c => c.Stamp_Id === painHammer.Id) && !D.Sta
   patched.push('Молота боли: і для Розбійника');
 }
 
+// 5d. Ornaments that give "+N% к урону (не работает против игроков)" (wiki), not "% к Атаке" as Anon's database has it
+for (const name of ['Снежный кристалин', 'Аура чистых помыслов', 'Некрополис']) {
+  const it = D.Equipment.find(e => e.Name === name && e.Type_Id === 13);
+  const b = it && D.EquipmentBonus.find(x => x.Equipment_Id === it.Id && x.Type_Id === 6);
+  if (b) { b.Type_Id = 240; patched.push(`${name}: % к урону, а не к атаке`); }
+}
+
 // 6. Collection trophies have no pictures in the database: give each a fitting icon of a pet, mount,
 //    book, potion or item that is already in data/img (picked by the trophy's theme).
 const TROPHY_ICONS = {
