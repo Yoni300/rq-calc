@@ -64,19 +64,24 @@ const CURRENCIES = {
   КР: ['kr', 'Королевские реалы'], АР: ['ar', 'Алхимические руны'], ЗО: ['zo', 'Знаки отличия'], ЗК: ['zk', 'Знаки крови'], ОА: ['oa', 'Осколки Аркона'],
   ЖЯ: ['zhya', 'Жетоны Ярмарки'], ЗМ: ['zm', 'Запредельные монеты'], МИ: ['mi', 'Монеты игрока'], ВГ: ['vg', 'Валюта гильдии'], ФК: ['fk', 'Фишкоинсы'],
 };
-function currencyOf(v) {
-  const m = String(v ?? '').trim().match(/^([\d\s  ]+)\s*([А-ЯЁ]{2})$/);
-  return m && CURRENCIES[m[2]] ? { n: +m[1].replace(/[\s  ]/g, ''), file: CURRENCIES[m[2]][0], name: CURRENCIES[m[2]][1] } : null;
+// "300" (gold), "5 ЗК" (another currency), "~2000" (an approximate price) → { about, n, cur }
+function priceParts(v) {
+  if (typeof v === 'number') return isFinite(v) ? { about: false, n: v, cur: null } : null;
+  const m = String(v ?? '').trim().match(/^(~\s*)?(\d[\d\s  ]*?)\s*([А-ЯЁ]{2})?$/);
+  if (!m || (m[3] && !CURRENCIES[m[3]])) return null;
+  return { about: !!m[1], n: +m[2].replace(/[\s  ]/g, ''), cur: m[3] ? { file: CURRENCIES[m[3]][0], name: CURRENCIES[m[3]][1] } : null };
 }
 function priceEl(v) {
-  const n = goldNum(v), c = n == null && currencyOf(v);
-  if (c) return h('span', { class: 'price', title: c.name }, fmtNum(c.n), h('img', { class: 'cur', src: `../data/currency/${c.file}.png`, alt: c.name, draggable: 'false' }));
-  return n == null ? h('span', { class: 'price' }, String(v ?? '')) : h('span', { class: 'price' }, fmtNum(n), h('i', { class: 'coin', title: T.goldWord || '' }));
+  const p = priceParts(v);
+  if (!p) return h('span', { class: 'price' }, String(v ?? ''));
+  return h('span', { class: 'price', title: p.cur ? p.cur.name : null }, p.about ? '≈ ' : null, fmtNum(p.n),
+    p.cur ? h('img', { class: 'cur', src: `../data/currency/${p.cur.file}.png`, alt: p.cur.name, draggable: 'false' }) : h('i', { class: 'coin', title: T.goldWord || '' }));
 }
 const priceHtml = v => {
-  const n = goldNum(v), c = n == null && currencyOf(v);
-  if (c) return `<span title="${esc(c.name)}">${fmtNum(c.n)}<img class="cur" src="../data/currency/${c.file}.png" alt=""></span>`;
-  return n == null ? esc(v) : `${fmtNum(n)}<i class="coin"></i>`;
+  const p = priceParts(v);
+  if (!p) return esc(v);
+  const icon = p.cur ? `<img class="cur" src="../data/currency/${p.cur.file}.png" alt="">` : '<i class="coin"></i>';
+  return `<span${p.cur ? ` title="${esc(p.cur.name)}"` : ''}>${p.about ? '≈ ' : ''}${fmtNum(p.n)}${icon}</span>`;
 };
 function fmtStat(s, v) {
   const d = s.roundDigits ?? (Math.abs(v - Math.round(v)) < 1e-9 ? 0 : 2);

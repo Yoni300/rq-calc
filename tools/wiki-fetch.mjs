@@ -37,6 +37,7 @@ export async function categoryPages(...cats) {
 // wiki text → plain text: pictures ([[Файл:Золото.png|16px|link=]]) go away, [[Page|text]] → text
 export const clean = (s) => String(s || '')
   .replace(/\[\[\s*(?:Файл|File|Изображение|Image)\s*:[^\]]*\]\]/gi, '')
+  .replace(/\{\{#tip-info:[^{}]*\}\}/gi, '') // hover hints of the wiki ("Разное{{#tip-info:…}}" → "Разное")
   .replace(/\[\[(?:[^|\]]*\|)?([^\]]*)\]\]/g, '$1').replace(/<[^>]+>/g, '').replace(/'''?/g, '')
   .replace(/\(\s+/g, '(').trim(); // a removed picture can leave "( 300)"; names keep their own spacing
 
