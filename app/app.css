@@ -1118,3 +1118,9 @@ body.tool-timer .calc-only { display: none !important; }
   .mobile-nav .ic { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
   body:not(.tool-timer) .layout { padding-bottom: 64px; }
 }
+/* touch screens: a long press shows a tip (app.js), so it must not select text or open the system menu */
+@media (hover: none) {
+  body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  input, textarea, [contenteditable] { -webkit-user-select: text; user-select: text; }
+  img { -webkit-user-drag: none; }
+}

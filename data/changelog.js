@@ -1,6 +1,10 @@
 // "What's new" under the bell in the top bar (app/news.js). Newest first. Add an entry for every change players see.
 // at: ISO time in UTC (shown in each viewer's own time zone); text: ru / uk / en.
 window.RQ_CHANGELOG = [
+  { at: '2026-11-02T20:25Z',
+    ru: 'Телефон: подсказки больше не выскакивают и не висят после касания — чтобы увидеть подсказку, задержите палец на полсекунды.',
+    uk: 'Телефон: підказки більше не вискакують і не висять після дотику — щоб побачити підказку, затримайте палець на пів секунди.',
+    en: 'Phones: tips no longer pop up and stay after a tap — press and hold for half a second to see one.' },
   { at: '2026-11-02T19:35Z',
     ru: 'Сайт удобен на телефоне: всё в одну колонку, внизу кнопки «Персонаж / Снаряжение / Результат», таймер, рынок, база и окна подстраиваются под экран.',
     uk: 'Сайт зручний на телефоні: усе в одну колонку, внизу кнопки «Персонаж / Спорядження / Результат», таймер, ринок, база й вікна підлаштовуються під екран.',

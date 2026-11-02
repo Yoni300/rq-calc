@@ -226,21 +226,44 @@ function pruneBuffs() {
 
 // ---------- tooltip ----------
 const tipEl = $('tip');
-document.addEventListener('mouseover', e => {
-  let el = e.target;
+const tipOf = target => {
+  let el = target;
   while (el && el !== document && !el._tip) el = el.parentElement;
-  if (!el || el === document || !el._tip) { tipEl.hidden = true; return; }
-  const v = typeof el._tip === 'function' ? el._tip() : el._tip;
+  if (!el || el === document || !el._tip) return '';
+  return (typeof el._tip === 'function' ? el._tip() : el._tip) || '';
+};
+// mouse: the tip follows the pointer. Touch: a tap only does the action (the browser's fake mouseover after a tap
+// is ignored); a long press shows the tip by the finger, the next touch or a scroll hides it.
+let lastTouch = 0, pressTimer = null, pressShown = false;
+document.addEventListener('mouseover', e => {
+  if (Date.now() - lastTouch < 1200) return;
+  const v = tipOf(e.target);
   if (!v) { tipEl.hidden = true; return; }
   tipEl.innerHTML = v; tipEl.hidden = false; placeTip(e);
 });
-document.addEventListener('mousemove', e => { if (!tipEl.hidden) placeTip(e); });
-function placeTip(e) {
+document.addEventListener('mousemove', e => { if (!tipEl.hidden && Date.now() - lastTouch >= 1200) placeTip(e); });
+document.addEventListener('pointerdown', e => {
+  if (e.pointerType !== 'touch') return;
+  lastTouch = Date.now(); tipEl.hidden = true; pressShown = false; clearTimeout(pressTimer);
+  const v = tipOf(e.target);
+  if (!v) return;
+  const at = { clientX: e.clientX, clientY: e.clientY };
+  pressTimer = setTimeout(() => { tipEl.innerHTML = v; tipEl.hidden = false; placeTip(at, true); pressShown = true; }, 450);
+}, true);
+const cancelPress = () => { clearTimeout(pressTimer); lastTouch = Date.now(); };
+document.addEventListener('pointerup', e => { if (e.pointerType === 'touch') cancelPress(); }, true);
+document.addEventListener('pointercancel', cancelPress, true);
+document.addEventListener('scroll', () => { clearTimeout(pressTimer); if (Date.now() - lastTouch < 1200) tipEl.hidden = true; }, true);
+// the release after a long press is not a tap: don't open or toggle anything
+document.addEventListener('click', e => { if (pressShown) { pressShown = false; e.preventDefault(); e.stopPropagation(); } }, true);
+document.addEventListener('contextmenu', e => { if (Date.now() - lastTouch < 1200) e.preventDefault(); });
+function placeTip(e, touch = false) {
   const r = tipEl.getBoundingClientRect();
   let x = e.clientX + 16, y = e.clientY + 14;
-  if (x + r.width > innerWidth - 8) x = e.clientX - r.width - 12;
+  if (touch) { x = e.clientX - r.width / 2; y = e.clientY - r.height - 24; if (y < 8) y = e.clientY + 28; } // above the finger
+  if (x + r.width > innerWidth - 8) x = touch ? innerWidth - r.width - 8 : e.clientX - r.width - 12;
   if (y + r.height > innerHeight - 8) y = innerHeight - r.height - 8;
-  tipEl.style.left = x + 'px'; tipEl.style.top = Math.max(8, y) + 'px';
+  tipEl.style.left = Math.max(8, x) + 'px'; tipEl.style.top = Math.max(8, y) + 'px';
 }
 // confirmation in the app's style (instead of the system confirm window); resolves true/false
 function confirmBox(text, { ok = T.yes, danger = false } = {}) {
