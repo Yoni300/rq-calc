@@ -59,11 +59,25 @@ function goldNum(v) {
   const s = String(v ?? '').trim();
   return /^[\d\s  ]+$/.test(s) && /\d/.test(s) ? +s.replace(/[\s  ]/g, '') : null;
 }
+// other currencies, as the wiki's «Цена» template writes them ("5 ЗК"): icon in data/currency/<file>.png
+const CURRENCIES = {
+  КР: ['kr', 'Королевские реалы'], АР: ['ar', 'Алхимические руны'], ЗО: ['zo', 'Знаки отличия'], ЗК: ['zk', 'Знаки крови'], ОА: ['oa', 'Осколки Аркона'],
+  ЖЯ: ['zhya', 'Жетоны Ярмарки'], ЗМ: ['zm', 'Запредельные монеты'], МИ: ['mi', 'Монеты игрока'], ВГ: ['vg', 'Валюта гильдии'], ФК: ['fk', 'Фишкоинсы'],
+};
+function currencyOf(v) {
+  const m = String(v ?? '').trim().match(/^([\d\s  ]+)\s*([А-ЯЁ]{2})$/);
+  return m && CURRENCIES[m[2]] ? { n: +m[1].replace(/[\s  ]/g, ''), file: CURRENCIES[m[2]][0], name: CURRENCIES[m[2]][1] } : null;
+}
 function priceEl(v) {
-  const n = goldNum(v);
+  const n = goldNum(v), c = n == null && currencyOf(v);
+  if (c) return h('span', { class: 'price', title: c.name }, fmtNum(c.n), h('img', { class: 'cur', src: `../data/currency/${c.file}.png`, alt: c.name, draggable: 'false' }));
   return n == null ? h('span', { class: 'price' }, String(v ?? '')) : h('span', { class: 'price' }, fmtNum(n), h('i', { class: 'coin', title: T.goldWord || '' }));
 }
-const priceHtml = v => { const n = goldNum(v); return n == null ? esc(v) : `${fmtNum(n)}<i class="coin"></i>`; };
+const priceHtml = v => {
+  const n = goldNum(v), c = n == null && currencyOf(v);
+  if (c) return `<span title="${esc(c.name)}">${fmtNum(c.n)}<img class="cur" src="../data/currency/${c.file}.png" alt=""></span>`;
+  return n == null ? esc(v) : `${fmtNum(n)}<i class="coin"></i>`;
+};
 function fmtStat(s, v) {
   const d = s.roundDigits ?? (Math.abs(v - Math.round(v)) < 1e-9 ? 0 : 2);
   return fmtNum(v, d) + (s.isPercent ? '%' : '');

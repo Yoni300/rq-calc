@@ -1033,3 +1033,5 @@ body.tool-timer .calc-only { display: none !important; }
 .forum-btn { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; padding-left: 7px; }
 .forum-btn img { width: 20px; height: 20px; flex: none; }
 @media (max-width: 900px) { .forum-btn span { display: none; } }
+/* other currencies (Знаки крови, Алхимические руны…) — the wiki's icons after the number */
+.cur { width: 1.5em; height: 1.5em; margin-left: .25em; vertical-align: -.42em; }

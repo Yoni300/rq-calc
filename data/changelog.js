@@ -1,6 +1,10 @@
 // "What's new" under the bell in the top bar (app/news.js). Newest first. Add an entry for every change players see.
 // at: ISO time in UTC (shown in each viewer's own time zone); text: ru / uk / en.
 window.RQ_CHANGELOG = [
+  { at: '2026-11-02T18:28Z',
+    ru: 'Цены в других валютах показываются с их иконкой: Знаки крови, Знаки отличия, Алхимические руны, Королевские реалы и другие (вместо «5 ЗК»).',
+    uk: 'Ціни в інших валютах показуються з їхньою іконкою: Знаки крови, Знаки отличия, Алхимические руны, Королевские реалы та інші (замість «5 ЗК»).',
+    en: 'Prices in other currencies show their icon: Знаки крови, Знаки отличия, Алхимические руны, Королевские реалы and others (instead of «5 ЗК»).' },
   { at: '2026-11-02T18:21Z',
     ru: '«База»: из описаний предметов убран служебный текст вики («20px|link=…»).',
     uk: '«База»: з описів предметів прибрано службовий текст вікі («20px|link=…»).',
