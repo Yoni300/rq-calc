@@ -1,6 +1,10 @@
 // "What's new" under the bell in the top bar (app/news.js). Newest first. Add an entry for every change players see.
 // at: ISO time in UTC (shown in each viewer's own time zone); text: ru / uk / en.
 window.RQ_CHANGELOG = [
+  { at: '2026-11-02T20:50Z',
+    ru: 'Костюмы в окне персонажа стали чёткими: все 42 картинки в два раза больше и без размытия.',
+    uk: 'Костюми у вікні персонажа стали чіткими: усі 42 картинки вдвічі більші й без розмиття.',
+    en: 'Costumes in the character window are sharp now: all 42 pictures are twice as large, no more blur.' },
   { at: '2026-11-02T20:40Z',
     ru: 'Программа RQ Tools обновлена до 1.0.9: таймер боссов с оповещением в углу экрана поверх игры, «База», «Рынок» со сканером цен, настройки, работа в трее и автозапуск с Windows.',
     uk: 'Програму RQ Tools оновлено до 1.0.9: таймер босів зі сповіщенням у куті екрана поверх гри, «База», «Ринок» зі сканером цін, налаштування, робота в треї й автозапуск з Windows.',

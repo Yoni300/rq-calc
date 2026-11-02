@@ -877,7 +877,9 @@ function renderModel() {
       h('div', { class: 'mc-name' }, cls.name),
       h('div', { class: 'mc-sub' }, `${ch.level} ${T.level.toLowerCase()} · ${gender?.Name || ''}${ch.stateId === 2 && mount ? ' · ' + mount.name : ''}`),
       costume ? h('div', { class: 'mc-sub' }, costume.name) : null),
-    figure ? h('img', { class: 'model-fig' + (costumeImg ? '' : ' silhouette'), src: IMG(figure), draggable: 'false' }) : null,
+    // costumes: sharper 2× pictures in data/costumes (tools/upscale-costumes.cjs), the small original if one is missing
+    figure ? h('img', { class: 'model-fig' + (costumeImg ? '' : ' silhouette'), src: costumeImg ? `../data/costumes/${costumeImg}.png` : IMG(figure), draggable: 'false',
+      onerror: costumeImg ? function () { if (this.dataset.fb) return; this.dataset.fb = 1; this.src = IMG(figure); } : null }) : null,
     h('div', { class: 'model-floor' }));
 }
 function renderGear(el) {
