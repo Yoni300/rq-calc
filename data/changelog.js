@@ -1,6 +1,10 @@
 // "What's new" under the bell in the top bar (app/news.js). Newest first. Add an entry for every change players see.
 // at: ISO time in UTC (shown in each viewer's own time zone); text: ru / uk / en.
 window.RQ_CHANGELOG = [
+  { at: '2026-11-03T00:05Z',
+    ru: '«База»: новый раздел «Ивенты» — 15 игровых событий с баннером, кратким описанием механики, локациями, НПС, монстрами, заданиями, наградами, официальными новостями и датами за все годы. Идущий сейчас ивент показывает, сколько осталось.',
+    uk: '«База»: новий розділ «Івенти» — 15 ігрових подій з банером, коротким описом механіки, локаціями, НПС, монстрами, завданнями, нагородами, офіційними новинами й датами за всі роки. Івент, що йде зараз, показує, скільки лишилося.',
+    en: '«Base»: a new «Events» section — 15 game events with a banner, a short summary of how they work, locations, NPCs, monsters, quests, rewards, official news and the dates of every year. A running event shows how long is left.' },
   { at: '2026-11-02T23:28Z',
     ru: '🐹 Рядом с автором появился хомяк — наведите на него.',
     uk: '🐹 Поруч з автором з\x27явився хом\x27ячок — наведіть на нього.',

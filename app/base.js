@@ -11,7 +11,7 @@
 const BASE_T = {
   uk: {
     title: 'База', sub: 'Монстри, локації з картами, НПС, завдання, рецепти, ресурси, предмети — і де що взяти',
-    cats: { monster: 'Монстри', loc: 'Локації', npc: 'НПС', quest: 'Завдання', recipe: 'Рецепти', res: 'Збір і рибалка', item: 'Спорядження', card: 'Карти', stamp: 'Печатки', good: 'Предмети', loot: 'Видобуток', thing: 'Предмет' },
+    cats: { monster: 'Монстри', loc: 'Локації', npc: 'НПС', quest: 'Завдання', event: 'Івенти', recipe: 'Рецепти', res: 'Збір і рибалка', item: 'Спорядження', card: 'Карти', stamp: 'Печатки', good: 'Предмети', loot: 'Видобуток', thing: 'Предмет' },
     goods: { all: 'Усі', fx: 'Ефект', box: 'Вміст', more: 'Додатково', gift: 'У подарунку', where: 'Де', gets: 'Виходить', needs: 'Потрібно', mons: 'Монстри', given: 'Видає', feat: 'Особливості', make: 'Створення' },
     search: 'Пошук по всій базі…', empty: 'Нічого не знайдено', pick: 'Оберіть щось у списку ліворуч', back: 'Назад', more: 'Показано {n} з {all} — уточніть пошук',
     lvl: 'рів.', level: 'Рівень', hp: 'Життя', race: 'Раса', element: 'Стихія', defense: 'Захист', exp: 'Досвід', mode: 'Атака',
@@ -20,6 +20,7 @@ const BASE_T = {
     drops: { equip: 'Спорядження', cards: 'Карти', drop: 'Видобуток', cons: 'Розхідники', questDrop: 'Для завдань', recipes: 'Рецепти', summon: 'Призов' },
     src: { drop: 'Хто дропає', node: 'Збір', shop: 'Продають', quest: 'Нагорода за завдання', craft: 'Створюється за рецептом', box: 'Міститься в', given: 'Видає', event: 'Івент', edition: 'Видання гри', season: 'Сезонна пригода', other: 'Ще', station: 'Створюється на верстаті', from: 'Створюється з', start: 'Початкове спорядження класу' },
     use: { recipe: 'Потрібно для рецептів', quest: 'Потрібно для завдань', coll: 'Потрібно для колекцій', station: 'Компонент на верстаті', made: 'З цього роблять' },
+    ev: { cat: 'Івенти', yearly: 'Проводиться регулярно', past: 'Більше не проводиться', status: 'Статус', usual: 'Зазвичай', last: 'Останній раз', since: 'Уведено', now: 'Іде зараз', left: 'ще {t}', soon: 'Почнеться {d}', how: 'Як це працює', history: 'Коли проводився', toCal: 'Календар', groups: { monsters: 'Монстри', npcs: 'НПС', locs: 'Локації', quests: 'Завдання', chains: 'Ланцюжки завдань', mounts: 'Вихованці та їздові', gear: 'Спорядження', cards: 'Карти', transmog: 'Преобразці', boxes: 'Коробки та скрині', cons: 'Витратні та їжа', trophies: 'Трофеї' } },
     whereGet: 'Де взяти', usedFor: 'Де потрібно', nobody: 'У вікі немає, звідки це береться',
     equip: 'Вдягнути в калькуляторі', equipped: 'Вдягнуто: {slot}', cantEquip: 'Не підходить поточному класу ({cls}) або рівню',
     slots: 'Куди ставиться', variants: 'Кольори печатки', monsters: 'Монстри', npc: 'Торговцю', market: 'Ціна на ринку',
@@ -35,7 +36,7 @@ const BASE_T = {
   },
   ru: {
     title: 'База', sub: 'Монстры, локации с картами, НПС, задания, рецепты, ресурсы, предметы — и где что взять',
-    cats: { monster: 'Монстры', loc: 'Локации', npc: 'НПС', quest: 'Задания', recipe: 'Рецепты', res: 'Сбор и рыбалка', item: 'Снаряжение', card: 'Карты', stamp: 'Печати', good: 'Предметы', loot: 'Добыча', thing: 'Предмет' },
+    cats: { monster: 'Монстры', loc: 'Локации', npc: 'НПС', quest: 'Задания', event: 'Ивенты', recipe: 'Рецепты', res: 'Сбор и рыбалка', item: 'Снаряжение', card: 'Карты', stamp: 'Печати', good: 'Предметы', loot: 'Добыча', thing: 'Предмет' },
     goods: { all: 'Все', fx: 'Эффект', box: 'Содержимое', more: 'Дополнительно', gift: 'В подарке', where: 'Где', gets: 'Получается', needs: 'Требуется', mons: 'Монстры', given: 'Выдаёт', feat: 'Особенности', make: 'Создание' },
     search: 'Поиск по всей базе…', empty: 'Ничего не найдено', pick: 'Выберите что-нибудь в списке слева', back: 'Назад', more: 'Показано {n} из {all} — уточните поиск',
     lvl: 'ур.', level: 'Уровень', hp: 'Жизни', race: 'Раса', element: 'Стихия', defense: 'Защита', exp: 'Опыт', mode: 'Атака',
@@ -44,6 +45,7 @@ const BASE_T = {
     drops: { equip: 'Снаряжение', cards: 'Карты', drop: 'Добыча', cons: 'Расходники', questDrop: 'Для заданий', recipes: 'Рецепты', summon: 'Призыв' },
     src: { drop: 'Кто дропает', node: 'Сбор', shop: 'Продают', quest: 'Награда за задание', craft: 'Создаётся по рецепту', box: 'Содержится в', given: 'Выдаёт', event: 'Ивент', edition: 'Издание игры', season: 'Сезонное приключение', other: 'Ещё', station: 'Создаётся на станке', from: 'Создаётся из', start: 'Начальная экипировка класса' },
     use: { recipe: 'Нужно для рецептов', quest: 'Нужно для заданий', coll: 'Нужно для коллекций', station: 'Компонент на станке', made: 'Из этого делают' },
+    ev: { cat: 'Ивенты', yearly: 'Проводится регулярно', past: 'Больше не проводится', status: 'Статус', usual: 'Обычно', last: 'Последний раз', since: 'Введён', now: 'Идёт сейчас', left: 'ещё {t}', soon: 'Начнётся {d}', how: 'Как это работает', history: 'Когда проводился', toCal: 'Календарь', groups: { monsters: 'Монстры', npcs: 'НПС', locs: 'Локации', quests: 'Задания', chains: 'Цепочки заданий', mounts: 'Питомцы и ездовые', gear: 'Снаряжение', cards: 'Карты', transmog: 'Преобразцы', boxes: 'Коробки и сундуки', cons: 'Расходники и еда', trophies: 'Трофеи' } },
     whereGet: 'Где взять', usedFor: 'Где нужно', nobody: 'В вики нет, откуда это берётся',
     equip: 'Надеть в калькуляторе', equipped: 'Надето: {slot}', cantEquip: 'Не подходит текущему классу ({cls}) или уровню',
     slots: 'Куда ставится', variants: 'Цвета печати', monsters: 'Монстры', npc: 'Торговцу', market: 'Цена на рынке',
@@ -59,7 +61,7 @@ const BASE_T = {
   },
   en: {
     title: 'Database', sub: 'Monsters, locations with maps, NPCs, quests, recipes, resources, items — and where to get what',
-    cats: { monster: 'Monsters', loc: 'Locations', npc: 'NPCs', quest: 'Quests', recipe: 'Recipes', res: 'Gathering & fishing', item: 'Gear', card: 'Cards', stamp: 'Stamps', good: 'Items', loot: 'Loot', thing: 'Item' },
+    cats: { monster: 'Monsters', loc: 'Locations', npc: 'NPCs', quest: 'Quests', event: 'Events', recipe: 'Recipes', res: 'Gathering & fishing', item: 'Gear', card: 'Cards', stamp: 'Stamps', good: 'Items', loot: 'Loot', thing: 'Item' },
     goods: { all: 'All', fx: 'Effect', box: 'Contents', more: 'Also', gift: 'In the gift', where: 'Where', gets: 'Gives', needs: 'Needs', mons: 'Monsters', given: 'Given by', feat: 'Features', make: 'Crafting' },
     search: 'Search the whole database…', empty: 'Nothing found', pick: 'Pick something in the list on the left', back: 'Back', more: 'Showing {n} of {all} — narrow the search',
     lvl: 'lvl', level: 'Level', hp: 'Health', race: 'Race', element: 'Element', defense: 'Defence', exp: 'Experience', mode: 'Attack',
@@ -68,6 +70,7 @@ const BASE_T = {
     drops: { equip: 'Gear', cards: 'Cards', drop: 'Loot', cons: 'Consumables', questDrop: 'Quest items', recipes: 'Recipes', summon: 'Summons' },
     src: { drop: 'Dropped by', node: 'Gathering', shop: 'Sold by', quest: 'Quest reward', craft: 'Crafted by recipe', box: 'Found in', given: 'Given by', event: 'Event', edition: 'Game edition', season: 'Seasonal adventure', other: 'Also', station: 'Made on a station', from: 'Made from', start: 'Starting gear of' },
     use: { recipe: 'Used in recipes', quest: 'Needed for quests', coll: 'Needed for collections', station: 'Station component', made: 'Made into' },
+    ev: { cat: 'Events', yearly: 'Runs regularly', past: 'No longer runs', status: 'Status', usual: 'Usually', last: 'Last time', since: 'Added', now: 'Running now', left: '{t} left', soon: 'Starts {d}', how: 'How it works', history: 'When it ran', toCal: 'Calendar', groups: { monsters: 'Monsters', npcs: 'NPCs', locs: 'Locations', quests: 'Quests', chains: 'Quest chains', mounts: 'Pets and mounts', gear: 'Gear', cards: 'Cards', transmog: 'Transmogs', boxes: 'Boxes and chests', cons: 'Consumables and food', trophies: 'Trophies' } },
     whereGet: 'Where to get', usedFor: 'Used for', nobody: 'The wiki does not say where it comes from',
     equip: 'Put on in the calculator', equipped: 'Put on: {slot}', cantEquip: 'Not for the current class ({cls}) or level',
     slots: 'Goes into', variants: 'Stamp colours', monsters: 'Monsters', npc: 'To a vendor', market: 'Market price',
@@ -85,7 +88,7 @@ const BASE_T = {
 const BTX = () => BASE_T[lang] || BASE_T.ru;
 const bget2 = (k, def) => { try { const v = localStorage.getItem('rqc.' + k); return v == null ? def : JSON.parse(v); } catch { return def; } };
 const BS = { cat: bget2('baseCat', 'monster'), q: '', sel: bget2('baseSel', null), back: [] };
-const BCATS = ['monster', 'loc', 'npc', 'quest', 'recipe', 'res', 'item', 'good', 'card', 'stamp'];
+const BCATS = ['monster', 'loc', 'npc', 'quest', 'event', 'recipe', 'res', 'item', 'good', 'card', 'stamp'];
 BS.sub = bget2('baseSub', '');
 
 // ---------- the index (built on first use) ----------
@@ -108,6 +111,7 @@ function baseIndex() {
     // quests: the story ones by level first, event and level-1 ones at the end
     quests: W.quests.slice().sort((a, b) => (!!a.event || (a.level ?? 0) <= 1) - (!!b.event || (b.level ?? 0) <= 1) || (a.level ?? 0) - (b.level ?? 0) || a.name.localeCompare(b.name, 'ru')), nodes: W.nodes,
     itemBy: byName(items), cardBy: byName(cards), lootBy: byName(window.RQ_MARKET_ITEMS || []), monBy: byName(monsters),
+    events: window.RQ_BASE_EVENTS || [], eventBy: byName(window.RQ_BASE_EVENTS || []),
     npcBy: byName(W.npcs), questBy: byName(W.quests), recipeBy: byName(W.recipes), nodeBy: byName(W.nodes) };
 
   // locations: the wiki's (map, markers) together with the ones the monsters name
@@ -206,7 +210,7 @@ function usesOf(name) {
 
 const hideImg = e => { e.target.style.visibility = 'hidden'; };
 // ---------- entries: { kind, key, name, icon, round, meta } ----------
-const ph = kind => ({ loc: 'globe', npc: 'group', quest: 'book', recipe: 'calc', res: 'globe' }[kind] || 'book');
+const ph = kind => ({ loc: 'globe', npc: 'group', quest: 'book', recipe: 'calc', res: 'globe', event: 'calendar' }[kind] || 'book');
 function iconOfName(name) {
   const X = baseIndex(), k = bnorm(bstrip(name));
   const it = X.itemBy.get(k); if (it) return IMG(it.imageId);
@@ -233,6 +237,8 @@ function entryOf(kind, x) {
     case 'res': return { kind, key: x.name, name: x.name, icon: (x.drops || []).map(d => iconOfName(d.n)).find(Boolean) || null, meta: [t.nodeKind[x.kind], (x.locs || []).length ? `${t.locsOf.toLowerCase()}: ${x.locs.length}` : ''].filter(Boolean).join(' · ') };
     case 'good': return { kind, key: x.name, name: x.name, icon: iconOfName(x.name), meta: [(x.f || {})['Тип'] || x.cat, (x.f || {})['МинУровень'] ? `${t.lvl} ${x.f['МинУровень']}+` : '', (x.f || {})['Ивент']].filter(Boolean).join(' · ') };
     case 'thing': return { kind, key: x, name: x, icon: iconOfName(x), meta: '' };
+    case 'event': return { kind, key: x.name, name: x.name, icon: x.img ? `../data/events/${x.img}` : null, cover: true,
+      meta: [x.running ? evMonths(x) : t.ev.past, x.dates[0] ? x.dates[0].to.slice(0, 4) : ''].filter(Boolean).join(' · ') };
   }
   return null;
 }
@@ -241,7 +247,7 @@ function entriesOf(kind) {
   const ck = kind + ':' + lang;
   if (entryCache.has(ck)) return entryCache.get(ck);
   const X = baseIndex();
-  const src = { monster: X.monsters, item: X.items, card: X.cards, stamp: X.stamps, loc: X.locs, loot: X.loot, good: X.goods, npc: X.npcs, quest: X.quests, recipe: X.recipes, res: X.nodes }[kind] || [];
+  const src = { event: X.events, monster: X.monsters, item: X.items, card: X.cards, stamp: X.stamps, loc: X.locs, loot: X.loot, good: X.goods, npc: X.npcs, quest: X.quests, recipe: X.recipes, res: X.nodes }[kind] || [];
   const list = src.map(x => entryOf(kind, x));
   if (kind === 'good') list.push(...X.lootOnly.map(x => entryOf('loot', x)));
   entryCache.set(ck, list);
@@ -263,6 +269,7 @@ function findEntry(kind, key) {
     case 'recipe': return pick(X.recipeBy.get(bnorm(key)));
     case 'res': return pick(X.nodeBy.get(bnorm(key)));
     case 'thing': return { e: entryOf('thing', key), x: key };
+    case 'event': return pick(X.eventBy.get(bnorm(key)));
   }
   return null;
 }
@@ -275,6 +282,7 @@ function linkOfName(name) {
   if (X.recipeBy.has(n)) return { kind: 'recipe', key: X.recipeBy.get(n).name };
   if (X.goodBy.has(n)) return { kind: 'good', key: X.goodBy.get(n).name };
   const l = X.lootBy.get(n); if (l && l.cat !== 'card') return { kind: 'loot', key: l.id };
+  if (X.eventBy.has(n)) return { kind: 'event', key: X.eventBy.get(n).name };
   if (X.npcBy.has(n)) return { kind: 'npc', key: X.npcBy.get(n).name };
   if (X.monBy.has(n)) return { kind: 'monster', key: X.monBy.get(n).name };
   if (X.locBy.has(name)) return { kind: 'loc', key: name };
@@ -432,6 +440,57 @@ function mapView(l) {
   return wrap;
 }
 
+// ---------- events (data/base-events.js; how they work: our own short points in tools/event-notes.mjs) ----------
+const evDate = (iso, year) => new Date(iso + 'T12:00:00').toLocaleDateString(locale(), { day: 'numeric', month: 'short', ...(year ? { year: 'numeric' } : {}) });
+const evRange = r => `${evDate(r.from, r.from.slice(0, 4) !== r.to.slice(0, 4))} – ${evDate(r.to, true)}`;
+// «октябрь – ноябрь»: the months of the latest run
+function evMonths(x) {
+  const r = x.dates && x.dates[0];
+  if (!r) return '';
+  const m = iso => new Date(iso + 'T12:00:00').toLocaleDateString(locale(), { month: 'long' });
+  return m(r.from) === m(r.to) ? m(r.from) : `${m(r.from)} – ${m(r.to)}`;
+}
+// the event name on other pages opens the event
+function evLink(name) {
+  if (!name) return null;
+  const ev = baseIndex().eventBy.get(bnorm(name));
+  return ev ? bchip(name, { kind: 'event', key: ev.name }, { icon: ev.img ? `../data/events/${ev.img}` : undefined }) : name;
+}
+// running now or coming: from the calendar (Steam news), else from the wiki's dates
+function evLive(x) {
+  const now = Date.now() / 1000;
+  const c = (typeof SN !== 'undefined' && SN.cal || []).find(c => (c.kind === 'event' || c.kind === 'season') && bnorm(c.name) === bnorm(x.name) && (c.end == null || c.end > now));
+  if (c) return c.start != null && c.start > now ? { soon: c.start } : { left: c.end != null ? c.end - now : null };
+  const r = x.dates && x.dates[0];
+  if (r && now >= Date.parse(r.from + 'T00:00:00+03:00') / 1000 && now < Date.parse(r.to + 'T23:59:59+03:00') / 1000) return { left: Date.parse(r.to + 'T23:59:59+03:00') / 1000 - now };
+  return null;
+}
+function drawEventPage(el, x) {
+  const t = BTX(), v = t.ev, X = baseIndex();
+  if (x.img) el.insertBefore(h('img', { class: 'bs-banner', src: `../data/events/${x.img}`, draggable: 'false', onerror: hideImg }), el.querySelector('.bs-head'));
+  const live = evLive(x);
+  if (live) el.append(h('div', { class: 'bs-live' }, h('b', null, live.soon ? fmtT(v.soon, { d: evDate(new Date(live.soon * 1000).toISOString().slice(0, 10)) }) : v.now),
+    live.left != null && typeof calSpan === 'function' ? ' · ' + v.left.replace('{t}', calSpan(live.left)) : '',
+    typeof switchTool === 'function' ? h('button', { class: 'btn small ghost', onclick: () => switchTool('calendar') }, '📅 ' + v.toCal) : null));
+  el.append(bfacts([[v.status, x.running ? v.yearly : v.past], [v.usual, x.running ? evMonths(x) : ''], [v.last, x.dates[0] ? evRange(x.dates[0]) : ''], [v.since, x.since]]));
+  const notes = x.notes && (x.notes[lang] || x.notes.ru);
+  if (notes && notes.length) el.append(bsec(v.how, h('ul', { class: 'bs-how' }, notes.map(n => h('li', null, n)))));
+  const G = v.groups;
+  const sec = (k, fn) => { const list = x[k] || []; if (list.length) el.append(bsec(`${G[k]} · ${list.length}`, chips(list, fn))); };
+  sec('locs', n => bchip(n, X.locBy.has(n) ? { kind: 'loc', key: n } : null));
+  sec('npcs', n => bchip(n, X.npcBy.has(bnorm(n)) ? { kind: 'npc', key: X.npcBy.get(bnorm(n)).name } : null));
+  sec('monsters', n => { const m = X.monBy.get(bnorm(n)); return m ? mchip(m) : bchip(n, null); });
+  sec('quests', n => { const q = X.questBy.get(bnorm(n)); return q ? qchip(q) : bchip(n, null); });
+  sec('chains', n => bchip(n, null));
+  for (const k of ['mounts', 'gear', 'cards', 'transmog', 'boxes', 'cons', 'trophies']) sec(k, n => bchip(n));
+  // the official posts about it on Steam (guides, dates), opened in «Новости»
+  const posts = (typeof SN !== 'undefined' && SN.items || []).filter(it => bnorm((it.ru || {}).t).includes(bnorm(x.name)) || bnorm((it.ru || {}).b).includes('«' + bnorm(x.name) + '»'));
+  if (posts.length && typeof snText === 'function') el.append(bsec(STX().title, h('div', { class: 'bs-chips' }, posts.slice(0, 8).map(it =>
+    h('button', { class: 'bs-chip link', onclick: () => { SN.sel = it.id; switchTool('steam'); } }, '📰 ' + snText(it).t, h('small', null, snDate(it.at)))))));
+  if (x.dates && x.dates.length) el.append(bsec(v.history, h('div', { class: 'bs-chips' }, x.dates.map(r => h('span', { class: 'bs-chip' }, evRange(r))))));
+  el.append(h('div', { class: 'bs-foot' }, wikiLink(x.name)));
+}
+
 // ---------- the page ----------
 function drawBaseDetail() {
   const el = document.getElementById('baseDetail');
@@ -443,12 +502,12 @@ function drawBaseDetail() {
   const { e, x } = f;
   if (BS.back.length) el.append(h('button', { class: 'btn small ghost bs-back', onclick: () => { const p = BS.back.pop(); if (p) openBase(p.kind, p.key, { push: false }); } }, '← ' + t.back));
   el.append(h('div', { class: 'bs-head' },
-    e.icon ? h('img', { class: 'bs-big' + (e.round ? ' round' : '') + (e.cover ? ' cover' : ''), src: e.icon, draggable: 'false', onerror: hideImg }) : h('span', { class: 'bs-big ph' }, iconEl(ph(e.kind))),
+    e.kind === 'event' ? null : e.icon ? h('img', { class: 'bs-big' + (e.round ? ' round' : '') + (e.cover ? ' cover' : ''), src: e.icon, draggable: 'false', onerror: hideImg }) : h('span', { class: 'bs-big ph' }, iconEl(ph(e.kind))),
     h('div', { class: 'bs-title' }, h('h2', null, e.name), h('div', { class: 'bs-meta' }, t.cats[e.kind] + (e.meta ? ' · ' + e.meta : '')))));
 
   if (e.kind === 'monster') {
     el.append(bfacts([[t.level, x.level], [t.hp, x.hp != null ? fmtNum(x.hp) : null], [t.race, x.race], [t.element, x.element], [t.defense, x.defense],
-      [t.exp, x.exp != null ? fmtNum(x.exp) : null], [t.mode, x.mode], [t.aggro, x.aggro ? t.yes : t.no], [t.event, x.event], [t.group, x.group], [t.quest, x.quest], [t.summoned, x.summoned]]));
+      [t.exp, x.exp != null ? fmtNum(x.exp) : null], [t.mode, x.mode], [t.aggro, x.aggro ? t.yes : t.no], [t.event, evLink(x.event)], [t.group, x.group], [t.quest, x.quest], [t.summoned, x.summoned]]));
     if ((x.locs || []).length) {
       el.append(bsec(t.where, h('div', { class: 'bs-chips' }, x.locs.map(l => bchip(l.loc, { kind: 'loc', key: l.loc }, { extra: l.resp ? `${t.resp} ${fmtMin(l.resp)}` : '' })))));
       if (typeof BOSSES !== 'undefined' && BOSSES.find(b => b.name === x.name)) el.append(h('button', { class: 'btn small bs-act', onclick: () => { BT.q = x.name; switchTool('timer'); } }, iconEl('skull'), t.toTimer));
@@ -458,6 +517,8 @@ function drawBaseDetail() {
       if (list.length) el.append(bsec(t.drops[k], chips(list, n => bchip(n, k === 'summon' ? linkOfName(n) : undefined))));
     }
     el.append(h('div', { class: 'bs-foot' }, wikiLink('Монстр ' + x.name)));
+  } else if (e.kind === 'event') {
+    drawEventPage(el, x);
   } else if (e.kind === 'loc' && x.name === 'Все локации') {
     // not a place: the wiki writes it for monsters that can turn up on any location (event and wandering ones)
     el.append(h('div', { class: 'note bs-everywhere' }, t.everywhere));
@@ -465,7 +526,7 @@ function drawBaseDetail() {
     for (const { m } of x.monsters) grid.append(baseRow(entryOf('monster', m), false, () => openBase('monster', m.name)));
     el.append(bsec(t.monsters, grid));
   } else if (e.kind === 'loc') {
-    el.append(bfacts([[t.locType, (x.type || []).join(', ')], [t.levels, x.min != null ? `${x.min}–${x.max}` : (x.lv || []).join('–')], [t.event, x.event]]));
+    el.append(bfacts([[t.locType, (x.type || []).join(', ')], [t.levels, x.min != null ? `${x.min}–${x.max}` : (x.lv || []).join('–')], [t.event, evLink(x.event)]]));
     if (x.map) el.append(mapView(x));
     const marks = x.marks || [];
     const npcNames = [...new Set([...marks.filter(m => ['npc', 'shop', 'infanta', 'post'].includes(markKind(m.t))).map(m => m.n), ...x.npcs.map(n => n.name)])];
@@ -481,7 +542,7 @@ function drawBaseDetail() {
     if (exits.length) el.append(bsec(t.exits, chips(exits, m => bchip(m.n, X.locBy.has(m.n) ? { kind: 'loc', key: m.n } : null, { extra: m.t }))));
     el.append(h('div', { class: 'bs-foot' }, wikiLink(x.name)));
   } else if (e.kind === 'npc') {
-    el.append(bfacts([[t.race, x.race], [t.event, x.event]]));
+    el.append(bfacts([[t.race, x.race], [t.event, evLink(x.event)]]));
     if ((x.locs || []).length) el.append(bsec(t.standsIn, chips(x.locs, l => bchip(l, X.locBy.has(l) ? { kind: 'loc', key: l } : null))));
     const gives = X.questsFrom.get(x.name) || [], takes = X.questsTo.get(x.name) || [];
     if (gives.length) el.append(bsec(`${t.gives} (${gives.length})`, chips(gives, qchip)));
@@ -491,7 +552,7 @@ function drawBaseDetail() {
     }
     el.append(h('div', { class: 'bs-foot' }, wikiLink(x.name)));
   } else if (e.kind === 'quest') {
-    el.append(bfacts([[t.level, x.level], [t.type, x.type], [t.event, x.event], [t.chain, x.chain ? `${x.chain}${x.num ? ` · №${x.num}` : ''}` : ''], [t.cls, (x.cls || []).join(', ')],
+    el.append(bfacts([[t.level, x.level], [t.type, x.type], [t.event, evLink(x.event)], [t.chain, x.chain ? `${x.chain}${x.num ? ` · №${x.num}` : ''}` : ''], [t.cls, (x.cls || []).join(', ')],
       [t.exp, x.exp ? fmtNum(x.exp) : null], [t.gold, x.gold ? priceEl(x.gold) : null]]));
     const npcLink = n => bchip(n, X.npcBy.has(bnorm(n)) ? { kind: 'npc', key: X.npcBy.get(bnorm(n)).name } : null);
     el.append(h('div', { class: 'bs-pair' }, x.from ? bsec(t.from, npcLink(x.from)) : null, x.to ? bsec(t.to, npcLink(x.to)) : null));
@@ -581,7 +642,7 @@ function drawBaseDetail() {
   } else if (e.kind === 'loot' || e.kind === 'thing') {
     const mi = e.kind === 'loot' ? x : X.lootBy.get(bnorm(x));
     if (mi) {
-      el.append(bfacts([[t.npc, mi.npc != null ? priceEl(mi.npc) : null], [t.event, mi.event]]));
+      el.append(bfacts([[t.npc, mi.npc != null ? priceEl(mi.npc) : null], [t.event, evLink(mi.event)]]));
       el.append(h('button', { class: 'btn small bs-act', onclick: () => { MK.sel = mi.id; store.set('marketSel', mi.id); switchTool('market'); } }, iconEl('coins'), t.market));
     }
     el.append(...whereBlocks(e.kind === 'loot' ? x.name : x));
