@@ -23,7 +23,7 @@ const BASE_T = {
     whereGet: 'Де взяти', usedFor: 'Де потрібно', nobody: 'У вікі немає, звідки це береться',
     equip: 'Вдягнути в калькуляторі', equipped: 'Вдягнуто: {slot}', cantEquip: 'Не підходить поточному класу ({cls}) або рівню',
     slots: 'Куди ставиться', variants: 'Кольори печатки', monsters: 'Монстри', npc: 'Торговцю', market: 'Ціна на ринку',
-    map: 'Карта', npcsHere: 'НПС', exits: 'Переходи', resHere: 'Ресурси', locType: 'Тип локації', levels: 'Рівні',
+    everywhere: 'Це не окрема локація: так вікі позначає монстрів, які можуть з\x27явитися на будь-якій локації — івентових і мандрівних.', map: 'Карта', npcsHere: 'НПС', exits: 'Переходи', resHere: 'Ресурси', locType: 'Тип локації', levels: 'Рівні',
     gives: 'Дає завдання', takes: 'Приймає завдання', shop: 'Продає', price: 'Ціна', standsIn: 'Де стоїть',
     from: 'Видає', to: 'Здати', chain: 'Ланцюжок', prev: 'Перед цим', next: 'Далі', cls: 'Клас',
     task: 'Що зробити', kill: 'Убити', need: 'Принести', useIt: 'Використати', bring: 'Віднести', reward: 'Нагорода', choice: 'На вибір', gold: 'Золото',
@@ -47,7 +47,7 @@ const BASE_T = {
     whereGet: 'Где взять', usedFor: 'Где нужно', nobody: 'В вики нет, откуда это берётся',
     equip: 'Надеть в калькуляторе', equipped: 'Надето: {slot}', cantEquip: 'Не подходит текущему классу ({cls}) или уровню',
     slots: 'Куда ставится', variants: 'Цвета печати', monsters: 'Монстры', npc: 'Торговцу', market: 'Цена на рынке',
-    map: 'Карта', npcsHere: 'НПС', exits: 'Переходы', resHere: 'Ресурсы', locType: 'Тип локации', levels: 'Уровни',
+    everywhere: 'Это не отдельная локация: так вики помечает монстров, которые могут появиться на любой локации, — ивентовых и бродячих.', map: 'Карта', npcsHere: 'НПС', exits: 'Переходы', resHere: 'Ресурсы', locType: 'Тип локации', levels: 'Уровни',
     gives: 'Даёт задания', takes: 'Принимает задания', shop: 'Продаёт', price: 'Цена', standsIn: 'Где стоит',
     from: 'Выдаёт', to: 'Сдать', chain: 'Цепочка', prev: 'Перед этим', next: 'Дальше', cls: 'Класс',
     task: 'Что сделать', kill: 'Убить', need: 'Принести', useIt: 'Использовать', bring: 'Отнести', reward: 'Награда', choice: 'На выбор', gold: 'Золото',
@@ -71,7 +71,7 @@ const BASE_T = {
     whereGet: 'Where to get', usedFor: 'Used for', nobody: 'The wiki does not say where it comes from',
     equip: 'Put on in the calculator', equipped: 'Put on: {slot}', cantEquip: 'Not for the current class ({cls}) or level',
     slots: 'Goes into', variants: 'Stamp colours', monsters: 'Monsters', npc: 'To a vendor', market: 'Market price',
-    map: 'Map', npcsHere: 'NPCs', exits: 'Exits', resHere: 'Resources', locType: 'Location type', levels: 'Levels',
+    everywhere: 'Not a real location: the wiki marks this way the monsters that can turn up on any location — event and wandering ones.', map: 'Map', npcsHere: 'NPCs', exits: 'Exits', resHere: 'Resources', locType: 'Location type', levels: 'Levels',
     gives: 'Gives quests', takes: 'Takes quests', shop: 'Sells', price: 'Price', standsIn: 'Stands in',
     from: 'Given by', to: 'Turn in to', chain: 'Chain', prev: 'Before', next: 'Next', cls: 'Class',
     task: 'To do', kill: 'Kill', need: 'Bring', useIt: 'Use', bring: 'Deliver to', reward: 'Reward', choice: 'Choice of', gold: 'Gold',
@@ -121,7 +121,7 @@ function baseIndex() {
   for (const l of X.locs) {
     l.monsters.sort((a, b) => (a.m.level ?? 999) - (b.m.level ?? 999));
     const lv = l.monsters.map(x => x.m.level).filter(v => v != null && v > 1);
-    if (lv.length) { l.min = Math.min(...lv); l.max = Math.max(...lv); }
+    if (lv.length && l.name !== 'Все локации') { l.min = Math.min(...lv); l.max = Math.max(...lv); } // "everywhere" has no level range
   }
   X.locBy = new Map(X.locs.map(l => [l.name, l]));
 
@@ -458,6 +458,12 @@ function drawBaseDetail() {
       if (list.length) el.append(bsec(t.drops[k], chips(list, n => bchip(n, k === 'summon' ? linkOfName(n) : undefined))));
     }
     el.append(h('div', { class: 'bs-foot' }, wikiLink('Монстр ' + x.name)));
+  } else if (e.kind === 'loc' && x.name === 'Все локации') {
+    // not a place: the wiki writes it for monsters that can turn up on any location (event and wandering ones)
+    el.append(h('div', { class: 'note bs-everywhere' }, t.everywhere));
+    const grid = h('div', { class: 'bs-mlist' });
+    for (const { m } of x.monsters) grid.append(baseRow(entryOf('monster', m), false, () => openBase('monster', m.name)));
+    el.append(bsec(t.monsters, grid));
   } else if (e.kind === 'loc') {
     el.append(bfacts([[t.locType, (x.type || []).join(', ')], [t.levels, x.min != null ? `${x.min}–${x.max}` : (x.lv || []).join('–')], [t.event, x.event]]));
     if (x.map) el.append(mapView(x));

@@ -1,6 +1,10 @@
 // "What's new" under the bell in the top bar (app/news.js). Newest first. Add an entry for every change players see.
 // at: ISO time in UTC (shown in each viewer's own time zone); text: ru / uk / en.
 window.RQ_CHANGELOG = [
+  { at: '2026-11-02T18:38Z',
+    ru: '«База»: «Все локации» — это не локация, а монстры, которые встречаются где угодно (ивентовые и бродячие); теперь так и написано.',
+    uk: '«База»: «Все локации» — це не локація, а монстри, що трапляються будь-де (івентові й мандрівні); тепер так і написано.',
+    en: '«Base»: «Все локации» is not a location but monsters that turn up anywhere (event and wandering ones); now it says so.' },
   { at: '2026-11-02T18:33Z',
     ru: '«База»: вместо «2 слота» после названия снаряжения — иконки слотов карт, как в игре.',
     uk: '«База»: замість «2 слота» після назви спорядження — іконки слотів карт, як у грі.',
