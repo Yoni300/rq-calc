@@ -427,6 +427,9 @@ function renderTop() {
   $('btnSettings').innerHTML = svgIcon('cog'); $('btnSettings').title = T.settings;
   $('btnBug').innerHTML = svgIcon('bug'); $('btnBug').title = RT().btn;
   drawNewsBell();
+  // the game forum (royalquest.net), with its emblem
+  $('btnForum').querySelector('span').textContent = lang === 'en' ? 'Forum' : 'Форум';
+  $('btnForum').title = lang === 'en' ? 'Royal Quest forum' : 'Форум Royal Quest';
   if (settingsLang !== lang) { settingsLang = lang; applySettings(); } // tray menu texts follow the language
   const ls = $('langSwitch'); ls.innerHTML = ''; ls.title = T.language;
   for (const [k, label] of [['uk', 'УКР'], ['ru', 'РУС'], ['en', 'ENG']]) {

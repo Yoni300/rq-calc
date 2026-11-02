@@ -1,6 +1,10 @@
 // "What's new" under the bell in the top bar (app/news.js). Newest first. Add an entry for every change players see.
 // at: ISO time in UTC (shown in each viewer's own time zone); text: ru / uk / en.
 window.RQ_CHANGELOG = [
+  { at: '2026-11-02T18:17Z',
+    ru: 'Кнопка «Форум» вверху — ведёт на форум Royal Quest (royalquest.net).',
+    uk: 'Кнопка «Форум» угорі — веде на форум Royal Quest (royalquest.net).',
+    en: '«Forum» button at the top — opens the Royal Quest forum (royalquest.net).' },
   { at: '2026-11-02T18:11Z',
     ru: 'Украшения «Снежный кристаллин», «Аура чистых помыслов» и «Некрополис» дают % к урону (не против игроков), а не % к атаке, как в игре.',
     uk: 'Прикраси «Снежный кристаллин», «Аура чистых помыслов» і «Некрополис» дають % до урону (не проти гравців), а не % до атаки, як у грі.',

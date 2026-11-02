@@ -1028,3 +1028,8 @@ body.tool-timer .calc-only { display: none !important; }
 .bs-sub small { color: var(--dim); }
 .bs-sub:hover { color: var(--fg); border-color: var(--line-3); }
 .bs-sub.on { color: var(--gold-hi); border-color: var(--gold); background: rgba(var(--gold-rgb), .1); }
+
+/* the game forum button (royalquest.net) */
+.forum-btn { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; padding-left: 7px; }
+.forum-btn img { width: 20px; height: 20px; flex: none; }
+@media (max-width: 900px) { .forum-btn span { display: none; } }
