@@ -9,7 +9,7 @@ const SNEWS_T = {
 };
 const STX = () => SNEWS_T[lang] || SNEWS_T.ru;
 const STEAM_NEWS_URL = 'https://raw.githubusercontent.com/Yoni300/rq-calc/refs/heads/steam-news/steam-news.json';
-const SN = { items: null, sel: null, q: '', err: false, loading: false, prevSeen: 0 };
+const SN = { items: null, cal: null, sel: null, q: '', err: false, loading: false, prevSeen: 0 };
 
 // the posts: Russian for the Russian and Ukrainian interface (Steam has no Ukrainian text), English for English
 const snText = it => (lang === 'en' ? it.en || it.ru : it.ru || it.en) || { t: '', b: '' };
@@ -22,6 +22,7 @@ function snSeen() {
 async function loadSteamNews() {
   if (SN.loading) return;
   if (!SN.items) SN.items = store.get('steamNewsCache', null); // shown at once, refreshed below
+  if (!SN.cal) SN.cal = store.get('steamCalCache', null);
   SN.loading = true;
   try {
     // a new address every 5 minutes, so neither the browser nor GitHub serve an old copy for long
@@ -30,12 +31,15 @@ async function loadSteamNews() {
     const j = await r.json();
     SN.items = (j.items || []).filter(it => it && it.id && (it.ru || it.en));
     SN.err = false;
-    try { store.set('steamNewsCache', SN.items); } catch { /* storage full: fine, it's only a cache */ }
+    SN.cal = Array.isArray(j.cal) ? j.cal : [];
+    try { store.set('steamNewsCache', SN.items); store.set('steamCalCache', SN.cal); } catch { /* storage full: fine, it's only a cache */ }
   } catch { SN.err = !SN.items; }
   SN.loading = false;
   if (tab === 'steam') snMarkRead();
   drawSteamButton();
   if (tab === 'steam') { drawSteamList(); drawSteamPost(); }
+  if (tab === 'cal') drawCalendar();
+  drawMaintBar();
 }
 function drawSteamButton() {
   const btn = $('btnSteam');
@@ -43,7 +47,7 @@ function drawSteamButton() {
   const seen = snSeen(), unread = (SN.items || []).filter(it => it.at > seen).length;
   btn.innerHTML = svgIcon('news') + `<span>${esc(STX().btn)}</span>` + (unread ? `<span class="news-badge">${unread > 9 ? '9+' : unread}</span>` : '');
   btn.title = STX().tip;
-  btn.classList.toggle('on', tab === 'steam');
+  btn.classList.toggle('on', tab === 'steam' || tab === 'cal');
 }
 
 // ---------- Steam's BBCode → safe HTML (everything is escaped first; links and pictures only http(s)) ----------
@@ -80,7 +84,7 @@ function renderSteamNews(el) {
   snMarkRead();
   const search = h('input', { class: 'inp', placeholder: t.search, value: SN.q, spellcheck: false });
   search.addEventListener('input', () => { SN.q = search.value; drawSteamList(); });
-  el.append(h('div', { class: 'bs-wrap sn-wrap' },
+  el.append(snViewSwitch(), h('div', { class: 'bs-wrap sn-wrap' },
     h('div', { class: 'bs-side' }, search, h('div', { class: 'bs-list sn-list', id: 'snList' }), h('div', { class: 'sn-note' }, t.note)),
     h('div', { class: 'bs-detail sn-post', id: 'snPost' })));
   if (!SN.items && !SN.loading) loadSteamNews();

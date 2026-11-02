@@ -1067,6 +1067,38 @@ body.tool-timer .calc-only { display: none !important; }
 .sn-body td p { margin: 0; }
 .sn-body hr { border: 0; border-top: 1px solid var(--line); margin: 12px 0; }
 .sn-body mark { background: #000; color: #000; border-radius: 3px; } .sn-body mark:hover { color: var(--fg); }
+/* calendar (app/steam-calendar.js) */
+.sn-switch { display: flex; gap: 6px; margin-bottom: 10px; }
+.sn-switch .bs-cat { font-size: 13.5px; padding: 6px 14px; }
+.sn-wrap .bs-list { max-height: calc(100vh - 262px); }
+.sn-wrap .sn-post { max-height: calc(100vh - 192px); }
+.cal-wrap { max-width: 900px; }
+.cal-h { margin: 14px 0 8px; }
+.cal-h:first-child { margin-top: 2px; }
+.cal-list { display: flex; flex-direction: column; gap: 6px; }
+.cal-card { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px 12px; border: 1px solid var(--line); border-radius: 9px; background: rgba(0, 0, 0, .25); }
+.cal-card.now { border-color: rgba(var(--gold-rgb), .35); }
+.cal-card.k-maint { border-color: rgba(214, 120, 70, .45); background: rgba(120, 50, 20, .12); }
+.cal-card.past { opacity: .55; }
+.cal-ic { font-size: 22px; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 9px; background: rgba(0, 0, 0, .35); border: 1px solid var(--line); }
+.cal-name { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.cal-name b { font-size: 14.5px; }
+.cal-kind { font-size: 11px; font-weight: 700; color: var(--muted); border: 1px solid var(--line); border-radius: 8px; padding: 0 7px; }
+.cal-approx { color: var(--muted); font-weight: 700; }
+.cal-when { color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+.cal-bar { height: 4px; border-radius: 2px; background: rgba(255, 255, 255, .08); margin-top: 7px; overflow: hidden; max-width: 420px; }
+.cal-bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--gold-2), var(--gold)); }
+.cal-side { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
+.cal-count { font-weight: 700; color: var(--gold); white-space: nowrap; font-size: 13.5px; }
+.cal-card.k-maint .cal-count { color: #f0a070; }
+.cal-note { margin-top: 14px; }
+@media (max-width: 760px) { .cal-card { grid-template-columns: 34px minmax(0, 1fr); } .cal-ic { width: 34px; height: 34px; font-size: 18px; } .cal-side { grid-column: 2; flex-direction: row; align-items: center; justify-content: space-between; } }
+/* maintenance strip under the top bar */
+.maint-bar { display: flex; align-items: center; gap: 10px; padding: 6px 16px; background: linear-gradient(90deg, rgba(150, 60, 20, .55), rgba(90, 40, 15, .35)); border-bottom: 1px solid rgba(214, 120, 70, .45); color: #ffe2c8; font-size: 13px; cursor: pointer; position: relative; z-index: 4; }
+.maint-bar[hidden] { display: none; }
+.maint-bar .mb-txt { flex: 1; min-width: 0; }
+.maint-bar .mb-x { background: none; border: 0; color: inherit; opacity: .7; cursor: pointer; font-size: 14px; padding: 2px 6px; }
+.maint-bar .mb-x:hover { opacity: 1; }
 .sn-pic { display: block; max-width: 100%; height: auto; border-radius: 6px; margin: 8px 0; }
 /* other currencies (Знаки крови, Алхимические руны…) — the wiki's icons after the number */
 .cur { width: 1.5em; height: 1.5em; margin-left: .25em; vertical-align: -.42em; }

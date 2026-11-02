@@ -3,6 +3,7 @@
 // and pushes the file to the `steam-news` branch; clients load it from raw.githubusercontent.com.
 // Run: node tools/update-steam-news.mjs [out.json]   (default: steam-news.json)
 import fs from 'node:fs';
+import { calendar } from './steam-calendar.mjs';
 
 const APP = 2962300, COUNT = 40;
 const out = process.argv[2] || 'steam-news.json';
@@ -40,7 +41,9 @@ for (const [k, [, idx]] of Object.entries(LANGS)) {
   }
 }
 const list = [...items.values()].sort((a, b) => b.at - a.at).slice(0, COUNT);
-const json = JSON.stringify({ app: APP, items: list });
+// maintenance, events and offers with their dates, read from the posts' text (tools/steam-calendar.mjs)
+const cal = calendar(list);
+const json = JSON.stringify({ app: APP, items: list, cal });
 const old = fs.existsSync(out) ? fs.readFileSync(out, 'utf8') : '';
 if (old === json) console.log('no changes');
 else { fs.writeFileSync(out, json); console.log(`${list.length} news → ${out} (${Math.round(json.length / 1024)} KB)`); }

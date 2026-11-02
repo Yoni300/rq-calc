@@ -1,6 +1,10 @@
 // "What's new" under the bell in the top bar (app/news.js). Newest first. Add an entry for every change players see.
 // at: ISO time in UTC (shown in each viewer's own time zone); text: ru / uk / en.
 window.RQ_CHANGELOG = [
+  { at: '2026-11-02T23:40Z',
+    ru: 'Календарь техработ, ивентов и акций (меню «RQ Tools» → «Календарь» или «Новости» → «Календарь»): что идёт сейчас и сколько осталось, что скоро начнётся, по вашему времени. Перед профилактикой вверху появляется полоска с обратным отсчётом. Даты берутся из новостей Steam автоматически.',
+    uk: 'Календар техробіт, івентів і акцій (меню «RQ Tools» → «Календар» або «Новини» → «Календар»): що йде зараз і скільки лишилося, що скоро почнеться, за вашим часом. Перед профілактикою вгорі з'являється смужка зі зворотним відліком. Дати беруться з новин Steam автоматично.',
+    en: 'Calendar of maintenance, events and offers (the «RQ Tools» menu → «Calendar», or «News» → «Calendar»): what is running and how long is left, what starts soon, in your time. Before maintenance a strip with a countdown shows at the top. Dates come from the Steam news automatically.' },
   { at: '2026-11-02T21:10Z',
     ru: 'Новости игры из Steam: кнопка «Новости» вверху рядом с «Форумом» (с числом новых), все объявления Royal Quest с картинками, списками и таблицами, обновляются сами.',
     uk: 'Новини гри зі Steam: кнопка «Новини» вгорі поруч із «Форумом» (з числом нових), усі оголошення Royal Quest з картинками, списками й таблицями, оновлюються самі.',
