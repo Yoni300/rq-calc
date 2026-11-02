@@ -1518,9 +1518,7 @@ function renderRight() {
   el.append(h('div', { class: 'note' }, T.updated + ': ' + (ver.date || '—') + (ver.version ? ' · v' + ver.version : '')));
   // author contact; click copies the Discord name
   el.append(h('div', { class: 'note contact', title: T.copyContact, onclick: () => navigator.clipboard.writeText('ondirty').then(() => toast(T.copied + ': ondirty')) },
-    T.author + ': ', h('span', { class: 'discord' }, 'Discord ', h('b', null, 'ondirty')),
-    // the hamster next to the name, like the server tag in Discord
-    h('span', { class: 'sticker', tabindex: '0', onclick: e => e.stopPropagation() }, h('span', { class: 'sticker-emoji' }, '🐹'), h('span', { class: 'sticker-tip' }, 'Фанаты Джунгарика'))));
+    T.author + ': ', h('span', { class: 'discord' }, 'Discord ', h('b', null, 'ondirty'))));
   if (!window.RQC_WEB) el.append(h('div', { class: 'note' }, h('a', { class: 'site-link', href: SITE_URL, target: '_blank' }, T.siteLink)));
   el.scrollTop = scroll;
 }

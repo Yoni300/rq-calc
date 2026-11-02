@@ -1198,11 +1198,12 @@ body.tool-timer .calc-only { display: none !important; }
   img { -webkit-user-drag: none; }
 }
 
-/* the hamster next to the author's name (app.js, results footer); its label looks like a Discord tooltip */
-.sticker { position: relative; display: inline-block; margin-left: 5px; vertical-align: -3px; cursor: default; outline: none; -webkit-tap-highlight-color: transparent; }
-.sticker-emoji { display: inline-block; font-size: 17px; line-height: 1; transition: transform .18s; font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif; }
-.sticker:hover .sticker-emoji, .sticker:focus .sticker-emoji { transform: translateY(-2px) rotate(-8deg) scale(1.15); }
-.sticker-tip { position: absolute; left: 50%; bottom: calc(100% + 8px); white-space: nowrap; padding: 7px 11px; border-radius: 6px; background: #111214; color: #f2f3f5;
-  font: 600 14px/1.2 "gg sans", "Segoe UI", system-ui, sans-serif; box-shadow: 0 8px 16px rgba(0, 0, 0, .35); opacity: 0; transform: translate(-50%, 4px); pointer-events: none; transition: opacity .12s, transform .12s; z-index: 20; }
-.sticker-tip::after { content: ''; position: absolute; left: 50%; margin-left: -6px; top: 100%; border: 6px solid transparent; border-top-color: #111214; }
-.sticker:hover .sticker-tip, .sticker:focus .sticker-tip { opacity: 1; transform: translate(-50%, 0); }
+/* the hamster in the bottom-right corner (index.html); its label looks like a Discord tooltip */
+.sticker { position: fixed; right: 14px; bottom: 12px; z-index: 30; width: 34px; height: 34px; cursor: default; outline: none; -webkit-tap-highlight-color: transparent; }
+.sticker img { width: 100%; height: 100%; display: block; filter: drop-shadow(0 3px 6px rgba(0, 0, 0, .55)); transition: transform .18s; }
+.sticker:hover img, .sticker:focus img { transform: translateY(-2px) rotate(-8deg) scale(1.12); }
+.sticker-tip { position: absolute; right: -4px; bottom: calc(100% + 9px); white-space: nowrap; padding: 7px 11px; border-radius: 6px; background: #111214; color: #f2f3f5;
+  font: 600 14px/1.2 "gg sans", "Segoe UI", system-ui, sans-serif; box-shadow: 0 8px 16px rgba(0, 0, 0, .35); opacity: 0; transform: translateY(4px); pointer-events: none; transition: opacity .12s, transform .12s; }
+.sticker-tip::after { content: ''; position: absolute; right: 15px; top: 100%; border: 6px solid transparent; border-top-color: #111214; }
+.sticker:hover .sticker-tip, .sticker:focus .sticker-tip { opacity: 1; transform: none; }
+@media (max-width: 760px) { body:not(.tool-timer) .sticker { bottom: 72px; } .sticker { right: 10px; width: 30px; height: 30px; } }
