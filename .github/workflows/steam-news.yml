@@ -1,0 +1,41 @@
+# Royal Quest news from Steam → steam-news.json on the `steam-news` branch (the app and the site read it from
+# raw.githubusercontent.com; Steam itself can't be fetched from a web page). Every 20 minutes, or by hand.
+# The branch keeps one commit (force-pushed), so the repository doesn't grow.
+name: Steam news
+
+on:
+  schedule:
+    - cron: '7,27,47 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: steam-news
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: tools
+          path: main
+      - uses: actions/checkout@v4
+        with:
+          ref: steam-news
+          path: news
+      - name: Fetch the news
+        run: node main/tools/update-steam-news.mjs news/steam-news.json
+      - name: Publish if anything changed
+        working-directory: news
+        run: |
+          if git diff --quiet; then echo "No new posts"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -q --orphan fresh
+          git add -A
+          git commit -qm "Steam news $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push -qf origin fresh:steam-news

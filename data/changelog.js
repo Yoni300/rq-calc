@@ -1,6 +1,10 @@
 // "What's new" under the bell in the top bar (app/news.js). Newest first. Add an entry for every change players see.
 // at: ISO time in UTC (shown in each viewer's own time zone); text: ru / uk / en.
 window.RQ_CHANGELOG = [
+  { at: '2026-11-02T21:10Z',
+    ru: 'Новости игры из Steam: кнопка «Новости» вверху рядом с «Форумом» (с числом новых), все объявления Royal Quest с картинками, списками и таблицами, обновляются сами.',
+    uk: 'Новини гри зі Steam: кнопка «Новини» вгорі поруч із «Форумом» (з числом нових), усі оголошення Royal Quest з картинками, списками й таблицями, оновлюються самі.',
+    en: 'Game news from Steam: a «News» button at the top next to «Forum» (with the number of new posts), every Royal Quest announcement with pictures, lists and tables, updated automatically.' },
   { at: '2026-11-02T20:50Z',
     ru: 'Костюмы в окне персонажа стали чёткими: все 42 картинки в два раза больше и без размытия.',
     uk: 'Костюми у вікні персонажа стали чіткими: усі 42 картинки вдвічі більші й без розмиття.',
