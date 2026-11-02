@@ -195,6 +195,12 @@ function sourcesOf(name) {
     else if (how === 'u' || how === 'v') continue; // uses, see usesOf
     else add('other', src);
   }
+  // nothing else known: an event item at least comes from its event
+  if (!Object.keys(out).length) {
+    const g = X.goodBy.get(bnorm(name)), ev = g && g.f && g.f['Ивент'];
+    if (ev) add('event', ev);
+    else for (const e of X.events) if (Object.values(e).some(v => Array.isArray(v) && v.includes(name))) { add('event', e.name); break; }
+  }
   srcCache.set(ck, out);
   return out;
 }
@@ -374,7 +380,7 @@ function whereBlocks(name) {
   if (s.quest) parts.push(bsec(t.src.quest, chips(s.quest, qchip)));
   if (s.box) parts.push(bsec(t.src.box, chips(s.box, g => bchip(g.name, { kind: 'good', key: g.name }))));
   if (s.given) parts.push(bsec(t.src.given, chips(s.given, n => bchip(n))));
-  if (s.event) parts.push(bsec(t.src.event, chips(s.event, n => bchip(n, null))));
+  if (s.event) parts.push(bsec(t.src.event, chips(s.event, n => { const l = evLink(n); return l instanceof Node ? l : bchip(n, null); })));
   if (s.season) parts.push(bsec(t.src.season, chips(s.season, n => bchip(n, null))));
   if (s.edition) parts.push(bsec(t.src.edition, chips(s.edition, n => bchip(n, null))));
   if (s.craft) parts.push(bsec(t.src.craft, chips(s.craft, r => bchip(r.name.replace(/^Рецепт:\s*/, ''), { kind: 'recipe', key: r.name }, { extra: `${r.chance ?? '?'}%` }))));
@@ -624,7 +630,13 @@ function drawBaseDetail() {
   } else if (e.kind === 'good') {
     const g = x, F = g.f || {}, L = g.lists || {}, gt = t.goods;
     const priceKeys = new Set(['Цена', 'РыбнаяЦена']);
-    el.append(bfacts(Object.entries(F).map(([k, v]) => [k, priceKeys.has(k) ? priceEl(v) : v])));
+    // «Класс1…Класс6» → one «Класс» row; the event links to its page
+    const rows = [], cls = [];
+    for (const [k, v] of Object.entries(F)) {
+      if (/^Класс\d$/.test(k)) { if (!cls.length) rows.push(['Класс', cls]); cls.push(v); continue; }
+      rows.push([k, priceKeys.has(k) ? priceEl(v) : k === 'Ивент' ? evLink(v) : v]);
+    }
+    el.append(bfacts(rows.map(([k, v]) => [goodLabel(k), Array.isArray(v) ? v.join(', ') : v])));
     if (L['Бонус']) el.append(bsec(gt.fx, h('div', { class: 'bs-bonuses' }, L['Бонус'].map(b => h('div', null, b.n)))));
     if (L['Особенность']) el.append(bsec(gt.feat, h('div', { class: 'bs-bonuses' }, L['Особенность'].map(b => h('div', null, b.n)))));
     if (L['Дроп']) el.append(bsec(gt.box, chips(L['Дроп'], d => bchip(d.n, undefined, { count: d.c }))));
@@ -650,6 +662,14 @@ function drawBaseDetail() {
   el.append(h('div', { class: 'note bs-src' }, t.src2));
   el.scrollTop = 0;
 }
+
+// the wiki's field names → readable labels («МинУровень» → «Мин. уровень»); unknown ones get spaces between words
+const GOOD_L = {
+  ru: { Цена: 'Цена', Тип: 'Тип', Ивент: 'Ивент', Выдаёт: 'Выдаёт', МинУровень: 'Мин. уровень', МаксУровень: 'Макс. уровень', ФактУровень: 'Факт. уровень', КлассПредмета: 'Класс предмета', Класс: 'Класс', Слоты: 'Слоты для карт', Защита: 'Защита', Атака: 'Атака', Пол: 'Пол', Скорость: 'Скорость', БонусКоллекции: 'Бонус коллекции', Корм: 'Корм', Создаётся: 'Создаётся', СоздаётсяШт: 'Создаётся, шт.', Жизни: 'Жизни', Требования: 'Требования', Раса: 'Раса', Элемент: 'Стихия', Устаревший: 'Устаревший', РыбнаяЦена: 'Цена рыбой' },
+  uk: { Цена: 'Ціна', Тип: 'Тип', Ивент: 'Івент', Выдаёт: 'Видає', МинУровень: 'Мін. рівень', МаксУровень: 'Макс. рівень', ФактУровень: 'Факт. рівень', КлассПредмета: 'Клас предмета', Класс: 'Клас', Слоты: 'Слоти для карт', Защита: 'Захист', Атака: 'Атака', Пол: 'Стать', Скорость: 'Швидкість', БонусКоллекции: 'Бонус колекції', Корм: 'Корм', Создаётся: 'Створюється', СоздаётсяШт: 'Створюється, шт.', Жизни: 'Життя', Требования: 'Вимоги', Раса: 'Раса', Элемент: 'Стихія', Устаревший: 'Застарілий', РыбнаяЦена: 'Ціна рибою' },
+  en: { Цена: 'Price', Тип: 'Type', Ивент: 'Event', Выдаёт: 'Given by', МинУровень: 'Min level', МаксУровень: 'Max level', ФактУровень: 'Actual level', КлассПредмета: 'Grade', Класс: 'Class', Слоты: 'Card slots', Защита: 'Defense', Атака: 'Attack', Пол: 'Gender', Скорость: 'Speed', БонусКоллекции: 'Collection bonus', Корм: 'Food', Создаётся: 'Made at', СоздаётсяШт: 'Made, pcs', Жизни: 'HP', Требования: 'Requirements', Раса: 'Race', Элемент: 'Element', Устаревший: 'Obsolete', РыбнаяЦена: 'Fish price' },
+};
+const goodLabel = k => (GOOD_L[lang] || GOOD_L.ru)[k] || k.replace(/([а-яё])([А-ЯЁ])/g, (m, a, b) => a + ' ' + b.toLowerCase());
 
 // «Предметы»: one chip per wiki category (Еда, Зелья, Контейнеры, Трофеи…), the biggest first
 function goodsFilter() {

@@ -16,6 +16,25 @@ export const GOODS_CATS = ['Еда', 'Напитки', 'Зелья', 'Эликс
 const pages = !process.argv.includes('--refresh') && fs.existsSync(cache) ? JSON.parse(fs.readFileSync(cache, 'utf8')) : await categoryPages(...GOODS_CATS);
 if (process.argv.includes('--refresh') || !fs.existsSync(cache)) fs.writeFileSync(cache, JSON.stringify(pages));
 
+// gear the calculator's database doesn't have (event hats and glasses, old and unique pieces): shown as items too,
+// so event pages and «Где взять» can open them. Gear the calculator knows stays in «Снаряжение».
+const gearCache = path.join(root, 'source', 'wiki-gear.json');
+const gearPages = !process.argv.includes('--refresh') && fs.existsSync(gearCache) ? JSON.parse(fs.readFileSync(gearCache, 'utf8')) : await categoryPages('Экипировка', 'Оружие');
+if (process.argv.includes('--refresh') || !fs.existsSync(gearCache)) fs.writeFileSync(gearCache, JSON.stringify(gearPages));
+{
+  const { createRequire } = await import('node:module');
+  const RQ = createRequire(import.meta.url)(path.join(root, 'data', 'rqdata.js'));
+  const norm = (s) => String(s || '').toLowerCase().replace(/ё/g, 'е').replace(/\s*\(класс [a-zа-я]\)$/i, '').replace(/\s+/g, ' ').trim();
+  const known = new Set(RQ.Equipment.map((e) => norm(e.Name)));
+  let added = 0;
+  for (const p of gearPages) {
+    if (known.has(norm(p.title)) || !/\{\{\s*(Экипировка|Оружие)/.test(p.text)) continue;
+    pages.push({ ...p, cat: 'Экипировка' });
+    added++;
+  }
+  console.log('gear not in the calculator:', added, 'of', gearPages.length);
+}
+
 const PROSE = /^(Описание|Пояснение|Комментарий|ДопКомментарий|Замечание|История|Цитата|Текст|Изображение\d*|Подпись\d*|Имя)$/;
 const LISTS = { 'Дроп': 'Штук', 'ДопДроп': 'ДопШтук', 'Подарок': 'Шт', 'Бонус': null, 'Префикс': null, 'Выдаёт': null, 'Ивент': null, 'Создание': null, 'Особенность': null,
   'Лока': null, 'Получается': null, 'Требуется': null, 'Монстр': null };
