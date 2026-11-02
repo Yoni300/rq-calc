@@ -1,6 +1,10 @@
 // "What's new" under the bell in the top bar (app/news.js). Newest first. Add an entry for every change players see.
 // at: ISO time in UTC (shown in each viewer's own time zone); text: ru / uk / en.
 window.RQ_CHANGELOG = [
+  { at: '2026-11-02T18:21Z',
+    ru: '«База»: из описаний предметов убран служебный текст вики («20px|link=…»).',
+    uk: '«База»: з описів предметів прибрано службовий текст вікі («20px|link=…»).',
+    en: '«Base»: removed wiki markup («20px|link=…») from item texts.' },
   { at: '2026-11-02T18:17Z',
     ru: 'Кнопка «Форум» вверху — ведёт на форум Royal Quest (royalquest.net).',
     uk: 'Кнопка «Форум» угорі — веде на форум Royal Quest (royalquest.net).',

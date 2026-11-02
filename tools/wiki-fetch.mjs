@@ -34,7 +34,11 @@ export async function categoryPages(...cats) {
   return [...out.values()];
 }
 
-export const clean = (s) => String(s || '').replace(/\[\[(?:[^|\]]*\|)?([^\]]*)\]\]/g, '$1').replace(/<[^>]+>/g, '').replace(/'''?/g, '').trim();
+// wiki text → plain text: pictures ([[Файл:Золото.png|16px|link=]]) go away, [[Page|text]] → text
+export const clean = (s) => String(s || '')
+  .replace(/\[\[\s*(?:Файл|File|Изображение|Image)\s*:[^\]]*\]\]/gi, '')
+  .replace(/\[\[(?:[^|\]]*\|)?([^\]]*)\]\]/g, '$1').replace(/<[^>]+>/g, '').replace(/'''?/g, '')
+  .replace(/\(\s+/g, '(').trim(); // a removed picture can leave "( 300)"; names keep their own spacing
 
 /** The fields of the first {{<name> …}} template on a page (multiline or one-line «|a=1|b=2» rows). */
 export function templateFields(text, name) {
