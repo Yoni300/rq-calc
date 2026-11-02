@@ -18,8 +18,8 @@ const BASE_T = {
     aggro: 'Агресивний', yes: 'так', no: 'ні', event: 'Івент', group: 'Група', quest: 'Завдання', summoned: 'Призивається', type: 'Тип',
     boss: 'бос', elite: 'еліта', where: 'Де живе', resp: 'респаун', toTimer: 'У таймер',
     drops: { equip: 'Спорядження', cards: 'Карти', drop: 'Видобуток', cons: 'Розхідники', questDrop: 'Для завдань', recipes: 'Рецепти', summon: 'Призов' },
-    src: { drop: 'Хто дропає', node: 'Збір', shop: 'Продають', quest: 'Нагорода за завдання', craft: 'Створюється за рецептом', box: 'Міститься в', given: 'Видає' },
-    use: { recipe: 'Потрібно для рецептів', quest: 'Потрібно для завдань' },
+    src: { drop: 'Хто дропає', node: 'Збір', shop: 'Продають', quest: 'Нагорода за завдання', craft: 'Створюється за рецептом', box: 'Міститься в', given: 'Видає', event: 'Івент', edition: 'Видання гри', season: 'Сезонна пригода', other: 'Ще', station: 'Створюється на верстаті', from: 'Створюється з', start: 'Початкове спорядження класу' },
+    use: { recipe: 'Потрібно для рецептів', quest: 'Потрібно для завдань', coll: 'Потрібно для колекцій', station: 'Компонент на верстаті', made: 'З цього роблять' },
     whereGet: 'Де взяти', usedFor: 'Де потрібно', nobody: 'У вікі немає, звідки це береться',
     equip: 'Вдягнути в калькуляторі', equipped: 'Вдягнуто: {slot}', cantEquip: 'Не підходить поточному класу ({cls}) або рівню',
     slots: 'Куди ставиться', variants: 'Кольори печатки', monsters: 'Монстри', npc: 'Торговцю', market: 'Ціна на ринку',
@@ -42,8 +42,8 @@ const BASE_T = {
     aggro: 'Агрессивный', yes: 'да', no: 'нет', event: 'Ивент', group: 'Группа', quest: 'Задание', summoned: 'Призывается', type: 'Тип',
     boss: 'босс', elite: 'элита', where: 'Где живёт', resp: 'респаун', toTimer: 'В таймер',
     drops: { equip: 'Снаряжение', cards: 'Карты', drop: 'Добыча', cons: 'Расходники', questDrop: 'Для заданий', recipes: 'Рецепты', summon: 'Призыв' },
-    src: { drop: 'Кто дропает', node: 'Сбор', shop: 'Продают', quest: 'Награда за задание', craft: 'Создаётся по рецепту', box: 'Содержится в', given: 'Выдаёт' },
-    use: { recipe: 'Нужно для рецептов', quest: 'Нужно для заданий' },
+    src: { drop: 'Кто дропает', node: 'Сбор', shop: 'Продают', quest: 'Награда за задание', craft: 'Создаётся по рецепту', box: 'Содержится в', given: 'Выдаёт', event: 'Ивент', edition: 'Издание игры', season: 'Сезонное приключение', other: 'Ещё', station: 'Создаётся на станке', from: 'Создаётся из', start: 'Начальная экипировка класса' },
+    use: { recipe: 'Нужно для рецептов', quest: 'Нужно для заданий', coll: 'Нужно для коллекций', station: 'Компонент на станке', made: 'Из этого делают' },
     whereGet: 'Где взять', usedFor: 'Где нужно', nobody: 'В вики нет, откуда это берётся',
     equip: 'Надеть в калькуляторе', equipped: 'Надето: {slot}', cantEquip: 'Не подходит текущему классу ({cls}) или уровню',
     slots: 'Куда ставится', variants: 'Цвета печати', monsters: 'Монстры', npc: 'Торговцу', market: 'Цена на рынке',
@@ -66,8 +66,8 @@ const BASE_T = {
     aggro: 'Aggressive', yes: 'yes', no: 'no', event: 'Event', group: 'Group', quest: 'Quest', summoned: 'Summoned by', type: 'Type',
     boss: 'boss', elite: 'elite', where: 'Lives in', resp: 'respawn', toTimer: 'To the timer',
     drops: { equip: 'Gear', cards: 'Cards', drop: 'Loot', cons: 'Consumables', questDrop: 'Quest items', recipes: 'Recipes', summon: 'Summons' },
-    src: { drop: 'Dropped by', node: 'Gathering', shop: 'Sold by', quest: 'Quest reward', craft: 'Crafted by recipe', box: 'Found in', given: 'Given by' },
-    use: { recipe: 'Used in recipes', quest: 'Needed for quests' },
+    src: { drop: 'Dropped by', node: 'Gathering', shop: 'Sold by', quest: 'Quest reward', craft: 'Crafted by recipe', box: 'Found in', given: 'Given by', event: 'Event', edition: 'Game edition', season: 'Seasonal adventure', other: 'Also', station: 'Made on a station', from: 'Made from', start: 'Starting gear of' },
+    use: { recipe: 'Used in recipes', quest: 'Needed for quests', coll: 'Needed for collections', station: 'Station component', made: 'Made into' },
     whereGet: 'Where to get', usedFor: 'Used for', nobody: 'The wiki does not say where it comes from',
     equip: 'Put on in the calculator', equipped: 'Put on: {slot}', cantEquip: 'Not for the current class ({cls}) or level',
     slots: 'Goes into', variants: 'Stamp colours', monsters: 'Monsters', npc: 'To a vendor', market: 'Market price',
@@ -91,7 +91,7 @@ BS.sub = bget2('baseSub', '');
 // ---------- the index (built on first use) ----------
 const bnorm = s => String(s || '').toLowerCase().replace(/ё/g, 'е').replace(/\s+/g, ' ').trim();
 // "Ледяная коса к.вд2сл", "Брюки ловца 1 слот", "Перчатки лучника 1СЛ", "Кинжал новичка ЭОГ" → the item itself
-const bstrip = s => String(s || '').replace(/\s+\d+\s+слот(а|ов)?\s*$/i, '').replace(/\s*\d\s*сл\.?$/i, '').replace(/\s+к\.\s*\S+$/i, '').replace(/\s+Э[А-ЯЁ]{1,2}\d?$/, '').trim();
+const bstrip = s => String(s || '').replace(/\s+\d+\s+слот(а|ов)?\s*$/i, '').replace(/\s*\d\s*сл\.?$/i, '').replace(/\s+к\.\s*\S+$/i, '').replace(/\s+Э[А-ЯЁ]{1,2}\d?$/, '').replace(/\s*\(Класс [A-ZА-Я]\)$/, '').trim();
 let BX = null;
 function baseIndex() {
   if (BX) return BX;
@@ -156,8 +156,53 @@ function baseIndex() {
   BX = X;
   return X;
 }
-const sourcesOf = name => baseIndex().src.get(bnorm(bstrip(name))) || baseIndex().src.get(bnorm(name)) || {};
-const usesOf = name => baseIndex().use.get(bnorm(name)) || {};
+const srcCache = new Map();
+const eqv = (a, b) => a === b;
+let WSN = null;
+const wikiSrc = name => {
+  if (!WSN) { WSN = new Map(); for (const [k, v] of Object.entries(window.RQ_BASE_SOURCES || {})) { const n = bnorm(k); WSN.set(n, [...(WSN.get(n) || []), ...v]); } }
+  const a = bnorm(name), b = bnorm(bstrip(name));
+  return [...(WSN.get(a) || []), ...(b !== a ? WSN.get(b) || [] : [])];
+};
+function sourcesOf(name) {
+  const ck = bnorm(name);
+  if (srcCache.has(ck)) return srcCache.get(ck);
+  const X = baseIndex();
+  const own = X.src.get(bnorm(bstrip(name))) || X.src.get(bnorm(name)) || {};
+  const out = {};
+  for (const [k, v] of Object.entries(own)) out[k] = v.slice();
+  const add = (k, v, same = eqv) => { const l = (out[k] ||= []); if (!l.some(x => same(x, v))) l.push(v); };
+  for (const [src, how, kind] of wikiSrc(name)) {
+    if (kind === 'k' || kind === 'z') continue; // a collection needs the item; a card page lists its monster's drops
+    const page = src.replace(/^Монстр\s+/, '').replace(/^Задание\s*[—-]\s*/, '');
+    const g = X.goodBy.get(bnorm(src)), n = X.nodeBy.get(bnorm(src.replace(/\s*\(ресурс\)$/, '')));
+    if (how === 'd' && kind === 'm') { const m = X.monBy.get(bnorm(page)); m ? add('drop', m) : add('other', src); }
+    else if (how === 'd' && kind === 'e') add('event', src);
+    else if ((how === 'b' || how === 'g') && g) add('box', g);
+    else if ((how === 'b' && kind === 'x') || how === 'f' || n) n ? add('node', n) : add('other', src);
+    else if (how === 'g' && kind === 'i') add('edition', src);
+    else if (how === 's') { const p = X.npcBy.get(bnorm(src)); p ? add('shop', { npc: p, price: (p.shop || []).find(x => bnorm(x.n) === bnorm(name))?.p || '' }, (a, b) => a.npc === b.npc) : add('other', src); }
+    else if (how === 'q' && kind === 'p') add('season', src.replace(/^Сезонное приключение\s*[—-]\s*/, ''));
+    else if (how === 'q') { const q = X.questBy.get(bnorm(page)); q ? add('quest', q) : add('other', src); }
+    else if (how === 'r') { const r = X.recipeBy.get(bnorm(src)); r ? add('craft', r) : add('other', src); }
+    else if (how === 'w') add('station', src);
+    else if (how === 'c') add('from', src);
+    else if (how === 't') add('start', src);
+    else if (how === 'u' || how === 'v') continue; // uses, see usesOf
+    else add('other', src);
+  }
+  srcCache.set(ck, out);
+  return out;
+}
+function usesOf(name) {
+  const out = Object.assign({}, baseIndex().use.get(bnorm(name)) || {});
+  const coll = wikiSrc(name).filter(x => x[2] === 'k').map(x => x[0]);
+  if (coll.length) out.coll = [...new Set(coll)];
+  const w = wikiSrc(name);
+  const st = w.filter(x => x[1] === 'u').map(x => x[0]); if (st.length) out.station = [...new Set(st)];
+  const mk = w.filter(x => x[1] === 'v').map(x => x[0]); if (mk.length) out.made = [...new Set(mk)];
+  return out;
+}
 
 const hideImg = e => { e.target.style.visibility = 'hidden'; };
 // ---------- entries: { kind, key, name, icon, round, meta } ----------
@@ -313,11 +358,21 @@ function whereBlocks(name) {
   if (s.quest) parts.push(bsec(t.src.quest, chips(s.quest, qchip)));
   if (s.box) parts.push(bsec(t.src.box, chips(s.box, g => bchip(g.name, { kind: 'good', key: g.name }))));
   if (s.given) parts.push(bsec(t.src.given, chips(s.given, n => bchip(n))));
+  if (s.event) parts.push(bsec(t.src.event, chips(s.event, n => bchip(n, null))));
+  if (s.season) parts.push(bsec(t.src.season, chips(s.season, n => bchip(n, null))));
+  if (s.edition) parts.push(bsec(t.src.edition, chips(s.edition, n => bchip(n, null))));
   if (s.craft) parts.push(bsec(t.src.craft, chips(s.craft, r => bchip(r.name.replace(/^Рецепт:\s*/, ''), { kind: 'recipe', key: r.name }, { extra: `${r.chance ?? '?'}%` }))));
+  if (s.station) parts.push(bsec(t.src.station, chips(s.station, n => bchip(n))));
+  if (s.from) parts.push(bsec(t.src.from, chips(s.from, n => bchip(n))));
+  if (s.start) parts.push(bsec(t.src.start, chips(s.start, n => bchip(n, null))));
+  if (s.other) parts.push(bsec(t.src.other, chips(s.other, n => bchip(n))));
   out.push(h('div', { class: 'bs-group' }, h('h3', null, t.whereGet), parts.length ? parts : h('div', { class: 'hint' }, t.nobody)));
   const uses = [];
   if (u.recipe) uses.push(bsec(t.use.recipe, chips(u.recipe, r => bchip(r.name.replace(/^Рецепт:\s*/, ''), { kind: 'recipe', key: r.name }, { count: (r.res.find(x => bnorm(x.n) === bnorm(name)) || {}).c }))));
   if (u.quest) uses.push(bsec(t.use.quest, chips(u.quest, qchip)));
+  if (u.coll) uses.push(bsec(t.use.coll, chips(u.coll, n => bchip(n, null))));
+  if (u.station) uses.push(bsec(t.use.station, chips(u.station, n => bchip(n))));
+  if (u.made) uses.push(bsec(t.use.made, chips(u.made, n => bchip(n))));
   if (uses.length) out.push(h('div', { class: 'bs-group' }, h('h3', null, t.usedFor), uses));
   return out;
 }
@@ -447,9 +502,12 @@ function drawBaseDetail() {
     el.append(bsec(t.ingredients, chips(x.res || [], r => bchip(r.n, undefined, { count: r.c }))));
     const s = sourcesOf(x.name);
     const parts = [];
-    if (s.drop) parts.push(bsec(t.src.drop, chips(s.drop, mchip)));
+    if (s.drop) parts.push(bsec(t.src.drop, chips(s.drop.slice().sort((a, b) => (a.level ?? 999) - (b.level ?? 999)), mchip)));
+    if (s.box) parts.push(bsec(t.src.box, chips(s.box, g => bchip(g.name, { kind: 'good', key: g.name }))));
     if (s.shop) parts.push(bsec(t.src.shop, chips(s.shop, y => bchip(y.npc.name, { kind: 'npc', key: y.npc.name }, { extra: priceEl(y.price) }))));
     if (s.quest) parts.push(bsec(t.src.quest, chips(s.quest, qchip)));
+    if (s.season) parts.push(bsec(t.src.season, chips(s.season, n => bchip(n, null))));
+    if (s.other) parts.push(bsec(t.src.other, chips(s.other, n => bchip(n))));
     if (x.from) parts.push(bsec(t.from, chips([x.from], n => bchip(n))));
     el.append(h('div', { class: 'bs-group' }, h('h3', null, t.recipeFrom), parts.length ? parts : h('div', { class: 'hint' }, t.nobody)));
     el.append(h('div', { class: 'bs-foot' }, wikiLink(x.name)));

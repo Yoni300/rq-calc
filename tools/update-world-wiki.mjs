@@ -8,7 +8,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { categoryPages, templateFields, numbered, imageUrls, download } from './wiki-fetch.mjs';
+import { api, categoryPages, templateFields, numbered, imageUrls, download } from './wiki-fetch.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const src = (n) => path.join(root, 'source', n);
@@ -47,13 +47,50 @@ for (const p of locPages) {
 locs.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
 
 // ---- NPCs: where they stand, race, event, what they sell ------------------------------------------------------------------
+// a shop lists goods in numbered pairs: «Вещь1 / Цена1» on an NPC, «Расх1 / ЦенаР1», «Элик1 / ЦенаЭ1» on a premium shop…
+function shopOf(f) {
+  const out = [];
+  for (const [k, v] of Object.entries(f)) {
+    const m = k.match(/^([А-ЯЁа-яё]+?)(\d+)$/);
+    if (!m || m[1].startsWith('Цена') || !v) continue;
+    const price = f[`Цена${m[2]}`] ?? f[`Цена${m[1][0]}${m[2]}`];
+    if (price === undefined) continue;
+    out.push({ n: v, p: price || '', _o: +m[2], _g: m[1] });
+  }
+  out.sort((a, b) => a._g.localeCompare(b._g) || a._o - b._o);
+  return out.map(({ n, p }) => ({ n, p }));
+}
 const npcs = [];
 for (const p of npcPages) {
-  const f = templateFields(p.text, 'НПС') || {};
-  const shop = numbered(f, 'Вещь').map((n, i) => ({ n, p: f[`Цена${i + 1}`] || '' }));
+  const tpl = (p.text.match(/\{\{([^|\n}#]+)/) || [])[1]?.trim() || 'НПС';
+  const f = templateFields(p.text, 'НПС') || templateFields(p.text, tpl) || {};
   npcs.push(prune({ name: p.title, locs: numbered(f, 'Лока'), race: f['Раса'] || '', event: f['Ивент'] || '', infanta: !!f['Инфанта'] || undefined,
-    kind: p.cat === 'Торговцы' ? 'seller' : p.cat === 'КвестовыеНПС' ? 'quest' : '', shop }));
+    kind: p.cat === 'Торговцы' || /магазин/i.test(p.title) ? 'seller' : p.cat === 'КвестовыеНПС' ? 'quest' : '', shop: shopOf(f) }));
 }
+// every seller the wiki knows («Продаёт»), shops that are not NPC pages included; prices come from the pages above
+{
+  const byName = new Map(npcs.map((n) => [n.name, n]));
+  let offset = 0, pairs = 0;
+  for (let i = 0; i < 40; i++) {
+    const j = await api({ action: 'ask', query: `[[Продаёт::+]]|?Продаёт|limit=500|offset=${offset}` });
+    for (const [page, r] of Object.entries(j.query?.results || {})) {
+      let n = byName.get(page);
+      if (!n) { n = { name: page, kind: 'seller', shop: [] }; npcs.push(n); byName.set(page, n); }
+      n.shop ||= [];
+      const have = new Set(n.shop.map((s) => s.n));
+      for (const it of r.printouts?.['Продаёт'] || []) {
+        const name = it.fulltext || String(it);
+        if (!name || name === 'Нет' || have.has(name)) continue; // «Нет» = sells nothing
+        n.shop.push({ n: name, p: '' }); have.add(name); pairs++;
+      }
+    }
+    const next = j['query-continue-offset'];
+    if (!next) break;
+    offset = next;
+  }
+  console.log(`  sellers from the wiki's «Продаёт»: ${pairs} goods added`);
+}
+for (const n of npcs) if (n.shop && !n.shop.length) delete n.shop;
 npcs.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
 
 // ---- quests: who, to whom, chain, what to do, rewards (no description or dialogue) ----------------------------------------
