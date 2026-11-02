@@ -333,13 +333,21 @@ function drawBaseList() {
 // ---------- pieces of a page ----------
 const bsec = (title, ...kids) => h('div', { class: 'bs-sec' }, h('h4', null, title), kids);
 const bfacts = rows => h('div', { class: 'bs-facts' }, rows.filter(([, v]) => v != null && v !== '').map(([k, v]) => h('div', null, h('span', null, k), h('b', null, v instanceof Node ? v : String(v)))));
+// "Цветущий лук 2 слота", "Перчатки лучника 1СЛ" → the name and that many card-slot icons, like in the game
+const slotsOf = s => {
+  const m = String(s || '').match(/^(.*?)\s+(\d)\s+слот(?:а|ов)?\s*$/i) || String(s || '').match(/^(.*?\S)\s*(\d)\s*сл\.?$/i);
+  return m && +m[2] > 0 ? { name: m[1].trim(), n: +m[2] } : null;
+};
+const slotIcons = n => h('span', { class: 'bs-slots', title: n + ' ' + (n === 1 ? 'слот' : n < 5 ? 'слота' : 'слотов') }, Array.from({ length: n }, () => h('i', { class: 'tt-empty-card' })));
 function bchip(name, link, { count, extra, icon } = {}) {
   if (link === undefined) link = linkOfName(name);
   const f = link && findEntry(link.kind, link.key);
   const ic = icon || (f && f.e.icon);
+  const sl = typeof name === 'string' ? slotsOf(name) : null;
   return h(link ? 'button' : 'span', { class: 'bs-chip' + (link ? ' link' : ''), onclick: link ? () => openBase(link.kind, link.key) : null },
     ic ? h('img', { src: ic, loading: 'lazy', draggable: 'false', class: f && f.e.round ? 'round' : '', onerror: hideImg }) : null,
-    name, count && count > 1 ? h('b', { class: 'bs-n' }, '×' + fmtNum(count)) : null, extra ? h('small', null, extra) : null);
+    sl ? sl.name : name, sl ? slotIcons(sl.n) : null,
+    count && count > 1 ? h('b', { class: 'bs-n' }, '×' + fmtNum(count)) : null, extra ? h('small', null, extra) : null);
 }
 const chips = (list, fn) => h('div', { class: 'bs-chips' }, list.map(fn));
 const mchip = m => bchip(`${m.name}${m.level != null ? ` · ${BTX().lvl} ${m.level}` : ''}`, { kind: 'monster', key: m.name });

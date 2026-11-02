@@ -1,6 +1,10 @@
 // "What's new" under the bell in the top bar (app/news.js). Newest first. Add an entry for every change players see.
 // at: ISO time in UTC (shown in each viewer's own time zone); text: ru / uk / en.
 window.RQ_CHANGELOG = [
+  { at: '2026-11-02T18:33Z',
+    ru: '«База»: вместо «2 слота» после названия снаряжения — иконки слотов карт, как в игре.',
+    uk: '«База»: замість «2 слота» після назви спорядження — іконки слотів карт, як у грі.',
+    en: '«Base»: card-slot icons after gear names instead of «2 слота», as in the game.' },
   { at: '2026-11-02T18:31Z',
     ru: '«База»: примерные цены показываются как «≈ 2 000» с монеткой, из полей предметов убраны служебные подсказки вики.',
     uk: '«База»: приблизні ціни показуються як «≈ 2 000» з монеткою, з полів предметів прибрано службові підказки вікі.',

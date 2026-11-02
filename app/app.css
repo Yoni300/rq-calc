@@ -1035,3 +1035,6 @@ body.tool-timer .calc-only { display: none !important; }
 @media (max-width: 900px) { .forum-btn span { display: none; } }
 /* other currencies (Знаки крови, Алхимические руны…) — the wiki's icons after the number */
 .cur { width: 1.5em; height: 1.5em; margin-left: .25em; vertical-align: -.42em; }
+/* card slots after an item name in «База» ("Цветущий лук 2 слота" → two slot icons) */
+.bs-slots { display: inline-flex; gap: 2px; margin-left: 5px; vertical-align: -2px; }
+.bs-slots .tt-empty-card { width: 8px; height: 11px; box-shadow: inset 0 0 0 1px #1a1610; }
