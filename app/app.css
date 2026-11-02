@@ -1039,3 +1039,82 @@ body.tool-timer .calc-only { display: none !important; }
 .bs-slots { display: inline-flex; gap: 2px; margin-left: 5px; vertical-align: -2px; }
 .bs-slots .tt-empty-card { width: 8px; height: 11px; box-shadow: inset 0 0 0 1px #1a1610; }
 .bs-everywhere { text-align: left; margin: 10px 0 4px; font-size: 13px; color: var(--muted); }
+
+/* ================= phones (≤ 760 px): one column, the page scrolls as a whole ================= */
+.mobile-nav { display: none; }
+@media (max-width: 760px) {
+  html, body { height: auto; min-height: 100%; }
+  body { overflow-x: hidden; overflow-y: auto; padding-bottom: env(safe-area-inset-bottom); }
+  /* top bar: wraps into rows, calculator buttons show only their icons */
+  .top { flex-wrap: wrap; gap: 5px; padding: 7px 8px; }
+  .brand { font-size: 17px; margin-right: 4px; }
+  .build-name { order: 10; width: 100%; flex: 1 1 100%; }
+  .top .btn { padding: 6px 7px; }
+  .top .btn .caret { display: none; }
+  #btnSave span, #btnBuilds span, #btnNew span, #btnCode span, #btnPublic span, .forum-btn span { display: none; }
+  .top .spacer { display: none; }
+  .lang button { padding: 3px 7px; }
+  .tool-name { font-size: 14px; }
+  /* calculator: character, gear/talents/effects, results — one under another */
+  .layout { display: block; }
+  .col { overflow: visible; }
+  .left, .right { border: 0; box-shadow: none; padding: 12px 10px; }
+  .right { border-top: 1px solid var(--line-2); }
+  .center { overflow: visible; }
+  .tabs { padding: 8px 6px 0; overflow-x: auto; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { padding: 7px 10px 8px; font-size: 13.5px; white-space: nowrap; }
+  .tab-body { overflow: visible; padding: 10px; }
+  .layout.wide .center { min-height: 0; }
+  /* the character window shrinks with the screen */
+  .gear-layout { min-height: 0; height: auto; }
+  .charwin { --s: min(64px, calc((100vw - 70px) / 6.6)); padding: 8px; column-gap: 4px; row-gap: 4px; }
+  .decor-row { flex-wrap: wrap; }
+  /* talents: the branches scroll sideways inside their block, not the page */
+  .branches { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 6px; }
+  .talwin { padding: 12px 10px; }
+  .tal-cols { overflow-x: auto; padding-bottom: 4px; }
+  .tal { --t: 40px; flex: none; }
+  .branch { flex: none; }
+  .tal-branch, .gt-branch { grid-template-columns: 1fr; }
+  .eff-grid { grid-template-columns: 1fr; }
+  /* menus, pickers, tooltips, dialogs fit the screen */
+  .menu, .tools-menu { min-width: 0; width: calc(100vw - 20px); max-width: calc(100vw - 20px); }
+  .dropdown { position: static; }
+  .menu { left: 10px; right: 10px; top: calc(100% + 4px); position: absolute; }
+  .pop { left: 8px !important; right: 8px; width: auto !important; max-width: calc(100vw - 16px); }
+  .tip, .tip:has(.tt-item), .tip:has(.bs-tt) { max-width: calc(100vw - 20px); min-width: 0; }
+  .dialog { width: calc(100vw - 16px); height: calc(100vh - 16px); }
+  .dialog.narrow { width: calc(100vw - 16px); height: auto; max-height: calc(100vh - 16px); }
+  .dialog-body { display: block; overflow: auto; }
+  .upd, .upd.site { left: 8px; right: 8px; width: auto; bottom: 70px; }
+  /* tool pages */
+  .pb-bar { gap: 6px; }
+  .pb-bar .seg { max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+  .pb-bar .inp { min-width: 0; flex: 1 1 100%; }
+  .seg button { flex: none; }
+  .layout.wide .bt-list { grid-template-columns: minmax(0, 1fr); }
+  .layout.wide .tab-body { padding: 10px; }
+  .bt-row { gap: 8px; padding: 8px 8px 10px 6px; }
+  .bt-row { grid-template-columns: 44px minmax(0, 1fr) auto; row-gap: 6px; }
+  .bt-state { grid-column: 2; grid-row: 2; text-align: left; min-width: 0; }
+  .bt-sub { white-space: normal; }
+  .bt-act { grid-column: 3; grid-row: 2; align-self: end; }
+  .bt-room { flex-wrap: wrap; }
+  .bt-nick { width: auto; flex: 1 1 120px; }
+  .mk-kv { grid-template-columns: repeat(2, 1fr); }
+  .bs-facts, .bs-kv { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .bs-chips { gap: 5px; }
+  .news-menu { position: fixed; left: 10px; right: 10px; top: 60px; width: auto; }
+  .set-row { flex-wrap: wrap; }
+  .set-c { flex: 1 1 auto; max-width: 100%; }
+  .set-themes { max-width: 100%; justify-content: flex-start; }
+  .set-body { padding: 6px 12px 12px; }
+  /* the jump bar at the bottom (calculator only) */
+  .mobile-nav { display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; gap: 4px; padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+    background: linear-gradient(180deg, #1d1812, #120f0b); border-top: 1px solid var(--line-2); box-shadow: 0 -6px 18px rgba(0, 0, 0, .45); }
+  .mobile-nav button { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 5px 0; background: none; border: 1px solid transparent; border-radius: 8px; color: var(--muted); font-size: 11px; font-weight: 600; }
+  .mobile-nav button:active { border-color: var(--line-2); color: var(--gold); }
+  .mobile-nav .ic { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+  body:not(.tool-timer) .layout { padding-bottom: 64px; }
+}

@@ -446,6 +446,7 @@ function renderTop() {
   $('btnSettings').innerHTML = svgIcon('cog'); $('btnSettings').title = T.settings;
   $('btnBug').innerHTML = svgIcon('bug'); $('btnBug').title = RT().btn;
   drawNewsBell();
+  drawMobileNav();
   // the game forum (royalquest.net), with its emblem
   $('btnForum').querySelector('span').textContent = lang === 'en' ? 'Forum' : 'Форум';
   $('btnForum').title = lang === 'en' ? 'Royal Quest forum' : 'Форум Royal Quest';
@@ -475,6 +476,15 @@ $('btnSettings').addEventListener('click', () => openSettings());
 $('btnBug').addEventListener('click', () => openReport());
 $('btnNews').addEventListener('click', e => { e.stopPropagation(); openNews(); });
 // ---------- tools (the brand menu): the calculator and the boss timer; more can be added to TOOLS ----------
+// phones: the calculator's columns stack, this bar jumps between them
+function drawMobileNav() {
+  const nav = $('mobileNav');
+  if (!nav) return;
+  nav.innerHTML = '';
+  for (const [id, icon, label] of [['left', 'gear', T.character], ['center', 'collection', T.tabGear], ['right', 'calc', T.results]]) {
+    nav.append(h('button', { onclick: () => { const el = id === 'center' ? document.querySelector('.center') : $(id); el && el.scrollIntoView({ behavior: 'smooth', block: 'start' }); } }, iconEl(icon), h('span', null, label)));
+  }
+}
 // a tool other than the calculator owns one `tab` value and takes the whole window
 const TOOLS = [
   { id: 'calc', icon: 'calc', name: () => T.toolCalc, sub: () => T.toolCalcSub },

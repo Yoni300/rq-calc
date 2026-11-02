@@ -1,6 +1,10 @@
 // "What's new" under the bell in the top bar (app/news.js). Newest first. Add an entry for every change players see.
 // at: ISO time in UTC (shown in each viewer's own time zone); text: ru / uk / en.
 window.RQ_CHANGELOG = [
+  { at: '2026-11-02T19:35Z',
+    ru: 'Сайт удобен на телефоне: всё в одну колонку, внизу кнопки «Персонаж / Снаряжение / Результат», таймер, рынок, база и окна подстраиваются под экран.',
+    uk: 'Сайт зручний на телефоні: усе в одну колонку, внизу кнопки «Персонаж / Спорядження / Результат», таймер, ринок, база й вікна підлаштовуються під екран.',
+    en: 'The site works well on phones: one column, «Character / Gear / Result» buttons at the bottom; the timer, market, base and dialogs fit the screen.' },
   { at: '2026-11-02T18:38Z',
     ru: '«База»: «Все локации» — это не локация, а монстры, которые встречаются где угодно (ивентовые и бродячие); теперь так и написано.',
     uk: '«База»: «Все локации» — це не локація, а монстри, що трапляються будь-де (івентові й мандрівні); тепер так і написано.',
