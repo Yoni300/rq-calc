@@ -413,6 +413,7 @@ function talentText(t) {
 // ---------- top bar ----------
 // line icons for the top bar buttons (24×24, drawn with the text color)
 const TOP_ICONS = {
+  image: '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/>',
   save: '<path d="M5 3h11l3 3v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M7.5 3v4.5h7V3"/><rect x="7" y="13" width="10" height="6" rx="1"/>',
   folder: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M3 10h18"/>',
   new: '<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M12 12v6M9 15h6"/>',
@@ -656,6 +657,7 @@ $('btnCode').addEventListener('click', () => {
       h('button', { class: 'btn', onclick: () => { navigator.clipboard.writeText(area.value).then(() => toast(T.copied)); } }, T.copy),
       h('button', { class: 'btn', title: T.linkTip, onclick: async () => copyText(await buildLink(), T.linkCopied) }, T.copyLink),
       h('button', { class: 'btn', title: T.forumTip, onclick: async () => copyText(await forumPost(), T.forumCopied) }, T.forBtn),
+      h('button', { class: 'btn', title: T.cardTip, onclick: () => { closeModal(); openBuildCard(); } }, T.cardBtn),
       h('div', { class: 'spacer' }),
       h('button', { class: 'btn primary', onclick: () => {
         const b = decodeBuild(area.value);
@@ -1442,6 +1444,7 @@ function renderRight() {
   const val = id => r.stats.get(id) ?? 0;
 
   el.append(h('div', { class: 'res-head' }, h('h3', null, T.results),
+    h('button', { class: 'btn small card-btn', title: T.cardTip, onclick: () => openBuildCard() }, iconEl('image'), h('span', null, T.cardBtn)),
     h('button', { class: 'btn small' + (baseline ? ' primary' : ''), onclick: () => { baseline = baseline ? null : new Map(r.stats); renderRight(); } }, baseline ? '📌 ' + T.unpin : '📌 ' + T.pin)));
   if (base) el.append(h('div', { class: 'baseline' }, baseline ? T.pinned : T.changed));
 

@@ -1207,3 +1207,16 @@ body.tool-timer .calc-only { display: none !important; }
 .sticker-tip::after { content: ''; position: absolute; right: 15px; top: 100%; border: 6px solid transparent; border-top-color: #111214; }
 .sticker:hover .sticker-tip, .sticker:focus .sticker-tip { opacity: 1; transform: none; }
 @media (max-width: 760px) { body:not(.tool-timer) .sticker { bottom: 72px; } .sticker { right: 10px; width: 30px; height: 30px; } }
+
+/* build picture (app/build-card.js) */
+.card-btn { display: inline-flex; align-items: center; gap: 5px; }
+.card-btn .ic { width: 14px; height: 14px; }
+.card-btn span { display: none; } /* the result panel is narrow: icon only, the text comes back on phones */
+.dialog.narrow.card-dlg { width: min(900px, calc(100vw - 40px)); }
+.card-preview { display: block; width: 100%; height: auto; border-radius: 10px; box-shadow: 0 0 0 1px var(--line-2), 0 8px 24px rgba(0, 0, 0, .5); }
+@media (max-width: 760px) {
+  .dialog.narrow.card-dlg { width: calc(100vw - 16px); }
+  .card-btn span { display: inline; }
+  .card-dlg .dialog-foot { flex-wrap: wrap; }
+  .card-dlg .dialog-foot .spacer { display: none; }
+}
