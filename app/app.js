@@ -401,11 +401,46 @@ function cardTip(card) {
 }
 const talentVars = new Map();
 for (const v of RQDATA.TalentVariable || []) { if (!talentVars.has(v.Talent_Id)) talentVars.set(v.Talent_Id, []); talentVars.get(v.Talent_Id)[v.Index] = v.Value; }
+// Effects a talent applies or explains («Бессилие: …», «Ружейное мастерство: …»), shown under its text like in the game.
+// {n} = the effect's own number × the talent's value: for stacking effects the value is the stack count
+// («Мощь (x3)»: 2% × 3), otherwise the bonus itself. Numbers that scale with attack (type 1) are unknown here → «?».
+const BUFF_DESC = new Map((RQDATA.BuffDescription || []).map(d => [d.Id, d]));
+const buffDescVars = new Map();
+for (const v of RQDATA.BuffDescriptionVariable || []) { if (!buffDescVars.has(v.BuffDescription_Id)) buffDescVars.set(v.BuffDescription_Id, []); buffDescVars.get(v.BuffDescription_Id)[v.Index] = v; }
+const talentFx = new Map();
+for (const r of [...(RQDATA.TalentBuffDescription || [])].sort((a, b) => a.OrderIndex - b.OrderIndex)) {
+  const d = BUFF_DESC.get(r.Description_Id);
+  if (!d) continue;
+  const vars = buffDescVars.get(d.Id) || [];
+  const k = r.Value ?? 1;
+  const num = n => {
+    const v = vars[n];
+    if (!v) return n === 0 && r.Value != null ? r.Value : null;
+    return v.Type === 0 ? Math.round(v.Value * k * 100) / 100 : null;
+  };
+  const text = String(d.Template || '')
+    .replace(/\{(\d+)\}(?:-\{(\d+)\})?/g, (_, a, b) => {
+      const x = num(+a), y = b != null ? num(+b) : null;
+      if (x == null) return '?';
+      return y != null && y !== x ? `${x}-${y}` : String(x);
+    })
+    .replace(/экпировано/g, 'экипировано').replace(/[◊∆]/g, '• ').replace(/\r\n?/g, '\n').trim();
+  if (!d.Name && !text) continue;
+  if (!talentFx.has(r.Talent_Id)) talentFx.set(r.Talent_Id, []);
+  talentFx.get(r.Talent_Id).push({
+    id: d.Id, name: d.Name ? d.Name + (d.IsStack && r.Value > 1 ? ` (x${r.Value})` : '') : '', text, passive: !!r.IsPassive, value: r.Value,
+  });
+}
+const RIFLE_FX = 213, RIFLE_TYPE = 34; // «Ружейное мастерство»: skill damage while a rifle is worn
 function talentText(t) {
   const vars = talentVars.get(t.id) || [];
   const sub = s => String(s || '').replace(/\{(\d+)\}/g, (_, n) => vars[+n] ?? '?').replace(/◊/g, '• ');
-  let s = `<b>${esc(t.name)}</b>${t.active ? ` <span class="m">(${esc(T.activeTalent)})</span>` : ''}\n${esc(sub(t.description))}`;
+  const fx = talentFx.get(t.id) || [];
+  const fxLines = passive => fx.filter(f => f.passive === passive).map(f => (f.name ? `<span class="fx">${esc(f.name)}:</span> ` : '') + esc(f.text));
+  let s = `<b>${esc(t.name)}</b>\n<span class="tk">${esc(t.active ? T.talActive : T.talPassive)}</span>\n${esc(sub(t.description))}`;
+  for (const l of fxLines(false)) s += '\n' + l;
   if (t.passiveDescription) s += `\n<span class="m">${esc(sub(t.passiveDescription))}</span>`;
+  for (const l of fxLines(true)) s += '\n' + l;
   if (t.equipmentCondition) s += `\n<span class="m">${esc(t.equipmentCondition)}</span>`;
   return s;
 }
@@ -1215,6 +1250,15 @@ function renderTalents(el) {
       cols));
   }
   const free = total - used;
+  // «Ружейное мастерство» of the chosen talents: skill damage, so it is not in «Урон в секунду» (auto-attack only)
+  const rifle = !ch.enableTalents ? 0 : valid.reduce((n, id) => n + (talentFx.get(id) || []).filter(f => f.id === RIFLE_FX).reduce((m, f) => m + (f.value || 0), 0), 0);
+  if (rifle) {
+    const w = ch.equipment['21:0'] && ctx.equipment.get(ch.equipment['21:0'].itemId);
+    const on = !!w && w.typeId === RIFLE_TYPE;
+    win.append(h('div', { class: 'tal-mastery' + (on ? '' : ' off') },
+      h('span', { class: 'fx' }, T.rifleName + ':'), ' ', h('b', null, '+' + rifle + '%'), ' ' + T.rifleSkills,
+      h('small', null, on ? T.rifleNote : T.rifleNeed)));
+  }
   win.append(h('div', { class: 'tal-foot' },
     h('div', { class: 'tal-free' + (free < 0 ? ' neg' : '') }, `${T.talentFree}: ${free}`),
     h('label', { class: 'check' }, h('input', { type: 'checkbox', checked: ch.enableTalents, onchange: e => changed(c => { c.enableTalents = e.target.checked; }) }), T.useTalents),

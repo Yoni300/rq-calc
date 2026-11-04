@@ -1,6 +1,10 @@
 // "What's new" under the bell in the top bar (app/news.js). Newest first. Add an entry for every change players see.
 // at: ISO time in UTC (shown in each viewer's own time zone); text: ru / uk / en.
 window.RQ_CHANGELOG = [
+  { at: '2026-11-04T18:51Z',
+    ru: 'Таланты: в подсказке теперь видны эффекты, как в игре — «Бессилие», «Мощь (x3)», «Крепкие доспехи (x4)» и другие, с цветными названиями. У Снайпера (и «Громилы» Охотника) появилось «Ружейное мастерство»: внизу вкладки «Таланты» видно, сколько процентов к урону умений с ружьём дают выбранные таланты. Спасибо за баг-репорт!',
+    uk: 'Таланти: у підказці тепер видно ефекти, як у грі — «Бессилие», «Мощь (x3)», «Крепкие доспехи (x4)» та інші, з кольоровими назвами. У Снайпера (і «Громилы» Мисливця) з’явилося «Ружейное мастерство»: внизу вкладки «Таланти» видно, скільки відсотків до урону вмінь з рушницею дають вибрані таланти. Дякуємо за баг-репорт!',
+    en: 'Talents: tooltips now show the effects like in the game — «Бессилие», «Мощь (x3)», «Крепкие доспехи (x4)» and more, with coloured names. Sniper (and the Hunter’s «Громила») now has Rifle mastery: the bottom of the Talents tab shows how much skill damage with a rifle the chosen talents give. Thanks for the bug report!' },
   { at: "2026-11-04T18:35Z",
     ru: "Инструмент «Рынок» убран вместе со сканером цен. Трофеи, руды и расходники остались в «Базе».",
     uk: "Інструмент «Ринок» прибрано разом зі сканером цін. Трофеї, руди й витратники лишилися в «Базі».",

@@ -381,6 +381,9 @@ input[type=range] { accent-color: var(--gold-2); }
 .tip b { font-family: var(--f-display); font-size: 15px; color: var(--gold); }
 .tip .g { color: var(--bonus); }
 .tip .m { color: var(--muted); }
+/* talent tooltips like in the game: the skill kind in green, effect names in turquoise */
+.tip .tk { color: #7fdc5a; }
+.tip .fx, .tal-mastery .fx { color: #4fd8b0; }
 
 .code-area { width: 100%; height: 110px; resize: vertical; padding: 9px; background: rgba(0, 0, 0, .35); border: 1px solid var(--line); border-radius: 6px; font-family: Consolas, monospace; font-size: 11.5px; color: var(--fg); outline: none; word-break: break-all; }
 .toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); background: linear-gradient(180deg, var(--p1), var(--gold-2)); color: var(--on-gold); padding: 8px 18px; border-radius: 7px; font-weight: 700; z-index: 120; box-shadow: 0 8px 24px rgba(0, 0, 0, .6); border: 1px solid #fff0c4; }
@@ -528,6 +531,10 @@ input[type=range] { accent-color: var(--gold-2); }
 .tal-foot { display: flex; align-items: center; gap: 16px; padding-top: 6px; }
 .tal-free { color: #7fd36a; font-size: 14px; font-weight: 600; flex: 1; }
 .tal-free.neg { color: var(--bad); }
+.tal-mastery { padding: 8px 10px; margin: 4px 0 6px; border: 1px solid rgba(79, 216, 176, .3); border-radius: 7px; background: rgba(79, 216, 176, .06); font-size: 13px; }
+.tal-mastery b { color: var(--fg); }
+.tal-mastery small { display: block; color: var(--dim); font-size: 11.5px; margin-top: 2px; }
+.tal-mastery.off { opacity: .6; }
 
 /* event hints under the event selector */
 .ev-hints { margin: -2px 0 8px 104px; display: flex; flex-direction: column; gap: 3px; }
