@@ -1,10 +1,19 @@
 'use strict';
 /* global ctx, ch, T, buildName, IMG, DOLL_POS, MODEL_BGS, modelBg, allowedSets, slotLockedByTwoHander, recalc, lastResult,
-   fmtNum, fmtStat, descNote, h, openModal, closeModal, toast, buildLink, copyText */
+   fmtNum, fmtStat, descNote, h, openModal, closeModal, toast, buildLink, copyText, SLOT_ORDER */
 
-// Build card: a picture of the current build (character window, key numbers) to post in Discord or on the forum.
-// Drawn on a canvas at 2x, so the PNG stays sharp after Discord shrinks it.
-const CARD_W = 1200, CARD_H = 675, CARD_SCALE = 2;
+// Build card: a picture of the current build (character window, key numbers, the gear list with upgrades, stamps and
+// cards) to post in Discord or on the forum. Drawn on a canvas at 2x, so the PNG stays sharp after Discord shrinks it.
+// The top part is 1200×675; the gear list below makes the picture taller.
+const CARD_W = 1200, CARD_TOP = 675, CARD_SCALE = 2;
+const GEAR_ROW = 58, GEAR_HEAD = 50, GEAR_FOOT = 64;
+// cuts the text with «…» to fit the width (font must be set)
+function cardEllipsis(g, text, maxW) {
+  if (g.measureText(text).width <= maxW) return text;
+  let lo = 0, hi = text.length;
+  while (lo < hi) { const m = (lo + hi + 1) >> 1; if (g.measureText(text.slice(0, m) + '…').width <= maxW) lo = m; else hi = m - 1; }
+  return text.slice(0, lo).trimEnd() + '…';
+}
 const CARD_FONT = { display: '"Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif', body: '"Segoe UI", system-ui, sans-serif' };
 const CARD_C = {
   bg: '#0b0a08', fg: '#eee4cf', muted: '#a89a80', dim: '#6f6553',
@@ -67,30 +76,38 @@ async function drawBuildCard() {
     ...slotList.map(s => cardImage(IMG(s.item ? s.item.imageId : s.slot.imageId))),
   ]);
 
+  // gear list: worn items that take upgrades / stamps / cards, in the app's slot order
+  const order = k => { const i = SLOT_ORDER.indexOf(k); return i < 0 ? 99 : i; };
+  const gearList = slotList.map((s, i) => ({ ...s, im: slotIms[i] }))
+    .filter(s => s.item && s.slot.isWeapon != null && !slotLockedByTwoHander(ch, s.key))
+    .sort((a, b) => order(a.key) - order(b.key));
+  const gearRows = Math.ceil(gearList.length / 2);
+  const H = gearList.length ? CARD_TOP - 20 + GEAR_HEAD + gearRows * GEAR_ROW + GEAR_FOOT : CARD_TOP;
+
   const cv = document.createElement('canvas');
-  cv.width = CARD_W * CARD_SCALE; cv.height = CARD_H * CARD_SCALE;
+  cv.width = CARD_W * CARD_SCALE; cv.height = H * CARD_SCALE;
   const g = cv.getContext('2d');
   g.scale(CARD_SCALE, CARD_SCALE);
   g.imageSmoothingQuality = 'high';
   g.textBaseline = 'alphabetic';
 
   // ---- background and frame
-  g.fillStyle = CARD_C.bg; g.fillRect(0, 0, CARD_W, CARD_H);
+  g.fillStyle = CARD_C.bg; g.fillRect(0, 0, CARD_W, H);
   let gr = g.createRadialGradient(330, 60, 0, 330, 60, 700);
   gr.addColorStop(0, 'rgba(230,184,92,.10)'); gr.addColorStop(1, 'rgba(230,184,92,0)');
-  g.fillStyle = gr; g.fillRect(0, 0, CARD_W, CARD_H);
+  g.fillStyle = gr; g.fillRect(0, 0, CARD_W, H);
   gr = g.createRadialGradient(950, 700, 0, 950, 700, 600);
   gr.addColorStop(0, 'rgba(230,184,92,.06)'); gr.addColorStop(1, 'rgba(230,184,92,0)');
-  g.fillStyle = gr; g.fillRect(0, 0, CARD_W, CARD_H);
-  cardRound(g, 10.5, 10.5, CARD_W - 21, CARD_H - 21, 14);
+  g.fillStyle = gr; g.fillRect(0, 0, CARD_W, H);
+  cardRound(g, 10.5, 10.5, CARD_W - 21, H - 21, 14);
   g.strokeStyle = 'rgba(214,168,79,.45)'; g.lineWidth = 1; g.stroke();
-  cardRound(g, 15.5, 15.5, CARD_W - 31, CARD_H - 31, 11);
+  cardRound(g, 15.5, 15.5, CARD_W - 31, H - 31, 11);
   g.strokeStyle = 'rgba(214,168,79,.14)'; g.stroke();
 
   // ---- character window (same grid as the gear tab)
   const s = 64, gx = 10, gy = 12, mw = 236, pad = 20;
   const winW = 3 * s + mw + 3 * gx + 2 * pad, winH = 7 * s + 6 * gy + 2 * pad;
-  const wx = 40, wy = (CARD_H - winH) / 2;
+  const wx = 40, wy = (CARD_TOP - winH) / 2;
   gr = g.createLinearGradient(0, wy, 0, wy + winH);
   gr.addColorStop(0, '#221c15'); gr.addColorStop(1, '#15120d');
   cardRound(g, wx, wy, winW, winH, 12); g.fillStyle = gr; g.fill();
@@ -300,12 +317,61 @@ async function drawBuildCard() {
     chx += cw + 8;
   }
 
+  // ---- gear list: icon, «+11 Name», then the stamp (its colour dot) and the cards
+  if (gearList.length) {
+    const gx0 = 40, gw = CARD_W - 80, colG = 28, cw = (gw - colG) / 2, gy0 = CARD_TOP - 20;
+    gr = g.createLinearGradient(gx0, 0, gx0 + gw, 0);
+    gr.addColorStop(0, 'rgba(201,150,63,0)'); gr.addColorStop(.5, 'rgba(201,150,63,.6)'); gr.addColorStop(1, 'rgba(201,150,63,0)');
+    g.fillStyle = gr; g.fillRect(gx0, gy0, gw, 1);
+    g.font = `700 17px ${CARD_FONT.display}`; g.fillStyle = CARD_C.gold;
+    g.fillText(T.tabGear, gx0, gy0 + 34);
+    const ic = 42;
+    gearList.forEach(({ e, item, im }, i) => {
+      const x = gx0 + (i % 2) * (cw + colG), y = gy0 + GEAR_HEAD + Math.floor(i / 2) * GEAR_ROW;
+      const stampV = e.stampVariantId && ctx.stampVariants.get(e.stampVariantId);
+      const stamp = stampV && ctx.stamps.get(stampV.stampId);
+      // the same card twice → «Карта Анубиса ×2»
+      const cardN = new Map();
+      for (const id of e.cards || []) { const n = id && ctx.cards.get(id)?.name; if (n) cardN.set(n, (cardN.get(n) || 0) + 1); }
+      const cards = [...cardN].map(([n, k]) => (k > 1 ? `${n} ×${k}` : n));
+      // icon
+      cardRound(g, x, y, ic, ic, 6); g.fillStyle = '#15110b'; g.fill();
+      if (im) { g.save(); cardRound(g, x + 3, y + 3, ic - 6, ic - 6, 4); g.clip(); g.drawImage(im, x + 3, y + 3, ic - 6, ic - 6); g.restore(); }
+      cardRound(g, x + .5, y + .5, ic - 1, ic - 1, 6);
+      g.strokeStyle = stampV?.color?.Argb || '#7a5a2a'; g.lineWidth = stampV ? 1.5 : 1; g.stroke(); g.lineWidth = 1;
+      // line 1: upgrade + name
+      const tx = x + ic + 12, tw = cw - ic - 12;
+      let lx = tx;
+      if (e.upgrade) {
+        g.font = `800 15px ${CARD_FONT.body}`; g.fillStyle = CARD_C.gold;
+        const up = '+' + e.upgrade; g.fillText(up, lx, y + 17); lx += g.measureText(up).width + 7;
+      }
+      g.font = `600 15px ${CARD_FONT.body}`; g.fillStyle = CARD_C.fg;
+      g.fillText(cardEllipsis(g, item.name, tx + tw - lx), lx, y + 17);
+      // line 2: stamp · cards
+      lx = tx;
+      const y2 = y + 37;
+      if (stamp) {
+        g.beginPath(); g.arc(lx + 4.5, y2 - 4.5, 4.5, 0, Math.PI * 2); g.fillStyle = stampV.color?.Argb || '#999'; g.fill();
+        g.font = `13px ${CARD_FONT.body}`; g.fillStyle = CARD_C.muted;
+        const st = cardEllipsis(g, stamp.name, cards.length ? tw * .45 : tw - 14);
+        g.fillText(st, lx + 14, y2); lx += 14 + g.measureText(st).width + 10;
+      }
+      if (cards.length) {
+        g.font = `13px ${CARD_FONT.body}`; g.fillStyle = CARD_C.card;
+        g.fillText(cardEllipsis(g, '◆ ' + cards.join(', '), tx + tw - lx), lx, y2);
+      }
+      if (!stamp && !cards.length) { g.font = `13px ${CARD_FONT.body}`; g.fillStyle = CARD_C.dim; g.fillText('—', lx, y2); }
+    });
+  }
+
   // footer
-  const fy = CARD_H - 44;
+  const fy = H - 44;
   g.font = `700 17px ${CARD_FONT.display}`; g.fillStyle = CARD_C.gold;
-  g.fillText('rqcalc.com', rx, fy);
+  const fx = gearList.length ? 40 : rx, fx2 = gearList.length ? CARD_W - 40 : rx + rw; // under the gear list: full width
+  g.fillText('rqcalc.com', fx, fy);
   g.font = `12px ${CARD_FONT.body}`; g.fillStyle = CARD_C.dim; g.textAlign = 'right';
-  g.fillText(T.cardFoot, rx + rw, fy);
+  g.fillText(T.cardFoot, fx2, fy);
   g.textAlign = 'left';
   return cv;
 }

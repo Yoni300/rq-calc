@@ -1170,7 +1170,7 @@ body.tool-timer .calc-only { display: none !important; }
 .card-btn .ic { width: 14px; height: 14px; }
 .card-btn span { display: none; } /* the result panel is narrow: icon only, the text comes back on phones */
 .dialog.narrow.card-dlg { width: min(900px, calc(100vw - 40px)); }
-.card-preview { display: block; width: 100%; height: auto; border-radius: 10px; box-shadow: 0 0 0 1px var(--line-2), 0 8px 24px rgba(0, 0, 0, .5); }
+.card-preview { display: block; max-width: 100%; max-height: calc(100vh - 230px); width: auto; height: auto; margin: 0 auto; border-radius: 10px; box-shadow: 0 0 0 1px var(--line-2), 0 8px 24px rgba(0, 0, 0, .5); }
 @media (max-width: 760px) {
   .dialog.narrow.card-dlg { width: calc(100vw - 16px); }
   .card-btn span { display: inline; }
