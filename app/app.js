@@ -19,7 +19,7 @@ let ch = normalize(store.get('current', null)) || ctx.defaultCharacter();
 let buildName = store.get('currentName', '');
 let tab = store.get('tab', 'gear');
 // a tab that no longer exists (e.g. a removed tool) opens the gear instead
-if (!['gear', 'talents', 'effects', 'builds', 'collection', 'bosses', 'market', 'base'].includes(tab)) tab = 'gear';
+if (!['gear', 'talents', 'effects', 'builds', 'collection', 'bosses', 'base'].includes(tab)) tab = 'gear';
 let baseline = null;      // pinned stats (Map) or null
 let previous = null;      // stats before the last change
 let lastResult = null;
@@ -434,7 +434,6 @@ const TOP_ICONS = {
   calendar: '<rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4M7.5 13.5h3M13.5 13.5h3M7.5 17h3"/>',
   news: '<path d="M4 5h13v13.5a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2z"/><path d="M17 9h3v9.5a2 2 0 0 1-4 0"/><path d="M7 8.5h7M7 12h7M7 15.5h4"/>',
   book: '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/><path d="M8 7.5h8M8 11h6"/>',
-  coins: '<ellipse cx="9" cy="7" rx="5.5" ry="2.5"/><path d="M3.5 7v3.5c0 1.4 2.5 2.5 5.5 2.5s5.5-1.1 5.5-2.5V7"/><path d="M3.5 10.5V14c0 1.4 2.5 2.5 5.5 2.5"/><ellipse cx="15" cy="14" rx="5.5" ry="2.5"/><path d="M9.5 14v3.5c0 1.4 2.5 2.5 5.5 2.5s5.5-1.1 5.5-2.5V14"/>',
   skull: '<path d="M12 3a7.5 7.5 0 0 0-7.5 7.5c0 2.6 1.3 4.6 3 5.8V19a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1v-2.7c1.7-1.2 3-3.2 3-5.8A7.5 7.5 0 0 0 12 3z"/><circle cx="9.2" cy="11" r="1.6"/><circle cx="14.8" cy="11" r="1.6"/><path d="M10.5 20v-2.5M13.5 20v-2.5M11.2 14.8l.8-1.3.8 1.3"/>',
   group: '<circle cx="9" cy="8.5" r="3"/><path d="M3.5 19.5c.4-3.2 2.6-5 5.5-5s5.1 1.8 5.5 5"/><circle cx="16.5" cy="9" r="2.4"/><path d="M15.5 14.6c2.6-.3 4.6 1.3 5 4.4"/>',
   lock: '<rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/>',
@@ -517,7 +516,6 @@ function drawMobileNav() {
 const TOOLS = [
   { id: 'calc', icon: 'calc', name: () => T.toolCalc, sub: () => T.toolCalcSub },
   { id: 'timer', tab: 'bosses', icon: 'skull', name: () => T.toolTimer, sub: () => T.toolTimerSub },
-  { id: 'market', tab: 'market', icon: 'coins', name: () => MT().title, sub: () => MT().sub },
   { id: 'base', tab: 'base', icon: 'book', name: () => BTX().title, sub: () => BTX().sub },
   { id: 'steam', tab: 'steam', icon: 'news', name: () => STX().title, sub: () => STX().sub },
   { id: 'calendar', tab: 'cal', icon: 'calendar', name: () => CTX().title, sub: () => CTX().sub },
@@ -779,7 +777,6 @@ function renderCenter() {
   else if (tab === 'effects') renderEffects(el);
   else if (tab === 'builds') renderBuilds(el);
   else if (tab === 'bosses') renderBosses(el);
-  else if (tab === 'market') renderMarket(el);
   else if (tab === 'base') renderBase(el);
   else if (tab === 'steam') renderSteamNews(el);
   else if (tab === 'cal') renderCalendar(el);

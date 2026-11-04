@@ -172,13 +172,6 @@ ipcMain.handle('rqc-app-version', () => app.getVersion());
 app.on('second-instance', showMain);
 // Windows shows notifications (boss timer) only for an app with this id; the installer uses the same one
 if (process.platform === 'win32') app.setAppUserModelId(IS_TEST ? process.execPath : 'com.yoni300.rqcalc');
-// ---------- market scanner (market-scan.js): turned on in the Market tool; pages go to the page, which uploads them ----------
-const marketScan = require('./market-scan');
-ipcMain.on('rqc-market-scan', (_e, on) => {
-  if (on) marketScan.start(ev => { if (win && !win.isDestroyed()) win.webContents.send('rqc-market', ev); });
-  else marketScan.stop();
-});
-app.on('before-quit', () => marketScan.stop());
 
 app.whenReady().then(() => { createWindow(); setupUpdates(); });
 app.on('window-all-closed', () => app.quit());

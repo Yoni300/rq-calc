@@ -25,9 +25,6 @@
     "files": [
       "main.js",
       "preload.js",
-      "market-parse.js",
-      "market-scan.js",
-      "ocr/**",
       "build/icon.png",
       "app/**",
       "src/**",
@@ -65,9 +62,6 @@
         "repo": "rq-calc",
         "releaseType": "release"
       }
-    ],
-    "asarUnpack": [
-      "ocr/**"
     ]
   },
   "dependencies": {

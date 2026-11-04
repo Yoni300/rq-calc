@@ -3,10 +3,15 @@
    - monsters: data/base-monsters.js (tools/update-base-wiki.mjs, the wiki's monster templates);
    - the world: data/base-world.js (tools/update-world-wiki.mjs) — locations with their map and markers, NPCs, quests,
      recipes, gathering points / ore veins / fishing spots;
-   - the calculator's items, cards and stamps; loot from the market catalog (data/market-items.js).
+   - the calculator's items, cards and stamps; loot (trophies, ores, consumables…) from data/market-items.js
+     (tools/update-market-items.mjs; the name stayed from the removed Market tool).
    No article text, quest descriptions or dialogues are copied. Everything is linked: for any name the base knows where
    it comes from (monsters, gathering, vendors, quest rewards, recipes) and what it is needed for (recipes, quests).
-   Uses globals from app.js / market.js / bosses.js at call time (h, T, ctx, ch, IMG, store, itemTip, MI, …). */
+   Uses globals from app.js / bosses.js at call time (h, T, ctx, ch, IMG, store, itemTip, locale, …). */
+
+// loot catalog: id = wiki page id, icons in data/market-img
+const MI_BY = new Map((window.RQ_MARKET_ITEMS || []).map(i => [i.id, i]));
+const MI_IMG = id => `../data/market-img/${id}.png`;
 
 const BASE_T = {
   uk: {
@@ -23,7 +28,7 @@ const BASE_T = {
     ev: { cat: 'Івенти', yearly: 'Проводиться регулярно', past: 'Більше не проводиться', status: 'Статус', usual: 'Зазвичай', last: 'Останній раз', since: 'Уведено', now: 'Іде зараз', left: 'ще {t}', soon: 'Почнеться {d}', how: 'Як це працює', history: 'Коли проводився', toCal: 'Календар', groups: { monsters: 'Монстри', npcs: 'НПС', locs: 'Локації', quests: 'Завдання', chains: 'Ланцюжки завдань', mounts: 'Вихованці та їздові', gear: 'Спорядження', cards: 'Карти', transmog: 'Преобразці', boxes: 'Коробки та скрині', cons: 'Витратні та їжа', trophies: 'Трофеї' } },
     whereGet: 'Де взяти', usedFor: 'Де потрібно', nobody: 'У вікі немає, звідки це береться',
     equip: 'Вдягнути в калькуляторі', equipped: 'Вдягнуто: {slot}', cantEquip: 'Не підходить поточному класу ({cls}) або рівню',
-    slots: 'Куди ставиться', variants: 'Кольори печатки', monsters: 'Монстри', npc: 'Торговцю', market: 'Ціна на ринку',
+    slots: 'Куди ставиться', variants: 'Кольори печатки', monsters: 'Монстри', npc: 'Торговцю',
     everywhere: 'Це не окрема локація: так вікі позначає монстрів, які можуть з\x27явитися на будь-якій локації — івентових і мандрівних.', map: 'Карта', npcsHere: 'НПС', exits: 'Переходи', resHere: 'Ресурси', locType: 'Тип локації', levels: 'Рівні',
     gives: 'Дає завдання', takes: 'Приймає завдання', shop: 'Продає', price: 'Ціна', standsIn: 'Де стоїть',
     from: 'Видає', to: 'Здати', chain: 'Ланцюжок', prev: 'Перед цим', next: 'Далі', cls: 'Клас',
@@ -48,7 +53,7 @@ const BASE_T = {
     ev: { cat: 'Ивенты', yearly: 'Проводится регулярно', past: 'Больше не проводится', status: 'Статус', usual: 'Обычно', last: 'Последний раз', since: 'Введён', now: 'Идёт сейчас', left: 'ещё {t}', soon: 'Начнётся {d}', how: 'Как это работает', history: 'Когда проводился', toCal: 'Календарь', groups: { monsters: 'Монстры', npcs: 'НПС', locs: 'Локации', quests: 'Задания', chains: 'Цепочки заданий', mounts: 'Питомцы и ездовые', gear: 'Снаряжение', cards: 'Карты', transmog: 'Преобразцы', boxes: 'Коробки и сундуки', cons: 'Расходники и еда', trophies: 'Трофеи' } },
     whereGet: 'Где взять', usedFor: 'Где нужно', nobody: 'В вики нет, откуда это берётся',
     equip: 'Надеть в калькуляторе', equipped: 'Надето: {slot}', cantEquip: 'Не подходит текущему классу ({cls}) или уровню',
-    slots: 'Куда ставится', variants: 'Цвета печати', monsters: 'Монстры', npc: 'Торговцу', market: 'Цена на рынке',
+    slots: 'Куда ставится', variants: 'Цвета печати', monsters: 'Монстры', npc: 'Торговцу',
     everywhere: 'Это не отдельная локация: так вики помечает монстров, которые могут появиться на любой локации, — ивентовых и бродячих.', map: 'Карта', npcsHere: 'НПС', exits: 'Переходы', resHere: 'Ресурсы', locType: 'Тип локации', levels: 'Уровни',
     gives: 'Даёт задания', takes: 'Принимает задания', shop: 'Продаёт', price: 'Цена', standsIn: 'Где стоит',
     from: 'Выдаёт', to: 'Сдать', chain: 'Цепочка', prev: 'Перед этим', next: 'Дальше', cls: 'Класс',
@@ -73,7 +78,7 @@ const BASE_T = {
     ev: { cat: 'Events', yearly: 'Runs regularly', past: 'No longer runs', status: 'Status', usual: 'Usually', last: 'Last time', since: 'Added', now: 'Running now', left: '{t} left', soon: 'Starts {d}', how: 'How it works', history: 'When it ran', toCal: 'Calendar', groups: { monsters: 'Monsters', npcs: 'NPCs', locs: 'Locations', quests: 'Quests', chains: 'Quest chains', mounts: 'Pets and mounts', gear: 'Gear', cards: 'Cards', transmog: 'Transmogs', boxes: 'Boxes and chests', cons: 'Consumables and food', trophies: 'Trophies' } },
     whereGet: 'Where to get', usedFor: 'Used for', nobody: 'The wiki does not say where it comes from',
     equip: 'Put on in the calculator', equipped: 'Put on: {slot}', cantEquip: 'Not for the current class ({cls}) or level',
-    slots: 'Goes into', variants: 'Stamp colours', monsters: 'Monsters', npc: 'To a vendor', market: 'Market price',
+    slots: 'Goes into', variants: 'Stamp colours', monsters: 'Monsters', npc: 'To a vendor',
     everywhere: 'Not a real location: the wiki marks this way the monsters that can turn up on any location — event and wandering ones.', map: 'Map', npcsHere: 'NPCs', exits: 'Exits', resHere: 'Resources', locType: 'Location type', levels: 'Levels',
     gives: 'Gives quests', takes: 'Takes quests', shop: 'Sells', price: 'Price', standsIn: 'Stands in',
     from: 'Given by', to: 'Turn in to', chain: 'Chain', prev: 'Before', next: 'Next', cls: 'Class',
@@ -620,8 +625,6 @@ function drawBaseDetail() {
     el.append(h('div', { class: 'bs-bonuses' }, x.bonuses.map(cb => h('div', null, bonusText({ typeId: cb.typeId, vars: cardBonusVarsForDisplay(cb) })))));
     const where = [...(x.slotIds || []).map(id => ctx.slots.get(id)?.name), ...(x.typeIds || []).map(id => ctx.eqTypes.get(id)?.name)].filter(Boolean);
     if (where.length) el.append(bsec(t.slots, chips(where, w => h('span', { class: 'bs-chip' }, w))));
-    const mi = X.lootBy.get(bnorm(x.name));
-    if (mi) el.append(h('button', { class: 'btn small bs-act', onclick: () => { MK.sel = mi.id; store.set('marketSel', mi.id); switchTool('market'); } }, iconEl('coins'), t.market));
     el.append(...whereBlocks(x.name));
   } else if (e.kind === 'stamp') {
     el.append(bsec(t.variants, h('div', { class: 'bs-variants' }, x.variants.map(v => h('div', { class: 'bs-var' },
@@ -647,15 +650,12 @@ function drawBaseDetail() {
     if (L['Создание']) el.append(bsec(gt.make, chips(L['Создание'], d => bchip(d.n))));
     if (L['Монстр']) el.append(bsec(gt.mons, chips(L['Монстр'], d => bchip(d.n))));
     if (L['Лока']) el.append(bsec(gt.where, chips(L['Лока'], d => bchip(d.n, X.locBy.has(d.n) ? { kind: 'loc', key: d.n } : null))));
-    const mi = X.lootBy.get(bnorm(g.name));
-    if (mi) el.append(h('button', { class: 'btn small bs-act', onclick: () => { MK.sel = mi.id; store.set('marketSel', mi.id); switchTool('market'); } }, iconEl('coins'), t.market));
     el.append(...whereBlocks(g.name));
     el.append(h('div', { class: 'bs-foot' }, wikiLink(g.name)));
   } else if (e.kind === 'loot' || e.kind === 'thing') {
     const mi = e.kind === 'loot' ? x : X.lootBy.get(bnorm(x));
     if (mi) {
       el.append(bfacts([[t.npc, mi.npc != null ? priceEl(mi.npc) : null], [t.event, evLink(mi.event)]]));
-      el.append(h('button', { class: 'btn small bs-act', onclick: () => { MK.sel = mi.id; store.set('marketSel', mi.id); switchTool('market'); } }, iconEl('coins'), t.market));
     }
     el.append(...whereBlocks(e.kind === 'loot' ? x.name : x));
   }

@@ -15,7 +15,6 @@ const VIEWS = {
   result: "tab='gear'; renderCenter(); document.getElementById('right').scrollIntoView();",
   menu: "document.getElementById('brandBtn').click();",
   timer: "switchTool('timer');",
-  market: "switchTool('market');",
   base: "switchTool('base');",
   baseItem: "switchTool('base'); openBase('monster', 'Пещерный Волк', { push: false });",
   editor: "switchTool('calc'); openEditor('1:0');",

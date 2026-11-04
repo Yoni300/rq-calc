@@ -11,9 +11,6 @@ contextBridge.exposeInMainWorld('rqcApp', {
   onOpenBosses: cb => ipcRenderer.on('rqc-open-bosses', () => cb()),
   // settings only the app has: tray, start with Windows
   appSettings: s => ipcRenderer.send('rqc-app-settings', s),
-  // market scanner: on/off, and its events (status, a read market page)
-  marketScan: on => ipcRenderer.send('rqc-market-scan', !!on),
-  onMarket: cb => ipcRenderer.on('rqc-market', (_e, ev) => cb(ev)),
 });
 
 // used only by app/alert.html (the corner window)
