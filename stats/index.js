@@ -12,6 +12,7 @@ const { ScreenTracker } = require('./src/screen-tracker');
 const { LogWatcher, findChatlogsDir } = require('./src/log-watcher');
 const { mergeSources, exactUntil } = require('./src/merge');
 const { computeStats } = require('./src/stats');
+const { mobIcon, itemIcon } = require('./icons');
 
 const OVERLAY_W = 410;
 const OVERLAY_H = 760;
@@ -90,8 +91,8 @@ function saveCurrent(name) {
     start: s.start, durationMs: s.durationMs, gold: s.gold, exp: s.exp, totalKills: s.totalKills, totalItems: s.totalItems, cards: s.cards,
     dealt: s.dealt, recv: s.recv, heal: s.heal, hits: s.hits, misses: s.misses, avgDps: s.avgDps, peakDps: s.peakDps, maxHit: s.maxHit,
     level: s.level, levelsGained: s.levelsGained,
-    mobs: s.mobs.map(m => ({ name: m.name, count: m.count, exp: m.exp })),
-    items: s.items.map(i => ({ name: i.name, qty: i.qty, rarity: i.rarity, card: i.card })),
+    mobs: s.mobs.map(m => ({ name: m.name, count: m.count, exp: m.exp, icon: m.icon })),
+    items: s.items.map(i => ({ name: i.name, qty: i.qty, rarity: i.rarity, card: i.card, icon: i.icon })),
   };
   writeSaved([entry, ...listSaved()].slice(0, 300));
   return entry;
@@ -155,7 +156,11 @@ function current() {
   const now = Date.now();
   screenEvents = screenEvents.filter(e => e.time >= sessionStart);
   const events = mergeSources({ ...files, screen: screenEvents, start: sessionStart }).filter(e => !inPause(e.time));
-  return computeStats(events, sessionStart, now, Math.max(0, now - sessionStart - closedMs - pausedMs(now)));
+  const s = computeStats(events, sessionStart, now, Math.max(0, now - sessionStart - closedMs - pausedMs(now)));
+  // pictures (paths inside data/) for the lists
+  for (const m of s.mobs) m.icon = mobIcon(m.name);
+  for (const i of s.items) i.icon = itemIcon(i.name);
+  return s;
 }
 function pushSnapshot() {
   if (!overlay || overlay.isDestroyed()) return;

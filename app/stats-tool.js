@@ -163,6 +163,7 @@ function statsSaveAsk() {
 
 const statsDur = ms => { const s = Math.floor(ms / 1000), p = n => String(n).padStart(2, '0'); return `${Math.floor(s / 3600)}:${p(Math.floor(s / 60) % 60)}:${p(s % 60)}`; };
 const statsNum = n => fmtNum(Math.round(n || 0), 0);
+const statsPic = (p, mob) => p ? h('img', { class: 'st-pic' + (mob ? ' mob' : ''), src: '../data/' + p, alt: '', onerror: e => { e.target.style.visibility = 'hidden'; } }) : h('i', { class: 'st-pic none' });
 function statsSavedList() {
   const t = STT(), list = statsState.sessions || [];
   const card = e => {
@@ -180,9 +181,9 @@ function statsSavedList() {
           window.rqcApp.stats({ action: 'delete', id: e.id });
         } }, '✕')),
       open ? h('div', { class: 'st-sess-body' },
-        h('div', null, h('h4', null, t.mobs), h('div', { class: 'st-rows' }, (e.mobs || []).map(m => h('div', null, h('span', null, m.name), h('b', null, '×' + statsNum(m.count)))))),
+        h('div', null, h('h4', null, t.mobs), h('div', { class: 'st-rows' }, (e.mobs || []).map(m => h('div', null, h('span', { class: 'st-nm' }, statsPic(m.icon, true), m.name), h('b', null, '×' + statsNum(m.count)))))),
         h('div', null, h('h4', null, t.loot), h('div', { class: 'st-rows' }, (e.items || []).map(i => h('div', { class: i.card ? 'card' : '' },
-          h('span', { style: i.rarity ? `color:${i.rarity}` : null }, i.name), h('b', null, '×' + statsNum(i.qty))))))) : null);
+          h('span', { class: 'st-nm', style: i.rarity && !i.card ? `color:${i.rarity}` : null }, statsPic(i.icon), i.name), h('b', null, '×' + statsNum(i.qty))))))) : null);
   };
   return h('section', { class: 'st-card st-saved' }, h('h3', null, t.savedTitle),
     list.length ? h('div', { class: 'st-sess-list' }, list.map(card)) : h('div', { class: 'bs-empty' }, t.noSaved));

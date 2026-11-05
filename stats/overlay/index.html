@@ -99,6 +99,10 @@ html, body { margin: 0; background: transparent; color: var(--fg); font-family: 
 .l-grid { grid-template-columns: minmax(0, 1fr) 60px; }
 .nm { min-width: 0; overflow-wrap: anywhere; line-height: 1.25; }
 .nm.card { color: var(--card); }
+/* mob and loot pictures (stats/icons.js gives the path inside data/) */
+.nm.has-pic { display: flex; align-items: center; gap: 8px; }
+.pic { flex: none; width: 24px; height: 24px; border-radius: 5px; object-fit: cover; background: rgb(0 0 0 / .3); border: 1px solid var(--line); }
+.pic.mob { border-radius: 50%; }
 .ct { font-family: var(--f-num); font-weight: 600; text-align: right; }
 .share { position: absolute; left: 8px; right: 8px; bottom: 2px; height: 2px; background: var(--soft); border-radius: 1px; }
 .share i { display: block; height: 100%; background: var(--accent); opacity: .65; border-radius: 1px; }
@@ -254,6 +258,8 @@ html, body { margin: 0; background: transparent; color: var(--fg); font-family: 
 
   const img = (n) => '<img class="ic" src="icons/' + n + '.png" alt="">';
   const ICON_IMG = { card: img('card') };
+  // a mob / item picture from data/ (RQ Tools); hidden if the file is missing
+  const pic = (p, mob) => p ? '<img class="pic' + (mob ? ' mob' : '') + '" src="../../data/' + esc(p) + '" alt="" onerror="this.style.visibility=\'hidden\'">' : '';
   const FEED_IMG = { kill: img('kills'), item: img('loot'), gold: img('gold'), level: img('level'), heal: img('heal'), recv: img('shield') };
 
   let S = null;
@@ -443,7 +449,7 @@ html, body { margin: 0; background: transparent; color: var(--fg); font-family: 
       $('mTotal').textContent = fmt(s.totalKills);
       $('mKinds').textContent = s.mobs.length + ' ' + kinds(s.mobs.length);
       keepScroll($('mobList'), s.mobs.length ? s.mobs.map((m) =>
-        '<li class="row m-grid"><span class="nm">' + esc(m.name) + '</span><span class="ct">' + fmt(m.count) + '</span>' +
+        '<li class="row m-grid"><span class="nm' + (m.icon ? ' has-pic' : '') + '">' + pic(m.icon, true) + '<span>' + esc(m.name) + '</span></span><span class="ct">' + fmt(m.count) + '</span>' +
         '<span class="share"><i style="width:' + (m.count / top * 100).toFixed(1) + '%"></i></span></li>').join('')
         : '<li class="empty">' + esc(T.noKills) + '</li>');
     }
@@ -453,7 +459,7 @@ html, body { margin: 0; background: transparent; color: var(--fg); font-family: 
       $('chips').innerHTML = chips.map(([k, label, n]) => '<button class="chip" data-cat="' + k + '" aria-pressed="' + (cat === k) + '">' + (label.startsWith('<img') ? label : esc(label)) + '<span class="n">' + n + '</span></button>').join('');
       const rows = s.items.filter((i) => cat === 'all' || (cat === 'card') === i.card);
       keepScroll($('lootList'), rows.length ? rows.map((i) =>
-        '<li class="row l-grid' + (s.now - i.last < 1500 ? ' flash' : '') + '"><span class="nm' + (i.card ? ' card' : '') + '"' + (i.rarity && !i.card ? ' style="color:' + i.rarity + '"' : '') + '>' + (i.card ? ICON_IMG.card : '') + esc(i.name) + '</span>' +
+        '<li class="row l-grid' + (s.now - i.last < 1500 ? ' flash' : '') + '"><span class="nm' + (i.card ? ' card' : '') + (i.icon ? ' has-pic' : '') + '"' + (i.rarity && !i.card ? ' style="color:' + i.rarity + '"' : '') + '>' + (i.icon ? pic(i.icon) : i.card ? ICON_IMG.card : '') + '<span>' + esc(i.name) + '</span></span>' +
         '<span class="ct">×' + fmt(i.qty) + '</span></li>').join('')
         : '<li class="empty">' + esc(T.noLoot) + '</li>');
     }
