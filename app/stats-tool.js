@@ -20,6 +20,10 @@ const STATS_T = {
     keys: 'Керування', keyRows: [['Alt+Shift+S', 'сховати / показати панель'], ['Alt+Shift+R', 'заново виділити чат'], ['Заголовок панелі', 'перетягнути панель']],
     note: 'Гра має бути у віконному режимі або «вікно без рамки». Програма лише читає екран і файли історії чату — у гру не втручається, пам’ять не читає. Сесія зберігається між запусками.',
     web: 'Оверлей працює лише в програмі RQ Tools для Windows.', dl: 'Скачати програму',
+    pause: 'Пауза', resume: 'Продовжити', isPaused: 'На паузі — нічого не рахується', save: 'Зберегти сесію', saveAsk: 'Як назвати сесію?', sessDefault: 'Сесія',
+    savedTitle: 'Збережені сесії', noSaved: 'Тут з’являться сесії, які ви збережете кнопкою «Зберегти сесію» (тут або на оверлеї).',
+    del: 'Видалити', delAsk: 'Видалити сесію «{name}»?', cancel: 'Скасувати', ok: 'Зберегти', savedToast: 'Сесію збережено',
+    dur: 'Час', gold: 'Золото', exp: 'Досвід', kills: 'Мобів', items: 'Луту', cards: 'карт', avgDps: 'Сер. DPS', maxHit: 'Макс. удар', mobs: 'Моби', loot: 'Лут', more: 'Детальніше', less: 'Згорнути',
   },
   ru: {
     title: 'Статистика боя', sub: 'DPS, золото, опыт и лут поверх игры',
@@ -36,6 +40,10 @@ const STATS_T = {
     keys: 'Управление', keyRows: [['Alt+Shift+S', 'скрыть / показать панель'], ['Alt+Shift+R', 'заново выделить чат'], ['Заголовок панели', 'перетащить панель']],
     note: 'Игра должна быть в оконном режиме или «окно без рамки». Программа только читает экран и файлы истории чата — в игру не вмешивается, память не читает. Сессия сохраняется между запусками.',
     web: 'Оверлей работает только в программе RQ Tools для Windows.', dl: 'Скачать программу',
+    pause: 'Пауза', resume: 'Продолжить', isPaused: 'На паузе — ничего не считается', save: 'Сохранить сессию', saveAsk: 'Как назвать сессию?', sessDefault: 'Сессия',
+    savedTitle: 'Сохранённые сессии', noSaved: 'Здесь появятся сессии, которые вы сохраните кнопкой «Сохранить сессию» (здесь или на оверлее).',
+    del: 'Удалить', delAsk: 'Удалить сессию «{name}»?', cancel: 'Отмена', ok: 'Сохранить', savedToast: 'Сессия сохранена',
+    dur: 'Время', gold: 'Золото', exp: 'Опыт', kills: 'Мобов', items: 'Лута', cards: 'карт', avgDps: 'Ср. DPS', maxHit: 'Макс. удар', mobs: 'Мобы', loot: 'Лут', more: 'Подробнее', less: 'Свернуть',
   },
   en: {
     title: 'Combat stats', sub: 'DPS, gold, exp and loot over the game',
@@ -52,6 +60,10 @@ const STATS_T = {
     keys: 'Controls', keyRows: [['Alt+Shift+S', 'hide / show the panel'], ['Alt+Shift+R', 'select the chat again'], ['Panel title', 'drag the panel']],
     note: 'The game must run in a window or a borderless window. The app only reads the screen and the chat history files — it never touches the game or its memory. The session is kept between starts.',
     web: 'The overlay works only in the RQ Tools app for Windows.', dl: 'Download app',
+    pause: 'Pause', resume: 'Continue', isPaused: 'Paused — nothing is counted', save: 'Save the session', saveAsk: 'Name the session', sessDefault: 'Session',
+    savedTitle: 'Saved sessions', noSaved: 'Sessions you save with «Save the session» (here or on the overlay) show up here.',
+    del: 'Delete', delAsk: 'Delete the session «{name}»?', cancel: 'Cancel', ok: 'Save', savedToast: 'Session saved',
+    dur: 'Time', gold: 'Gold', exp: 'Exp', kills: 'Mobs', items: 'Loot', cards: 'cards', avgDps: 'Avg DPS', maxHit: 'Max hit', mobs: 'Mobs', loot: 'Loot', more: 'Details', less: 'Collapse',
   },
 };
 const STT = () => STATS_T[lang] || STATS_T.ru;
@@ -68,7 +80,8 @@ function statsChatPicture() {
     h('div', { class: 'st-chat-wide' }, STATS_CHAT[2].map(cb)),
     h('figcaption', null, STT().chatCap));
 }
-let statsState = { on: false, hasRegion: true, keys: true };
+let statsState = { on: false, hasRegion: true, keys: true, paused: false, sessions: [] };
+const statsOpen = new Set(); // saved sessions shown in full
 
 // settings → main.js: on / off and the language; called at start and when the language changes
 function statsApply() {
@@ -106,9 +119,11 @@ function drawStatsTool() {
     ? h('div', { class: 'st-ctl web' }, h('div', { class: 'st-state' }, t.web),
       h('button', { class: 'btn primary', onclick: () => $('btnDownload').click() }, iconEl('download'), t.dl))
     : h('div', { class: 'st-ctl' + (on ? ' on' : '') },
-      h('div', { class: 'st-state' }, h('i', { class: 'st-dot' }), on ? t.isOn : t.isOff),
+      h('div', { class: 'st-state' + (on && statsState.paused ? ' paused' : '') }, h('i', { class: 'st-dot' }), on ? (statsState.paused ? t.isPaused : t.isOn) : t.isOff),
       h('div', { class: 'st-btns' },
         h('button', { class: 'btn' + (on ? '' : ' primary'), onclick: () => statsSet(!on) }, on ? t.off : t.on),
+        on ? h('button', { class: 'btn' + (statsState.paused ? ' primary' : ''), onclick: () => window.rqcApp.stats({ action: 'pause', value: !statsState.paused }) }, statsState.paused ? t.resume : t.pause) : null,
+        on ? h('button', { class: 'btn', onclick: statsSaveAsk }, t.save) : null,
         on ? h('button', { class: 'btn', onclick: () => window.rqcApp.stats({ action: 'calibrate' }) }, t.calib) : null,
         on ? h('button', { class: 'btn ghost', onclick: () => window.rqcApp.stats({ action: 'reset' }) }, t.reset) : null),
       on && !statsState.hasRegion ? h('div', { class: 'st-warn' }, t.noRegion) : null,
@@ -123,5 +138,52 @@ function drawStatsTool() {
         h('section', { class: 'st-card' }, h('h3', null, t.shows), h('ul', { class: 'st-list' }, t.showsList.map(s => h('li', null, s)))),
         h('section', { class: 'st-card' }, h('h3', null, t.keys),
           h('div', { class: 'st-keys' }, t.keyRows.map(([k, s]) => h('div', null, h('kbd', null, k), h('span', null, s))))))),
+    IS_APP && window.rqcApp.stats ? statsSavedList() : null,
     h('div', { class: 'sn-note st-note' }, t.note));
+}
+
+// «Сохранить сессию»: ask for a name (a date by default); the session itself goes on
+function statsSaveAsk() {
+  const t = STT(), d = new Date(), p = n => String(n).padStart(2, '0');
+  const def = `${t.sessDefault} ${p(d.getDate())}.${p(d.getMonth() + 1)} ${p(d.getHours())}:${p(d.getMinutes())}`;
+  const wrap = h('div', { class: 'modal confirm-wrap' });
+  const inp = h('input', { class: 'inp st-name', maxlength: 80, value: def });
+  const done = save => {
+    wrap.remove();
+    if (save) { window.rqcApp.stats({ action: 'save', name: inp.value.trim() || def }); toast(t.savedToast); }
+  };
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); done(true); } else if (e.key === 'Escape') { e.preventDefault(); done(false); } });
+  wrap.addEventListener('mousedown', e => { if (e.target === wrap) done(false); });
+  wrap.append(h('div', { class: 'dialog confirm' },
+    h('div', { class: 'confirm-text' }, t.saveAsk), inp,
+    h('div', { class: 'confirm-foot' }, h('button', { class: 'btn', onclick: () => done(false) }, t.cancel), h('button', { class: 'btn primary', onclick: () => done(true) }, t.ok))));
+  document.body.append(wrap);
+  inp.focus(); inp.select();
+}
+
+const statsDur = ms => { const s = Math.floor(ms / 1000), p = n => String(n).padStart(2, '0'); return `${Math.floor(s / 3600)}:${p(Math.floor(s / 60) % 60)}:${p(s % 60)}`; };
+const statsNum = n => fmtNum(Math.round(n || 0), 0);
+function statsSavedList() {
+  const t = STT(), list = statsState.sessions || [];
+  const card = e => {
+    const open = statsOpen.has(e.id);
+    const fact = (label, value) => h('div', { class: 'st-fact' }, h('small', null, label), h('b', null, value));
+    return h('div', { class: 'st-sess' + (open ? ' open' : '') },
+      h('div', { class: 'st-sess-head', onclick: () => { if (open) statsOpen.delete(e.id); else statsOpen.add(e.id); drawStatsTool(); } },
+        h('div', { class: 'st-sess-name' }, h('b', null, e.name), h('small', null, new Date(e.savedAt).toLocaleString())),
+        h('div', { class: 'st-facts' },
+          fact(t.dur, statsDur(e.durationMs)), fact(t.gold, statsNum(e.gold)), fact(t.exp, statsNum(e.exp)), fact(t.kills, statsNum(e.totalKills)),
+          fact(t.items, statsNum(e.totalItems) + (e.cards ? ` (${e.cards} ${t.cards})` : '')), fact(t.avgDps, statsNum(e.avgDps))),
+        h('button', { class: 'btn small ghost danger', title: t.del, onclick: async ev => {
+          ev.stopPropagation();
+          if (!await confirmBox(t.delAsk.replace('{name}', e.name), { ok: t.del, danger: true })) return;
+          window.rqcApp.stats({ action: 'delete', id: e.id });
+        } }, '✕')),
+      open ? h('div', { class: 'st-sess-body' },
+        h('div', null, h('h4', null, t.mobs), h('div', { class: 'st-rows' }, (e.mobs || []).map(m => h('div', null, h('span', null, m.name), h('b', null, '×' + statsNum(m.count)))))),
+        h('div', null, h('h4', null, t.loot), h('div', { class: 'st-rows' }, (e.items || []).map(i => h('div', { class: i.card ? 'card' : '' },
+          h('span', { style: i.rarity ? `color:${i.rarity}` : null }, i.name), h('b', null, '×' + statsNum(i.qty))))))) : null);
+  };
+  return h('section', { class: 'st-card st-saved' }, h('h3', null, t.savedTitle),
+    list.length ? h('div', { class: 'st-sess-list' }, list.map(card)) : h('div', { class: 'bs-empty' }, t.noSaved));
 }

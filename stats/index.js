@@ -40,7 +40,10 @@ function saveConfig() {
 }
 
 // ---------- session: survives closing the overlay and the app; time while it was off is not counted ----------
-let sessionStart = Date.now(), closedMs = 0, screenEvents = [];
+// pauses: [{ from, to }] (to = null while paused): their time is not counted and nothing that happened then counts
+let sessionStart = Date.now(), closedMs = 0, screenEvents = [], pauses = [], paused = false;
+const pausedMs = now => pauses.reduce((sum, p) => sum + Math.max(0, Math.min(p.to ?? now, now) - p.from), 0);
+const inPause = t => pauses.some(p => t >= p.from && t < (p.to ?? Infinity));
 function loadSession() {
   try {
     const s = JSON.parse(fs.readFileSync(sessionPath(), 'utf8'));
@@ -48,22 +51,57 @@ function loadSession() {
     sessionStart = s.start;
     closedMs = (s.closedMs || 0) + Math.max(0, Date.now() - (s.lastSeen || Date.now()));
     screenEvents = s.screenEvents.filter(e => e && typeof e.time === 'number' && e.time >= sessionStart);
+    pauses = Array.isArray(s.pauses) ? s.pauses.filter(p => p && typeof p.from === 'number') : [];
+    paused = !!s.paused;
+    // paused when closed: the closed time is already left out (closedMs), so the open pause restarts now
+    const open = pauses.find(p => p.to == null);
+    if (open) { open.to = Math.max(open.from, s.lastSeen || open.from); if (paused) pauses.push({ from: Date.now(), to: null }); }
   } catch { /* no saved session: a new one */ }
 }
 function saveSession() {
-  const data = JSON.stringify({ version: 1, start: sessionStart, closedMs, lastSeen: Date.now(), screenEvents });
+  const data = JSON.stringify({ version: 1, start: sessionStart, closedMs, lastSeen: Date.now(), screenEvents, pauses, paused });
   try {
     fs.mkdirSync(dataDir(), { recursive: true });
     fs.writeFileSync(sessionPath() + '.tmp', data);
     fs.renameSync(sessionPath() + '.tmp', sessionPath());
   } catch (err) { console.error('[stats] session save failed', err); }
 }
-function newSession() { sessionStart = Date.now(); closedMs = 0; screenEvents = []; saveSession(); }
+function newSession() { sessionStart = Date.now(); closedMs = 0; screenEvents = []; pauses = []; paused = false; saveSession(); }
+function setPaused(v) {
+  if (v === paused) return;
+  const now = Date.now();
+  if (v) pauses.push({ from: now, to: null });
+  else { const open = pauses.find(p => p.to == null); if (open) open.to = now; }
+  paused = v;
+  saveSession();
+}
+
+// ---------- saved sessions: the player names a session and keeps its results (stats\sessions.json) ----------
+const savedPath = () => path.join(dataDir(), 'sessions.json');
+function listSaved() { try { const a = JSON.parse(fs.readFileSync(savedPath(), 'utf8')); return Array.isArray(a) ? a : []; } catch { return []; } }
+function writeSaved(list) {
+  try { fs.mkdirSync(dataDir(), { recursive: true }); fs.writeFileSync(savedPath() + '.tmp', JSON.stringify(list)); fs.renameSync(savedPath() + '.tmp', savedPath()); }
+  catch (err) { console.error('[stats] sessions save failed', err); }
+}
+function saveCurrent(name) {
+  const s = current();
+  const entry = {
+    id: Date.now().toString(36), name: String(name || '').trim().slice(0, 80) || new Date().toLocaleString(), savedAt: Date.now(),
+    start: s.start, durationMs: s.durationMs, gold: s.gold, exp: s.exp, totalKills: s.totalKills, totalItems: s.totalItems, cards: s.cards,
+    dealt: s.dealt, recv: s.recv, heal: s.heal, hits: s.hits, misses: s.misses, avgDps: s.avgDps, peakDps: s.peakDps, maxHit: s.maxHit,
+    level: s.level, levelsGained: s.levelsGained,
+    mobs: s.mobs.map(m => ({ name: m.name, count: m.count, exp: m.exp })),
+    items: s.items.map(i => ({ name: i.name, qty: i.qty, rarity: i.rarity, card: i.card })),
+  };
+  writeSaved([entry, ...listSaved()].slice(0, 300));
+  return entry;
+}
+function deleteSaved(id) { writeSaved(listSaved().filter(e => e.id !== id)); }
 
 let tracker = new ScreenTracker();
 let files = { monthly: null, exported: null };
 const status = { screen: 'starting', error: '', lastFrameAt: 0, lastEventAt: 0, chatlogsDir: '' };
-let on = false, lang = 'ru', onOff = () => {};
+let on = false, lang = 'ru', onChange = () => {};
 let overlay = null, calib = null, ocr = null, ocrStopping = false, watcher = null, dragFrom = null, timers = [];
 
 // ---------- screen reading ----------
@@ -113,12 +151,17 @@ function startWatcher() {
   watcher.start();
 }
 
+function current() {
+  const now = Date.now();
+  screenEvents = screenEvents.filter(e => e.time >= sessionStart);
+  const events = mergeSources({ ...files, screen: screenEvents, start: sessionStart }).filter(e => !inPause(e.time));
+  return computeStats(events, sessionStart, now, Math.max(0, now - sessionStart - closedMs - pausedMs(now)));
+}
 function pushSnapshot() {
   if (!overlay || overlay.isDestroyed()) return;
   const now = Date.now();
-  screenEvents = screenEvents.filter(e => e.time >= sessionStart);
-  const events = mergeSources({ ...files, screen: screenEvents, start: sessionStart });
-  const snap = computeStats(events, sessionStart, now, Math.max(0, now - sessionStart - closedMs));
+  const snap = current();
+  snap.paused = paused;
   const exact = exactUntil(files);
   snap.status = {
     screen: status.screen, error: status.error, reading: now - status.lastFrameAt < 5000, lastEventAt: status.lastEventAt,
@@ -186,8 +229,11 @@ ipcMain.on('overlay:drag-end', () => {
 ipcMain.on('overlay:action', (_e, name) => {
   if (name === 'reset') { newSession(); pushSnapshot(); }
   else if (name === 'calibrate') openCalibration();
-  else if (name === 'quit') { stop(); onOff(); } // the overlay's ✕: off, the tool page shows it
+  else if (name === 'pause') { setPaused(!paused); pushSnapshot(); onChange(); }
+  else if (name === 'quit') { stop(); onChange(); } // the overlay's ✕: off, the tool page shows it
 });
+// the overlay's «save» with the name typed there
+ipcMain.on('overlay:save', (_e, name) => { saveCurrent(name); onChange(); });
 ipcMain.on('calib:done', (_e, r) => {
   const d = screen.getPrimaryDisplay();
   const phys = screen.dipToScreenRect(null, { x: d.bounds.x + r.x, y: d.bounds.y + r.y, width: r.w, height: r.h });
@@ -201,10 +247,10 @@ ipcMain.on('calib:cancel', () => { if (calib) calib.close(); });
 
 // ---------- on / off ----------
 let loaded = false;
-/** opts: { lang, onOff: called when the overlay's ✕ turned it off } → { keys: whether the hotkeys could be taken } */
+/** opts: { lang, onChange: called when the overlay changed something (✕, pause, save) } → state + { keys: whether the hotkeys could be taken } */
 function start(opts = {}) {
   if (opts.lang) lang = opts.lang;
-  if (opts.onOff) onOff = opts.onOff;
+  if (opts.onChange) onChange = opts.onChange;
   if (on) { if (overlay) overlay.showInactive(); return state(); }
   on = true;
   if (!loaded) { takeOverStandalone(); loadConfig(); loadSession(); loaded = true; }
@@ -230,7 +276,16 @@ function stop() {
   if (calib) calib.close();
   if (overlay) overlay.close();
 }
-function state() { return { on, hasRegion: !!(config.region), chatlogs: status.chatlogsDir || '' }; }
+function state() {
+  if (!loaded) { takeOverStandalone(); loadConfig(); loadSession(); loaded = true; } // the page asks before it was ever on
+  return { on, paused, hasRegion: !!(config.region), chatlogs: status.chatlogsDir || '', sessions: listSaved() };
+}
 function setLang(l) { lang = l; }
 
-module.exports = { start, stop, state, setLang, calibrate: openCalibration, show: () => overlay && overlay.showInactive(), newSession: () => { newSession(); pushSnapshot(); } };
+module.exports = {
+  start, stop, state, setLang, calibrate: openCalibration, show: () => overlay && overlay.showInactive(),
+  newSession: () => { state(); newSession(); pushSnapshot(); },
+  pause: v => { state(); setPaused(v); pushSnapshot(); },
+  save: name => { state(); return saveCurrent(name); },
+  remove: id => deleteSaved(id),
+};

@@ -2,7 +2,7 @@
 window.RQ_I18N = {
   uk: {
     settings: 'Налаштування', calibrate: 'Виділити чат (Alt+Shift+R)', reset: 'Нова сесія', resetAsk: 'Скинути?',
-    compact: 'Згорнути', expand: 'Розгорнути', quit: 'Закрити оверлей',
+    compact: 'Згорнути', expand: 'Розгорнути', quit: 'Закрити оверлей', pause: 'Пауза: нічого не рахується', resume: 'Продовжити', saveSess: 'Зберегти сесію', saveName: 'Назва сесії', saveOk: 'Зберегти', saved: 'Сесію збережено — вона в RQ Tools → «Статистика бою»', sessDefault: 'Сесія',
     language: 'Мова', show: 'Показувати', alpha: 'Прозорість панелі', done: 'Готово',
     gold: 'Золото', exp: 'Досвід', kills: 'Вбито мобів', items: 'Предметів', level: 'Рівень',
     tabMobs: 'Моби', tabLoot: 'Лут', tabCombat: 'Бій',
@@ -25,7 +25,7 @@ window.RQ_I18N = {
   },
   ru: {
     settings: 'Настройки', calibrate: 'Выделить чат (Alt+Shift+R)', reset: 'Новая сессия', resetAsk: 'Сбросить?',
-    compact: 'Свернуть', expand: 'Развернуть', quit: 'Закрыть оверлей',
+    compact: 'Свернуть', expand: 'Развернуть', quit: 'Закрыть оверлей', pause: 'Пауза: ничего не считается', resume: 'Продолжить', saveSess: 'Сохранить сессию', saveName: 'Название сессии', saveOk: 'Сохранить', saved: 'Сессия сохранена — она в RQ Tools → «Статистика боя»', sessDefault: 'Сессия',
     language: 'Язык', show: 'Показывать', alpha: 'Прозрачность панели', done: 'Готово',
     gold: 'Золото', exp: 'Опыт', kills: 'Убито мобов', items: 'Предметов', level: 'Уровень',
     tabMobs: 'Мобы', tabLoot: 'Лут', tabCombat: 'Бой',
@@ -48,7 +48,7 @@ window.RQ_I18N = {
   },
   en: {
     settings: 'Settings', calibrate: 'Select chat (Alt+Shift+R)', reset: 'New session', resetAsk: 'Reset?',
-    compact: 'Collapse', expand: 'Expand', quit: 'Close the overlay',
+    compact: 'Collapse', expand: 'Expand', quit: 'Close the overlay', pause: 'Pause: nothing is counted', resume: 'Continue', saveSess: 'Save the session', saveName: 'Session name', saveOk: 'Save', saved: 'Session saved — see RQ Tools → «Combat stats»', sessDefault: 'Session',
     language: 'Language', show: 'Show', alpha: 'Panel opacity', done: 'Done',
     gold: 'Gold', exp: 'Exp', kills: 'Mobs killed', items: 'Items', level: 'Level',
     tabMobs: 'Mobs', tabLoot: 'Loot', tabCombat: 'Combat',

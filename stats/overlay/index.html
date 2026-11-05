@@ -35,6 +35,17 @@ html, body { margin: 0; background: transparent; color: var(--fg); font-family: 
 .dot.on { background: var(--heal); animation: pulse 1.6s ease-in-out infinite; }
 .dot.warn { background: var(--gold); }
 .dot.err { background: var(--recv); }
+/* paused: the timer stands still */
+.sess.paused #timer { color: var(--gold); }
+.sess.paused .dot { background: var(--gold); animation: none; }
+.ib.paused { color: var(--gold); border-color: var(--gold); }
+/* «save the session»: a name field under the title */
+.saverow { display: flex; gap: 6px; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+.saverow input { flex: 1; min-width: 0; font: inherit; font-size: 13px; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--line); background: rgb(0 0 0 / .35); color: var(--fg); outline: none; }
+.saverow input:focus { border-color: var(--accent); }
+.saverow button { font: inherit; font-size: 12px; padding: 0 10px; border-radius: 6px; border: 1px solid var(--accent); background: var(--accent); color: var(--on-accent); cursor: pointer; }
+.saverow button.no { background: transparent; color: var(--muted); border-color: var(--line); }
+.savedmsg { padding: 6px 12px; font-size: 12px; color: var(--heal); border-bottom: 1px solid var(--line); }
 .tools { display: flex; gap: 2px; }
 .ib { height: 26px; min-width: 26px; display: inline-grid; place-items: center; padding: 0; background: transparent; border: 1px solid transparent; border-radius: 6px; color: var(--muted); cursor: pointer; font: inherit; font-size: 12px; }
 .ib:hover { background: var(--soft); color: var(--fg); border-color: var(--line); }
@@ -139,12 +150,16 @@ html, body { margin: 0; background: transparent; color: var(--fg); font-family: 
     <div class="tools">
       <button class="ib" id="bSet" data-i18n-title="settings"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2.5 4.5h7M12.5 4.5h1M2.5 11.5h1M6.5 11.5h7"/><circle cx="11" cy="4.5" r="1.6"/><circle cx="5" cy="11.5" r="1.6"/></svg></button>
       <button class="ib" id="bCal" data-i18n-title="calibrate"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 5V2h3M11 2h3v3M14 11v3h-3M5 14H2v-3"/></svg></button>
+      <button class="ib" id="bPause"></button>
+      <button class="ib" id="bSave"></button>
       <button class="ib" id="bReset"></button>
       <button class="ib" id="bCompact"></button>
       <button class="ib" id="bQuit" data-i18n-title="quit"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>
     </div>
   </header>
 
+  <form class="saverow" id="saveRow" hidden><input id="saveName" maxlength="80" autocomplete="off"><button type="submit" id="saveOk"></button><button type="button" class="no" id="saveNo">✕</button></form>
+  <div class="savedmsg" id="savedMsg" hidden></div>
   <div class="hint" id="hint" hidden></div>
 
   <div class="settings" id="settings" hidden>
@@ -232,6 +247,9 @@ html, body { margin: 0; background: transparent; color: var(--fg); font-family: 
     reset: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M13 8a5 5 0 1 1-1.6-3.7"/><path d="M13 2.5v3h-3"/></svg>',
     up: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10l4-4 4 4"/></svg>',
     down: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l4 4 4-4"/></svg>',
+    pause: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5.5 3.5v9M10.5 3.5v9"/></svg>',
+    play: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 3.2v9.6L12.6 8z"/></svg>',
+    save: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M3 2.5h8l2.5 2.5v8.5h-11z"/><path d="M5.5 2.5v3h5v-3M5 13.5V9.5h6v4"/></svg>',
   };
 
   const img = (n) => '<img class="ic" src="icons/' + n + '.png" alt="">';
@@ -265,6 +283,24 @@ html, body { margin: 0; background: transparent; color: var(--fg); font-family: 
 
   // ----- buttons -----
   $('bCal').onclick = () => window.rq.action('calibrate');
+  // pause: nothing counts and the timer stands until «continue»
+  $('bPause').onclick = () => window.rq.action('pause');
+  // save: name the session (a date by default), Enter saves, Esc cancels; the session itself goes on
+  const sessName = () => { const d = new Date(); return T.sessDefault + ' ' + pad(d.getDate()) + '.' + pad(d.getMonth() + 1) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()); };
+  const closeSave = () => { $('saveRow').hidden = true; window.rq.interactive(false); };
+  $('bSave').onclick = () => {
+    const row = $('saveRow');
+    if (!row.hidden) { closeSave(); return; }
+    row.hidden = false; $('saveName').value = sessName(); $('saveName').focus(); $('saveName').select();
+  };
+  $('saveRow').onsubmit = (e) => {
+    e.preventDefault();
+    window.rq.save($('saveName').value.trim() || sessName());
+    closeSave();
+    const m = $('savedMsg'); m.textContent = T.saved; m.hidden = false; setTimeout(() => { m.hidden = true; }, 2500);
+  };
+  $('saveNo').onclick = closeSave;
+  $('saveName').addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSave(); });
   $('bQuit').onclick = () => window.rq.action('quit');
   let armT = null;
   const resetBtn = $('bReset');
@@ -384,6 +420,13 @@ html, body { margin: 0; background: transparent; color: var(--fg); font-family: 
     const s = S;
     const sec = Math.floor(s.durationMs / 1000);
     $('timer').textContent = pad(Math.floor(sec / 3600)) + ':' + pad(Math.floor(sec / 60) % 60) + ':' + pad(sec % 60);
+    // paused: the timer and the counting stand still
+    document.querySelector('.sess').classList.toggle('paused', !!s.paused);
+    const pb = $('bPause');
+    if (pb.dataset.p !== String(!!s.paused)) { pb.dataset.p = String(!!s.paused); pb.innerHTML = s.paused ? ICON.play : ICON.pause; pb.classList.toggle('paused', !!s.paused); }
+    pb.title = s.paused ? T.resume : T.pause;
+    if (!$('bSave').innerHTML) $('bSave').innerHTML = ICON.save;
+    $('bSave').title = T.saveSess; $('saveOk').textContent = T.saveOk; $('saveName').placeholder = T.saveName;
     $('vDps').textContent = fmt(s.dps);
     renderSpark(s.chart);
     $('vGold').textContent = fmt(s.gold);

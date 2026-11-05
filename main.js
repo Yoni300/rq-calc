@@ -163,15 +163,19 @@ ipcMain.on('rqc-alert-action', async (_e, id) => {
   } finally { ocrInstalling = false; }
 });
 // ---------- RQ Stats (stats/): the «Статистика» tool page turns the overlay on / off ----------
-// { on: true | false, lang, action: 'calibrate' | 'show' | 'reset' } → 'rqc-stats-state' { on, hasRegion, keys }
+// { on: true | false, lang, action: 'calibrate' | 'show' | 'reset' | 'pause' (value) | 'save' (name) | 'delete' (id) | 'state' }
+// → 'rqc-stats-state' { on, paused, hasRegion, keys, sessions }
 const statsState = st => { if (win && !win.isDestroyed()) win.webContents.send('rqc-stats-state', st); };
 ipcMain.on('rqc-stats', (_e, cmd) => {
   if (cmd.lang) stats.setLang(cmd.lang);
-  if (cmd.on === true) statsState(stats.start({ lang: cmd.lang, onOff: () => statsState(stats.state()) }));
+  if (cmd.on === true) statsState(stats.start({ lang: cmd.lang, onChange: () => statsState(stats.state()) }));
   else if (cmd.on === false) { stats.stop(); statsState(stats.state()); }
   if (cmd.action === 'calibrate') stats.calibrate();
   else if (cmd.action === 'show') stats.show();
-  else if (cmd.action === 'reset') stats.newSession();
+  else if (cmd.action === 'reset') { stats.newSession(); statsState(stats.state()); }
+  else if (cmd.action === 'pause') { stats.pause(!!cmd.value); statsState(stats.state()); }
+  else if (cmd.action === 'save') { stats.save(cmd.name); statsState(stats.state()); }
+  else if (cmd.action === 'delete') { stats.remove(cmd.id); statsState(stats.state()); }
   else if (cmd.action === 'state') statsState(stats.state());
 });
 app.on('will-quit', () => { stats.stop(); globalShortcut.unregisterAll(); cardScan.stop(); });

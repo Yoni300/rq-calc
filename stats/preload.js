@@ -7,6 +7,7 @@ contextBridge.exposeInMainWorld('rq', {
   drag: (dx, dy) => ipcRenderer.send('overlay:drag', dx, dy),
   dragEnd: () => ipcRenderer.send('overlay:drag-end'),
   action: (name) => ipcRenderer.send('overlay:action', name),
+  save: (name) => ipcRenderer.send('overlay:save', name),
   onCalibInit: (cb) => ipcRenderer.on('calib:init', (_e, d) => cb(d)),
   calibDone: (rect) => ipcRenderer.send('calib:done', rect),
   calibCancel: () => ipcRenderer.send('calib:cancel'),
