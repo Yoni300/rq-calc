@@ -15,6 +15,8 @@ contextBridge.exposeInMainWorld('rqcApp', {
   cardSettings: s => ipcRenderer.send('rqc-card-settings', s),
   onCardResult: cb => ipcRenderer.on('rqc-card-result', (_e, r) => cb(r)),
   onCardStatus: cb => ipcRenderer.on('rqc-card-status', (_e, st) => cb(st)),
+  // installing the Russian text recognition: { state: 'start' | 'ok' | 'cancel' | 'fail', reason }
+  onCardOcr: cb => ipcRenderer.on('rqc-card-ocr', (_e, st) => cb(st)),
 });
 
 // used only by app/alert.html (the corner window)
@@ -22,4 +24,5 @@ contextBridge.exposeInMainWorld('rqcAlert', {
   onAlert: cb => ipcRenderer.on('rqc-alert-show', (_e, a) => cb(a)),
   size: (w, h) => ipcRenderer.send('rqc-alert-size', w, h),
   open: () => ipcRenderer.send('rqc-alert-open'),
+  action: id => ipcRenderer.send('rqc-alert-action', id), // a button inside a message
 });

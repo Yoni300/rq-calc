@@ -32,9 +32,10 @@ function cardShowResult(r) {
   const base = { key: 'card', noOpen: true, corner: SETTINGS.corner };
   if (!r || !r.ok) {
     const noOcr = r && r.reason === 'no-ru-ocr', failed = r && r.reason !== 'none';
-    window.rqcApp.bossAlert({ ...base, kind: 'miss', ms: 6000,
+    window.rqcApp.bossAlert({ ...base, kind: 'miss', ms: noOcr ? 30000 : 6000,
       title: noOcr ? T.cardNoOcr : failed ? T.cardFailed2 : T.cardNone,
-      sub: noOcr ? T.cardNoOcrHint : failed ? String(r.reason || '') : T.cardNoneHint });
+      sub: noOcr ? T.cardNoOcrHint : failed ? String(r.reason || '') : T.cardNoneHint,
+      action: noOcr && window.rqcApp.onCardOcr ? { id: 'install-ru-ocr', label: T.cardOcrInstall } : null });
     return;
   }
   const price = cardPrice(), server = (CARD_SERVERS.find(s => s[0] === SETTINGS.cardServer) || CARD_SERVERS[0])[1];
@@ -45,6 +46,14 @@ function cardShowResult(r) {
 if (IS_APP && window.rqcApp.onCardResult) {
   window.rqcApp.onCardStatus(st => { cardKeyStatus = st; if (typeof drawSettings === 'function') drawSettings(); });
   window.rqcApp.onCardResult(cardShowResult);
+  // «Установить» was pressed: Windows installs the Russian text recognition (main.js)
+  if (window.rqcApp.onCardOcr) window.rqcApp.onCardOcr(st => {
+    const a = { key: 'card', noOpen: true, corner: SETTINGS.corner };
+    if (st.state === 'start') window.rqcApp.bossAlert({ ...a, kind: 'miss', ms: 600000, title: T.cardOcrInstalling, sub: T.cardOcrInstallingHint });
+    else if (st.state === 'ok') window.rqcApp.bossAlert({ ...a, kind: 'up nopic', ms: 15000, title: T.cardOcrDone, sub: T.cardOcrDoneHint.replace('{key}', SETTINGS.cardKey || 'F8') });
+    else window.rqcApp.bossAlert({ ...a, kind: 'miss', ms: 40000, title: st.state === 'cancel' ? T.cardOcrCancel : T.cardOcrFail, sub: T.cardOcrManual,
+      action: st.state === 'cancel' ? { id: 'install-ru-ocr', label: T.cardOcrInstall } : null });
+  });
 }
 
 // the «Сканер карт» block of the settings dialog (settings.js passes its little builders)

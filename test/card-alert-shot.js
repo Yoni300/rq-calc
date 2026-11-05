@@ -1,5 +1,5 @@
 // Pictures of the card scanner: its block in the settings and the corner alerts it makes (found with a price,
-// found without a price, not found). Run: SHOT_DIR=<dir> electron test/card-alert-shot.js → settings.png, alert.png
+// found without a price, not found, no Russian OCR + its install button and results). Run: SHOT_DIR=<dir> electron test/card-alert-shot.js → settings.png, alert.png
 'use strict';
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
@@ -25,13 +25,16 @@ app.whenReady().then(async () => {
     cardShowResult({ ok: true, name: 'Карта Воко', signs: 190 });
     SETTINGS.cardPrice_fenix = 0; cardShowResult({ ok: true, name: 'Карта Королевы Крыс', signs: 150 }); SETTINGS.cardPrice_fenix = 55000;
     cardShowResult({ ok: false, reason: 'none' });
+    cardShowResult({ ok: false, reason: 'no-ru-ocr' });
   `);
+  // the «Установить» button: how the install went (main.js → the page)
+  for (const state of ['ok', 'cancel']) win.webContents.send('rqc-card-ocr', { state });
   await new Promise(r => setTimeout(r, 600));
   fs.writeFileSync(path.join(outDir, 'settings.png'), (await win.webContents.capturePage()).toPNG());
 
-  const aw = new BrowserWindow({ width: 380, height: 360, backgroundColor: '#3a3f44', webPreferences: { preload: path.join(root, 'preload.js') } });
+  const aw = new BrowserWindow({ width: 380, height: 760, backgroundColor: '#3a3f44', webPreferences: { preload: path.join(root, 'preload.js') } });
   await aw.loadFile(path.join(root, 'app', 'alert.html'));
-  alerts.forEach((a, i) => aw.webContents.send('rqc-alert-show', { ...a, key: 'card' + i })); // the app replaces one with the next; here all three
+  alerts.forEach((a, i) => aw.webContents.send('rqc-alert-show', { ...a, key: 'card' + i })); // the app replaces one with the next; here all of them
   await new Promise(r => setTimeout(r, 900));
   fs.writeFileSync(path.join(outDir, 'alert.png'), (await aw.webContents.capturePage()).toPNG());
   console.log(JSON.stringify(alerts.map(a => [a.title, a.big, a.sub])));

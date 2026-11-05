@@ -86,4 +86,27 @@ async function scan() {
   return { ok: true, name: found.name, signs: found.signs, ms: Date.now() - t0 };
 }
 
-module.exports = { start, stop, scan };
+// The Windows component «Optical character recognition» for Russian (a keyboard layout alone does not bring it).
+// Installing needs admin rights: Windows asks (UAC), then downloads it, which can take a few minutes.
+// → { ok: true } or { ok: false, reason: 'cancel' (the UAC prompt was declined) | 'no-package' | <code> }
+function installRuOcr() {
+  const inner = [
+    "$ErrorActionPreference = 'Stop'",
+    'try {',
+    "  $c = Get-WindowsCapability -Online | Where-Object { $_.Name -like 'Language.OCR~~~ru-RU~*' } | Select-Object -First 1",
+    '  if (-not $c) { exit 3 }',
+    "  if ($c.State -ne 'Installed') { Add-WindowsCapability -Online -Name $c.Name | Out-Null }",
+    '  exit 0',
+    '} catch { exit 1 }',
+  ].join('\n');
+  const enc = s => Buffer.from(s, 'utf16le').toString('base64');
+  const outer = 'try { $p = Start-Process powershell.exe -Verb RunAs -WindowStyle Hidden -Wait -PassThru ' +
+    `-ArgumentList '-NoProfile','-EncodedCommand','${enc(inner)}'; exit $p.ExitCode } catch { exit 1223 }`;
+  return new Promise(res => {
+    const p = spawn('powershell.exe', ['-NoProfile', '-EncodedCommand', enc(outer)], { windowsHide: true });
+    p.on('error', e => res({ ok: false, reason: e.message }));
+    p.on('exit', code => res(code === 0 ? { ok: true } : { ok: false, reason: code === 1223 ? 'cancel' : code === 3 ? 'no-package' : 'code ' + code }));
+  });
+}
+
+module.exports = { start, stop, scan, installRuOcr };

@@ -30,7 +30,11 @@ html, body { margin: 0; background: transparent; overflow: hidden; font-family: 
 .card.miss .title { color: #c9b89a; }
 .card.miss .bar { background: #6f6553; }
 .card.miss .pic { display: none; }
-.card.miss .sub, .card.sign .sub { white-space: normal; }
+.card.miss .sub, .card.sign .sub, .card.nopic .sub { white-space: normal; }
+.card.nopic .pic { display: none; }
+.act { margin-top: 8px; padding: 5px 14px; border: 1px solid #e6b85c; border-radius: 7px; cursor: pointer; font: 700 13px "Segoe UI", system-ui, sans-serif;
+  color: #ffe2a0; background: linear-gradient(180deg, rgba(230, 184, 92, .22), rgba(230, 184, 92, .08)); }
+.act:hover { background: rgba(230, 184, 92, .3); }
 @keyframes in { from { opacity: 0; transform: translateX(60px); } to { opacity: 1; transform: none; } }
 @keyframes out { to { opacity: 0; transform: translateX(60px); } }
 @keyframes shrink { to { transform: scaleX(0); } }

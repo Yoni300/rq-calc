@@ -141,6 +141,22 @@ ipcMain.on('rqc-card-settings', (_e, s) => {
   if (s.enabled) cardScan.start(); else cardScan.stop();
   if (win && !win.isDestroyed()) win.webContents.send('rqc-card-status', { hotkey: s.hotkey, ok: !s.enabled || ok });
 });
+// «Установить» in the «no Russian text recognition» alert
+let ocrInstalling = false;
+ipcMain.on('rqc-alert-action', async (_e, id) => {
+  if (id !== 'install-ru-ocr' || ocrInstalling) return;
+  ocrInstalling = true;
+  const send = st => { if (win && !win.isDestroyed()) win.webContents.send('rqc-card-ocr', st); };
+  send({ state: 'start' });
+  try {
+    const r = await cardScan.installRuOcr();
+    // the helper checks the language when it starts: restart it, that also tells whether it works now
+    cardScan.stop();
+    const works = r.ok && await cardScan.start();
+    if (!cardKey) cardScan.stop();
+    send(works ? { state: 'ok' } : { state: r.reason === 'cancel' ? 'cancel' : 'fail', reason: r.ok ? 'no-ru-ocr' : r.reason });
+  } finally { ocrInstalling = false; }
+});
 app.on('will-quit', () => { globalShortcut.unregisterAll(); cardScan.stop(); });
 
 // TEST client: reload the page when the app, engine or data change (main.js/preload.js need a restart)

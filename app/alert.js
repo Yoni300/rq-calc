@@ -34,6 +34,13 @@ window.rqcAlert.onAlert(a => {
   // card scanner: the big line with the result («190 знаков ≈ 10 450 000»)
   if (a.big) { const b = document.createElement('div'); b.className = 'big'; b.textContent = a.big; text.append(b); }
   text.append(s);
+  // an optional button («Установить»): does its thing in main.js and closes the message
+  if (a.action) {
+    const b = document.createElement('button');
+    b.className = 'act'; b.textContent = a.action.label;
+    b.addEventListener('click', e => { e.stopPropagation(); window.rqcAlert.action(a.action.id); close(card); });
+    text.append(b);
+  }
   const x = document.createElement('button');
   x.className = 'x'; x.textContent = '✕';
   x.addEventListener('click', e => { e.stopPropagation(); close(card); });

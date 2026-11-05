@@ -1,6 +1,10 @@
 // "What's new" under the bell in the top bar (app/news.js). Newest first. Add an entry for every change players see.
 // at: ISO time in UTC (shown in each viewer's own time zone); text: ru / uk / en.
 window.RQ_CHANGELOG = [
+  { at: '2026-11-05T17:35Z',
+    ru: 'Сканер карт: если в Windows нет распознавания русского текста, в сообщении теперь есть кнопка «Установить» — программа сама поставит нужный компонент Windows (попросит права администратора) и сразу проверит, что сканер заработал.',
+    uk: 'Сканер карт: якщо у Windows немає розпізнавання російського тексту, у повідомленні тепер є кнопка «Встановити» — програма сама поставить потрібний компонент Windows (попросить права адміністратора) і одразу перевірить, що сканер запрацював.',
+    en: 'Card scanner: if Windows has no Russian text recognition, the message now has an «Install» button — the app installs the Windows component itself (asks for admin rights) and checks right away that the scanner works.' },
   { at: '2026-11-05T08:24Z',
     ru: 'На сайте появилась кнопка «Скачать программу» в верхней панели: она сразу скачивает последнюю версию RQ Tools для Windows (таймер боссов поверх игры, сканер карт на знаки).',
     uk: 'На сайті з’явилася кнопка «Скачати програму» у верхній панелі: вона одразу завантажує останню версію RQ Tools для Windows (таймер босів поверх гри, сканер карт на знаки).',
