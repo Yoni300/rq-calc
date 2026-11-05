@@ -12,7 +12,7 @@ const { ScreenTracker } = require('./src/screen-tracker');
 const { LogWatcher, findChatlogsDir } = require('./src/log-watcher');
 const { mergeSources, exactUntil } = require('./src/merge');
 const { computeStats } = require('./src/stats');
-const { mobIcon, itemIcon } = require('./icons');
+const { mobIcon, itemIcon, fixScreenEvent } = require('./icons');
 
 const OVERLAY_W = 410;
 const OVERLAY_H = 760;
@@ -130,7 +130,7 @@ function startOcr() {
     if (msg.type === 'error') { status.screen = 'error'; status.error = msg.code || msg.message || ''; }
     if (msg.type === 'frame') {
       status.screen = 'ok'; status.lastFrameAt = Date.now();
-      const evs = tracker.push(msg);
+      const evs = tracker.push(msg).map(fixScreenEvent).filter(Boolean); // OCR-garbled names fixed or left out
       if (evs.length) { status.lastEventAt = Date.now(); screenEvents.push(...evs); pushSnapshot(); }
     }
   });
