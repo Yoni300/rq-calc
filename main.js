@@ -1,4 +1,4 @@
-const { app, BrowserWindow, shell, ipcMain, screen, Tray, Menu, globalShortcut } = require('electron');
+const { app, BrowserWindow, shell, ipcMain, screen, Tray, Menu, globalShortcut, clipboard } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const cardScan = require('./card-scan');
@@ -141,6 +141,8 @@ ipcMain.on('rqc-card-settings', (_e, s) => {
   if (s.enabled) cardScan.start(); else cardScan.stop();
   if (win && !win.isDestroyed()) win.webContents.send('rqc-card-status', { hotkey: s.hotkey, ok: !s.enabled || ok });
 });
+// card scanner: the gold sum goes to the clipboard, to paste it as the price in the trade window
+ipcMain.on('rqc-copy-text', (_e, text) => clipboard.writeText(String(text)));
 // «Установить» in the «no Russian text recognition» alert
 let ocrInstalling = false;
 ipcMain.on('rqc-alert-action', async (_e, id) => {

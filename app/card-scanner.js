@@ -39,9 +39,12 @@ function cardShowResult(r) {
     return;
   }
   const price = cardPrice(), server = (CARD_SERVERS.find(s => s[0] === SETTINGS.cardServer) || CARD_SERVERS[0])[1];
+  // the sum goes to the clipboard as plain digits, ready to paste as the price in the trade window
+  const copied = !!(price && SETTINGS.cardCopy && window.rqcApp.copyText);
+  if (copied) window.rqcApp.copyText(String(Math.round(r.signs * price)));
   window.rqcApp.bossAlert({ ...base, kind: 'sign', ms: 12000, img: cardIcon(r.name), title: r.name,
     big: `${r.signs} ${signsWord(r.signs)}` + (price ? ` ≈ ${fmtNum(r.signs * price, 0)}` : ''),
-    sub: price ? `${server} · ${fmtNum(price, 0)} ${T.cardPerSign}` : T.cardNoPrice });
+    sub: price ? `${server} · ${fmtNum(price, 0)} ${T.cardPerSign}` + (copied ? ` · ${T.cardCopied}` : '') : T.cardNoPrice });
 }
 if (IS_APP && window.rqcApp.onCardResult) {
   window.rqcApp.onCardStatus(st => { cardKeyStatus = st; if (typeof drawSettings === 'function') drawSettings(); });
@@ -70,6 +73,7 @@ function cardSettingsSection({ sec, row, sw, set }) {
     const inp = h('input', { class: 'inp set-price', type: 'number', min: 0, step: 1000, value: cardPrice() || '', placeholder: '55000' });
     inp.addEventListener('change', () => set('cardPrice_' + SETTINGS.cardServer, Math.max(0, Math.round(+inp.value || 0)), false));
     rows.push(row(T.setCardPrice, T.setCardPriceHint, inp));
+    if (window.rqcApp.copyText) rows.push(row(T.setCardCopy, T.setCardCopyHint, sw('cardCopy')));
   }
   return sec(T.setCards, ...rows);
 }

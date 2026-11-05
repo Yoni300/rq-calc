@@ -1,6 +1,10 @@
 // "What's new" under the bell in the top bar (app/news.js). Newest first. Add an entry for every change players see.
 // at: ISO time in UTC (shown in each viewer's own time zone); text: ru / uk / en.
 window.RQ_CHANGELOG = [
+  { at: '2026-11-05T18:33Z',
+    ru: 'Сканер карт копирует сумму в золоте в буфер обмена: в окне торговли просто вставьте её как цену (Ctrl+V). Отключается в настройках сканера («Копировать сумму»).',
+    uk: 'Сканер карт копіює суму в золоті в буфер обміну: у вікні торгівлі просто вставте її як ціну (Ctrl+V). Вимикається в налаштуваннях сканера («Копіювати суму»).',
+    en: 'Card scanner copies the gold sum to the clipboard: paste it as the price in the trade window (Ctrl+V). Can be turned off in the scanner settings («Copy the sum»).' },
   { at: '2026-11-05T18:23Z',
     ru: 'Сканер карт лучше читает мелкий шрифт подсказки: учитывает буквы, которые Windows путает («Карга Отородното Путала» → «Карта Огородного пугала»), а если карта не нашлась, сразу перечитывает экран крупнее.',
     uk: 'Сканер карт краще читає дрібний шрифт підказки: враховує літери, які Windows плутає («Карга Отородното Путала» → «Карта Огородного пугала»), а якщо карту не знайдено, одразу перечитує екран більшим.',

@@ -8,7 +8,7 @@ const SET_DEFAULTS = {
   volume: 70, sound: 'bell',
   warnMin: 5, alertUp: true, popup: true, corner: 'br', popupTime: 'normal', titleTimer: true,
   tray: false, autostart: false,
-  cardScan: false, cardKey: 'F8', cardServer: 'fenix', // card scanner (app/card-scanner.js); prices: cardPrice_<server>
+  cardScan: false, cardKey: 'F8', cardServer: 'fenix', cardCopy: true, // card scanner (app/card-scanner.js); prices: cardPrice_<server>
 };
 const SETTINGS = (() => {
   let saved = {};
