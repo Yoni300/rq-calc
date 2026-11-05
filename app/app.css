@@ -994,6 +994,12 @@ body.tool-timer .calc-only { display: none !important; }
 .bs-sub.on { color: var(--gold-hi); border-color: var(--gold); background: rgba(var(--gold-rgb), .1); }
 
 /* the game forum button (royalquest.net) */
+/* website: download the Windows app */
+.dl-btn { border-color: rgba(var(--gold-rgb), .6); color: var(--gold-hi); background: linear-gradient(180deg, rgba(var(--gold-rgb), .16), rgba(var(--gold-rgb), .05)); }
+.dl-btn:hover { border-color: var(--gold); }
+/* the calculator's bar is full: text only on wide screens there; tool pages have room */
+@media (max-width: 1749px) { body:not(.tool-timer) .dl-btn span { display: none; } body:not(.tool-timer) .dl-btn { padding-left: 8px; padding-right: 8px; } }
+@media (max-width: 1100px) { .dl-btn span { display: none; } .dl-btn { padding-left: 8px; padding-right: 8px; } }
 .forum-btn { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; padding-left: 7px; }
 .forum-btn img { width: 20px; height: 20px; flex: none; }
 @media (max-width: 900px) { .forum-btn span { display: none; } }

@@ -1,6 +1,10 @@
 // "What's new" under the bell in the top bar (app/news.js). Newest first. Add an entry for every change players see.
 // at: ISO time in UTC (shown in each viewer's own time zone); text: ru / uk / en.
 window.RQ_CHANGELOG = [
+  { at: '2026-11-05T08:24Z',
+    ru: 'На сайте появилась кнопка «Скачать программу» в верхней панели: она сразу скачивает последнюю версию RQ Tools для Windows (таймер боссов поверх игры, сканер карт на знаки).',
+    uk: 'На сайті з’явилася кнопка «Скачати програму» у верхній панелі: вона одразу завантажує останню версію RQ Tools для Windows (таймер босів поверх гри, сканер карт на знаки).',
+    en: 'The website now has a «Download app» button in the top bar: it downloads the latest RQ Tools for Windows right away (boss timer over the game, card sign scanner).' },
   { at: '2026-11-05T08:04Z',
     ru: 'Сканер карт (в программе для Windows): наведите курсор на карту в игре и нажмите F8 — в углу экрана появится, сколько знаков она даёт и сколько это в золоте. Включается в настройках, там же цена знака для Fenix и Helios и своя горячая клавиша. Программа только читает экран, в игру не вмешивается.',
     uk: 'Сканер карт (у програмі для Windows): наведіть курсор на карту в грі й натисніть F8 — у кутку екрана з’явиться, скільки знаків вона дає і скільки це в золоті. Вмикається в налаштуваннях, там же ціна знака для Fenix і Helios та своя гаряча клавіша. Програма лише читає екран, у гру не втручається.',
