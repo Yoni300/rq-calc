@@ -1,6 +1,10 @@
 // "What's new" under the bell in the top bar (app/news.js). Newest first. Add an entry for every change players see.
 // at: ISO time in UTC (shown in each viewer's own time zone); text: ru / uk / en.
 window.RQ_CHANGELOG = [
+  { at: '2026-11-05T18:50Z',
+    ru: 'Охотник: «Вожак стаи» (форма волка) теперь умножает скорость атаки на 25%, как в игре, а не прибавляет 25. DPS в форме волка стал выше.',
+    uk: 'Мисливець: «Вожак стаи» (форма вовка) тепер множить швидкість атаки на 25%, як у грі, а не додає 25. DPS у формі вовка став вищим.',
+    en: 'Hunter: «Вожак стаи» (wolf form) now multiplies attack speed by 25% like the game does, instead of adding 25. Wolf form DPS is higher.' },
   { at: '2026-11-05T18:33Z',
     ru: 'Сканер карт копирует сумму в золоте в буфер обмена: в окне торговли просто вставьте её как цену (Ctrl+V). Отключается в настройках сканера («Копировать сумму»).',
     uk: 'Сканер карт копіює суму в золоті в буфер обміну: у вікні торгівлі просто вставте її як ціну (Ctrl+V). Вимикається в налаштуваннях сканера («Копіювати суму»).',

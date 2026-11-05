@@ -393,8 +393,11 @@
     const auras = new Map();
     for (const a of T.Aura || []) auras.set(a.Id, { id: a.Id, name: a.Name, classId: a.Class_Id, level: a.Level ?? 1, inVersion: inVersion(a), imageId: a.Image_Id ?? null, bonuses: g(auraBonusRows, a.Id).slice().sort((x, y) => (x.OrderIndex ?? 0) - (y.OrderIndex ?? 0)).map(b => ({ typeId: b.Type_Id, vars: [b.Value], sharedValue: b.SharedValue ?? null, inVersion: inVersion(b) })) });
     const buffBonusRows = group(T.BuffBonus, 'Buff_Id');
+    // «Вожак стаи» (wolf form, buff 48): the game multiplies attack speed by 1.25 instead of adding +25% (2026-11-05, players' check):
+    // its «к Скорости атаки» bonus (type 11) is counted as type 273, «бонус перемножается, а не складывается»
+    const MULTIPLY_AS_BUFFS = new Set([48]);
     const buffs = new Map();
-    for (const b of T.Buff || []) buffs.set(b.Id, { id: b.Id, name: b.Name, maxStack: b.MaxStackCount || 1, level: b.Level ?? 1, classId: b.Class_Id ?? null, cardId: b.Card_Id ?? null, stampId: b.Stamp_Id ?? null, talentId: b.TalentCondition_Id ?? null, guildTalentId: b.GuildCondition_Id ?? null, autoEnabled: !!b.AutoEnabled, inVersion: inVersion(b), imageId: b.Image_Id ?? null, isNegate: !!b.IsNegate, group: b.Group ?? null, bonuses: g(buffBonusRows, b.Id).slice().sort((x, y) => (x.OrderIndex ?? 0) - (y.OrderIndex ?? 0)).map(x => ({ typeId: x.Type_Id, vars: [x.Value] })) });
+    for (const b of T.Buff || []) buffs.set(b.Id, { id: b.Id, name: b.Name, maxStack: b.MaxStackCount || 1, level: b.Level ?? 1, classId: b.Class_Id ?? null, cardId: b.Card_Id ?? null, stampId: b.Stamp_Id ?? null, talentId: b.TalentCondition_Id ?? null, guildTalentId: b.GuildCondition_Id ?? null, autoEnabled: !!b.AutoEnabled, inVersion: inVersion(b), imageId: b.Image_Id ?? null, isNegate: !!b.IsNegate, group: b.Group ?? null, bonuses: g(buffBonusRows, b.Id).slice().sort((x, y) => (x.OrderIndex ?? 0) - (y.OrderIndex ?? 0)).map(x => ({ typeId: MULTIPLY_AS_BUFFS.has(b.Id) && x.Type_Id === 11 ? 273 : x.Type_Id, vars: [x.Value] })) });
     const simpleBonusMap = (rows, key) => { const m = group(rows, key); return id => g(m, id).slice().sort((x, y) => (x.OrderIndex ?? 0) - (y.OrderIndex ?? 0)).map(b => ({ typeId: b.Type_Id, vars: [b.Value] })); };
     const elixirBonuses = simpleBonusMap(T.ElixirBonus, 'Elixir_Id');
     const elixirs = new Map((T.Elixir || []).map(e => [e.Id, { id: e.Id, name: e.Name, isLegacy: !!e.IsLegacy, imageId: e.Image_Id ?? null, bonuses: elixirBonuses(e.Id) }]));
