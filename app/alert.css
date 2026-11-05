@@ -21,6 +21,16 @@ html, body { margin: 0; background: transparent; overflow: hidden; font-family: 
 .x:hover { background: rgba(255, 255, 255, .08); color: #eee4cf; }
 .bar { position: absolute; left: 0; bottom: 0; height: 3px; width: 100%; background: #e6b85c; transform-origin: left; animation: shrink linear forwards; }
 .card.up .bar { background: #86d46d; }
+/* card scanner (app/card-scanner.js): sign = a card was read, miss = nothing found */
+.big { font-size: 19px; font-weight: 700; color: #eee4cf; margin-top: 3px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.card.sign { border-color: rgba(195, 160, 255, .6); }
+.card.sign .pic { border-radius: 8px; border-color: #c3a0ff; }
+.card.sign .bar { background: #c3a0ff; }
+.card.miss { border-color: rgba(168, 154, 128, .5); }
+.card.miss .title { color: #c9b89a; }
+.card.miss .bar { background: #6f6553; }
+.card.miss .pic { display: none; }
+.card.miss .sub, .card.sign .sub { white-space: normal; }
 @keyframes in { from { opacity: 0; transform: translateX(60px); } to { opacity: 1; transform: none; } }
 @keyframes out { to { opacity: 0; transform: translateX(60px); } }
 @keyframes shrink { to { transform: scaleX(0); } }

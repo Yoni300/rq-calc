@@ -1,5 +1,5 @@
 'use strict';
-/* Boss alerts in the screen corner (main.js opens this page in a small always-on-top window).
+/* Boss alerts and card scanner results in the screen corner (main.js opens this page in a small always-on-top window).
    Messages stack up (newest at the bottom), close themselves after a while, a click opens the timer. */
 const stack = document.getElementById('stack');
 const WIDTH = 380, SHOW_FOR = { soon: 12000, up: 25000 }, MAX = 4;
@@ -30,7 +30,10 @@ window.rqcAlert.onAlert(a => {
   text.className = 'text';
   const t = document.createElement('div'); t.className = 'title'; t.textContent = a.title;
   const s = document.createElement('div'); s.className = 'sub'; s.textContent = a.sub || '';
-  text.append(t, s);
+  text.append(t);
+  // card scanner: the big line with the result («190 знаков ≈ 10 450 000»)
+  if (a.big) { const b = document.createElement('div'); b.className = 'big'; b.textContent = a.big; text.append(b); }
+  text.append(s);
   const x = document.createElement('button');
   x.className = 'x'; x.textContent = '✕';
   x.addEventListener('click', e => { e.stopPropagation(); close(card); });
@@ -39,7 +42,8 @@ window.rqcAlert.onAlert(a => {
   const ms = a.ms || SHOW_FOR[a.kind] || 15000;
   bar.style.animationDuration = ms + 'ms';
   card.append(pic, text, x, bar);
-  card.addEventListener('click', () => { window.rqcAlert.open(); close(card); });
+  // a click opens the boss timer (card scanner messages only close)
+  card.addEventListener('click', () => { if (!a.noOpen) window.rqcAlert.open(); close(card); });
   stack.append(card);
   fit();
   setTimeout(() => close(card), ms);

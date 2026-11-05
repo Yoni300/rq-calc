@@ -1,5 +1,6 @@
 'use strict';
-/* Settings (gear button in the top bar): look, sound, boss timer alerts and, in the app, tray / start with Windows.
+/* Settings (gear button in the top bar): look, sound, boss timer alerts and, in the app, tray / start with Windows
+   and the card scanner (its block is in app/card-scanner.js).
    Loads before app.js so the theme and size apply before the first paint; the dialog uses app.js helpers at call time. */
 
 const SET_DEFAULTS = {
@@ -7,6 +8,7 @@ const SET_DEFAULTS = {
   volume: 70, sound: 'bell',
   warnMin: 5, alertUp: true, popup: true, corner: 'br', popupTime: 'normal', titleTimer: true,
   tray: false, autostart: false,
+  cardScan: false, cardKey: 'F8', cardServer: 'fenix', // card scanner (app/card-scanner.js); prices: cardPrice_<server>
 };
 const SETTINGS = (() => {
   let saved = {};
@@ -103,7 +105,8 @@ function drawSettings() {
       row(T.setTitleTimer, T.setTitleTimerHint, sw('titleTimer'))),
     IS_APP ? sec(T.setApp,
       row(T.setTray, T.setTrayHint, sw('tray')),
-      row(T.setAutostart, T.setAutostartHint, sw('autostart'))) : null);
+      row(T.setAutostart, T.setAutostartHint, sw('autostart'))) : null,
+    typeof cardSettingsSection === 'function' ? cardSettingsSection({ sec, row, sw, set }) : null);
 
   setWrap.innerHTML = '';
   setWrap.append(h('div', { class: 'dialog set-dlg' },
@@ -113,6 +116,7 @@ function drawSettings() {
       h('button', { class: 'btn ghost', onclick: async () => {
         if (!await confirmBox(T.setResetAsk, { ok: T.setReset })) return;
         Object.assign(SETTINGS, SET_DEFAULTS); saveSettings(); drawSettings();
+        if (typeof cardApply === 'function') cardApply();
       } }, T.setReset),
       h('div', { class: 'spacer' }),
       h('button', { class: 'btn primary', onclick: closeSettings }, T.done))));

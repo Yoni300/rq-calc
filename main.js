@@ -1,6 +1,7 @@
-const { app, BrowserWindow, shell, ipcMain, screen, Tray, Menu } = require('electron');
+const { app, BrowserWindow, shell, ipcMain, screen, Tray, Menu, globalShortcut } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const cardScan = require('./card-scan');
 
 // The installed app keeps its data in %APPDATA%\rq-calc. Running from the source code is the TEST client:
 // it has its own profile (%APPDATA%\rq-calc-test, first filled with a copy of the main one) and reloads itself
@@ -121,6 +122,26 @@ ipcMain.on('rqc-alert-open', () => {
   showMain();
   win.webContents.send('rqc-open-bosses');
 });
+
+// ---------- card scanner (card-scan.js): a hotkey over a card in the game → how many «Знаки» it gives ----------
+// The page (app/card-scanner.js) sends the settings; the result goes back to the page, which shows it as an alert.
+let cardKey = null, cardBusy = false;
+async function onCardKey() {
+  if (cardBusy || !win || win.isDestroyed()) return;
+  cardBusy = true;
+  try { win.webContents.send('rqc-card-result', await cardScan.scan()); } finally { cardBusy = false; }
+}
+ipcMain.on('rqc-card-settings', (_e, s) => {
+  if (cardKey) { globalShortcut.unregister(cardKey); cardKey = null; }
+  let ok = true;
+  if (s.enabled && s.hotkey) {
+    try { ok = globalShortcut.register(s.hotkey, onCardKey); } catch { ok = false; }
+    if (ok) cardKey = s.hotkey;
+  }
+  if (s.enabled) cardScan.start(); else cardScan.stop();
+  if (win && !win.isDestroyed()) win.webContents.send('rqc-card-status', { hotkey: s.hotkey, ok: !s.enabled || ok });
+});
+app.on('will-quit', () => { globalShortcut.unregisterAll(); cardScan.stop(); });
 
 // TEST client: reload the page when the app, engine or data change (main.js/preload.js need a restart)
 function watchForChanges() {

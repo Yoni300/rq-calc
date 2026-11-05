@@ -25,6 +25,9 @@
     "files": [
       "main.js",
       "preload.js",
+      "ocr/**",
+      "card-match.js",
+      "card-scan.js",
       "build/icon.png",
       "app/**",
       "src/**",
@@ -62,6 +65,9 @@
         "repo": "rq-calc",
         "releaseType": "release"
       }
+    ],
+    "asarUnpack": [
+      "ocr/**"
     ]
   },
   "dependencies": {

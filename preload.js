@@ -11,6 +11,10 @@ contextBridge.exposeInMainWorld('rqcApp', {
   onOpenBosses: cb => ipcRenderer.on('rqc-open-bosses', () => cb()),
   // settings only the app has: tray, start with Windows
   appSettings: s => ipcRenderer.send('rqc-app-settings', s),
+  // card scanner: { enabled, hotkey } → main.js; results of the hotkey and whether the hotkey could be taken
+  cardSettings: s => ipcRenderer.send('rqc-card-settings', s),
+  onCardResult: cb => ipcRenderer.on('rqc-card-result', (_e, r) => cb(r)),
+  onCardStatus: cb => ipcRenderer.on('rqc-card-status', (_e, st) => cb(st)),
 });
 
 // used only by app/alert.html (the corner window)

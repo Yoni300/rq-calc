@@ -1,6 +1,10 @@
 // "What's new" under the bell in the top bar (app/news.js). Newest first. Add an entry for every change players see.
 // at: ISO time in UTC (shown in each viewer's own time zone); text: ru / uk / en.
 window.RQ_CHANGELOG = [
+  { at: '2026-11-05T08:04Z',
+    ru: 'Сканер карт (в программе для Windows): наведите курсор на карту в игре и нажмите F8 — в углу экрана появится, сколько знаков она даёт и сколько это в золоте. Включается в настройках, там же цена знака для Fenix и Helios и своя горячая клавиша. Программа только читает экран, в игру не вмешивается.',
+    uk: 'Сканер карт (у програмі для Windows): наведіть курсор на карту в грі й натисніть F8 — у кутку екрана з’явиться, скільки знаків вона дає і скільки це в золоті. Вмикається в налаштуваннях, там же ціна знака для Fenix і Helios та своя гаряча клавіша. Програма лише читає екран, у гру не втручається.',
+    en: 'Card scanner (in the Windows app): point at a card in the game and press F8 — the screen corner shows how many signs it gives and what that is in gold. Turn it on in the settings, where you also set the sign price for Fenix and Helios and your own hotkey. The app only reads the screen and never touches the game.' },
   { at: '2026-11-04T19:00Z',
     ru: 'Картинка билда: под персонажем теперь список снаряжения — заточка, название, печать (с её цветом) и вставленные карты для каждой вещи.',
     uk: 'Картинка білда: під персонажем тепер список спорядження — заточка, назва, печатка (з її кольором) і вставлені карти для кожної речі.',
