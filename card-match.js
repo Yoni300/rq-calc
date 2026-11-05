@@ -5,12 +5,18 @@
 const LOOKALIKE = { a: 'а', b: 'в', c: 'с', e: 'е', h: 'н', k: 'к', m: 'м', o: 'о', p: 'р', t: 'т', x: 'х', y: 'у', 3: 'з', 0: 'о', 6: 'б' };
 const norm = s => String(s || '').toLowerCase().replace(/ё/g, 'е').replace(/[a-z0-9]/g, ch => LOOKALIKE[ch] || ch).replace(/[^a-zа-я]/g, '');
 
+// letters the game's small tooltip font gets mixed up by OCR («Карга Отородното Путала» = «Карта Огородного Пугала»):
+// swapping them costs half a mistake
+const CONFUSED = new Set(['гт', 'тг', 'ин', 'ни', 'пл', 'лп', 'пн', 'нп', 'шщ', 'щш', 'ьъ', 'ъь', 'цщ', 'щц']);
 function lev(a, b) {
   if (a === b) return 0;
   let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
   for (let i = 1; i <= a.length; i++) {
     const cur = [i];
-    for (let j = 1; j <= b.length; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    for (let j = 1; j <= b.length; j++) {
+      const x = a[i - 1], y = b[j - 1], sub = x === y ? 0 : CONFUSED.has(x + y) ? 0.5 : 1;
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + sub);
+    }
     prev = cur;
   }
   return prev[b.length];
@@ -21,8 +27,8 @@ function makeMatcher(signs) {
   const cards = Object.entries(signs).map(([name, n]) => ({ name, signs: n, key: norm(name) }));
   function best(text) {
     const t = norm(text);
-    // every card name has «карта» in it; «арт» still passes when OCR got the first letter wrong
-    if (t.length < 6 || !/арт/.test(t)) return null;
+    // every card name has «карта» in it; a part of it still passes when OCR got a letter wrong («Карга», «Норта»)
+    if (t.length < 6 || !/арт|кар|арг|орт/.test(t)) return null;
     let top = null;
     for (const c of cards) {
       // the whole name inside the line («Карта Воко (3 шт.)») wins; a longer name beats a shorter one it contains
