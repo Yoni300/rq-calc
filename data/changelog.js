@@ -1,6 +1,10 @@
 // "What's new" under the bell in the top bar (app/news.js). Newest first. Add an entry for every change players see.
 // at: ISO time in UTC (shown in each viewer's own time zone); text: ru / uk / en.
 window.RQ_CHANGELOG = [
+  { at: '2026-11-05T18:59Z',
+    ru: 'Новый инструмент «Статистика боя» (меню RQ Tools): панель поверх игры с DPS, поднятым золотом, опытом, убитыми мобами и всем собранным лутом — бывшая программа RQ Stats теперь встроена в RQ Tools. Данные берутся только из чата игры (экран и файлы истории чата). Только в программе для Windows.',
+    uk: 'Новий інструмент «Статистика бою» (меню RQ Tools): панель поверх гри з DPS, піднятим золотом, досвідом, убитими мобами і всім зібраним лутом — колишня програма RQ Stats тепер вбудована в RQ Tools. Дані беруться лише з чату гри (екран і файли історії чату). Лише в програмі для Windows.',
+    en: 'New tool «Combat stats» (RQ Tools menu): a panel over the game with DPS, gold picked up, exp, mobs killed and all the loot — the former RQ Stats app is now part of RQ Tools. Data comes only from the game chat (the screen and the chat history files). Windows app only.' },
   { at: '2026-11-05T18:50Z',
     ru: 'Охотник: «Вожак стаи» (форма волка) теперь умножает скорость атаки на 25%, как в игре, а не прибавляет 25. DPS в форме волка стал выше.',
     uk: 'Мисливець: «Вожак стаи» (форма вовка) тепер множить швидкість атаки на 25%, як у грі, а не додає 25. DPS у формі вовка став вищим.',

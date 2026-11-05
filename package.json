@@ -28,6 +28,7 @@
       "ocr/**",
       "card-match.js",
       "card-scan.js",
+      "stats/**",
       "build/icon.png",
       "app/**",
       "src/**",
@@ -67,7 +68,8 @@
       }
     ],
     "asarUnpack": [
-      "ocr/**"
+      "ocr/**",
+      "stats/ocr/**"
     ]
   },
   "dependencies": {

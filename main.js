@@ -2,6 +2,7 @@ const { app, BrowserWindow, shell, ipcMain, screen, Tray, Menu, globalShortcut, 
 const path = require('path');
 const fs = require('fs');
 const cardScan = require('./card-scan');
+const stats = require('./stats'); // RQ Stats: the DPS / loot overlay over the game
 
 // The installed app keeps its data in %APPDATA%\rq-calc. Running from the source code is the TEST client:
 // it has its own profile (%APPDATA%\rq-calc-test, first filled with a copy of the main one) and reloads itself
@@ -61,6 +62,8 @@ function createWindow() {
   win.once('ready-to-show', () => { if (STARTED_HIDDEN) win.minimize(); else win.show(); });
   // settings → "keep running in the tray": closing the window only hides it, so boss alerts keep coming
   win.on('close', e => { if (tray && !quitting) { e.preventDefault(); win.hide(); } });
+  // really closed (no tray): the stats overlay and the alert window must not keep the app running
+  win.on('closed', () => app.quit());
   if (IS_TEST && !process.env.RQC_SCREENSHOT) watchForChanges();
   // links open in the normal browser
   win.webContents.setWindowOpenHandler(({ url }) => { shell.openExternal(url); return { action: 'deny' }; });
@@ -159,7 +162,19 @@ ipcMain.on('rqc-alert-action', async (_e, id) => {
     send(works ? { state: 'ok' } : { state: r.reason === 'cancel' ? 'cancel' : 'fail', reason: r.ok ? 'no-ru-ocr' : r.reason });
   } finally { ocrInstalling = false; }
 });
-app.on('will-quit', () => { globalShortcut.unregisterAll(); cardScan.stop(); });
+// ---------- RQ Stats (stats/): the «Статистика» tool page turns the overlay on / off ----------
+// { on: true | false, lang, action: 'calibrate' | 'show' | 'reset' } → 'rqc-stats-state' { on, hasRegion, keys }
+const statsState = st => { if (win && !win.isDestroyed()) win.webContents.send('rqc-stats-state', st); };
+ipcMain.on('rqc-stats', (_e, cmd) => {
+  if (cmd.lang) stats.setLang(cmd.lang);
+  if (cmd.on === true) statsState(stats.start({ lang: cmd.lang, onOff: () => statsState(stats.state()) }));
+  else if (cmd.on === false) { stats.stop(); statsState(stats.state()); }
+  if (cmd.action === 'calibrate') stats.calibrate();
+  else if (cmd.action === 'show') stats.show();
+  else if (cmd.action === 'reset') stats.newSession();
+  else if (cmd.action === 'state') statsState(stats.state());
+});
+app.on('will-quit', () => { stats.stop(); globalShortcut.unregisterAll(); cardScan.stop(); });
 
 // TEST client: reload the page when the app, engine or data change (main.js/preload.js need a restart)
 function watchForChanges() {

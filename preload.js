@@ -17,7 +17,10 @@ contextBridge.exposeInMainWorld('rqcApp', {
   onCardStatus: cb => ipcRenderer.on('rqc-card-status', (_e, st) => cb(st)),
   // installing the Russian text recognition: { state: 'start' | 'ok' | 'cancel' | 'fail', reason }
   onCardOcr: cb => ipcRenderer.on('rqc-card-ocr', (_e, st) => cb(st)),
-  copyText: text => ipcRenderer.send('rqc-copy-text', text), // the clipboard (works while the game has the focus)
+  copyText: text => ipcRenderer.send('rqc-copy-text', text),
+  // RQ Stats overlay: { on, lang, action } → main.js; its state back ({ on, hasRegion, keys })
+  stats: cmd => ipcRenderer.send('rqc-stats', cmd),
+  onStats: cb => ipcRenderer.on('rqc-stats-state', (_e, st) => cb(st)), // the clipboard (works while the game has the focus)
 });
 
 // used only by app/alert.html (the corner window)
