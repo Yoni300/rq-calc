@@ -3,6 +3,17 @@
 // through the same banner and countdown the app uses. The page's own build id comes from this script's ?v=.
 (() => {
   window.RQC_WEB = true;
+
+  // Visitors (GoatCounter, https://<GC>.goatcounter.com): no cookies, nothing personal; only on the website, never in the app.
+  // A page view when the site opens; events: which tool is opened (tool-<id>) and «Скачать программу» (download-app).
+  const GC = 'rqtools'; // the GoatCounter code (https://rqtools.goatcounter.com); empty = nothing is counted
+  const send = params => {
+    if (!GC || !/^https:/.test(location.protocol)) return;
+    const q = new URLSearchParams({ t: document.title, s: [screen.width, screen.height, window.devicePixelRatio || 1].join(','), rnd: Math.random().toString(36).slice(2), ...params });
+    new Image().src = 'https://' + GC + '.goatcounter.com/count?' + q;
+  };
+  window.rqcTrack = name => send({ p: name, e: 'true' });
+  send({ p: '/', r: document.referrer });
   const me = document.currentScript && new URL(document.currentScript.src).searchParams.get('v');
   let state = { status: 'idle' }, last = 0;
   const listeners = [];

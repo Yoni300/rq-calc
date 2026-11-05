@@ -545,6 +545,7 @@ $('btnBug').addEventListener('click', () => openReport());
 // if GitHub does not answer, the release page
 const RELEASES_URL = 'https://github.com/Yoni300/rq-calc/releases/latest';
 $('btnDownload').addEventListener('click', async () => {
+  if (window.rqcTrack) window.rqcTrack('download-app');
   try {
     const r = await fetch('https://api.github.com/repos/Yoni300/rq-calc/releases/latest', { headers: { Accept: 'application/vnd.github+json' } });
     const exe = r.ok && (await r.json()).assets?.find(a => /\.exe$/i.test(a.name) && !/uninstall/i.test(a.name));
@@ -583,6 +584,7 @@ function switchTool(id) {
   else { tab = store.get('calcTab', 'gear'); if (toolOfTab(tab)) tab = 'gear'; }
   store.set('tab', tab);
   renderCenter(); animateEnter($('center')); renderTop();
+  if (window.rqcTrack) window.rqcTrack('tool-' + id); // the website counts which tools are used (web/web.js)
 }
 $('brandBtn').addEventListener('click', e => {
   e.stopPropagation();
