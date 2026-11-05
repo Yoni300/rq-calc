@@ -34,7 +34,7 @@ function cardShowResult(r) {
     const noOcr = r && r.reason === 'no-ru-ocr', failed = r && r.reason !== 'none';
     window.rqcApp.bossAlert({ ...base, kind: 'miss', ms: noOcr ? 30000 : 6000,
       title: noOcr ? T.cardNoOcr : failed ? T.cardFailed2 : T.cardNone,
-      sub: noOcr ? T.cardNoOcrHint : failed ? String(r.reason || '') : T.cardNoneHint,
+      sub: noOcr ? T.cardNoOcrHint : failed ? String(r.reason || '') : r && r.read ? T.cardRead.replace('{text}', r.read) : T.cardNoneHint,
       action: noOcr && window.rqcApp.onCardOcr ? { id: 'install-ru-ocr', label: T.cardOcrInstall } : null });
     return;
   }

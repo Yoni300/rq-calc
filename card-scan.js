@@ -65,8 +65,8 @@ async function ocr(rect) {
   });
 }
 
-/** Reads the card under the mouse → { ok, name, signs, ms } or { ok: false, reason: 'none' | 'no-ru-ocr' | <error> } */
-async function scan() {
+/** skip: the alert window bounds (DIP), its text is ignored. Reads the card under the mouse → { ok, name, signs, ms } or { ok: false, reason: 'none' | 'no-ru-ocr' | <error>, read } */
+async function scan(skip) {
   const t0 = Date.now();
   if (!match) match = makeMatcher(require('./data/card-signs.js'));
   // Electron works in DIP; the helper captures physical pixels
@@ -80,9 +80,14 @@ async function scan() {
   const rect = { x: x0, y: y0, width: Math.min(br.x, x0 + AREA_W) - x0, height: Math.min(br.y, y0 + AREA_H) - y0 };
   let lines;
   try { lines = await ocr(rect); } catch (e) { return { ok: false, reason: e.message }; }
+  // our own alert in the corner (an earlier result) is on the screen too: not a card under the mouse
+  if (skip) {
+    const a = toPx({ x: skip.x, y: skip.y }), b = toPx({ x: skip.x + skip.width, y: skip.y + skip.height });
+    lines = lines.filter(l => !(l.x >= a.x && l.r <= b.x && l.y >= a.y && l.b <= b.y));
+  }
   const found = match(lines, cur);
   if (process.env.RQC_CARD_DEBUG) console.log('[card-scan]', JSON.stringify({ rect, cur, found, lines: lines.map(l => l.text) }));
-  if (!found) return { ok: false, reason: 'none', ms: Date.now() - t0 };
+  if (!found || found.miss) return { ok: false, reason: 'none', read: found && found.miss, ms: Date.now() - t0 };
   return { ok: true, name: found.name, signs: found.signs, ms: Date.now() - t0 };
 }
 

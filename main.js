@@ -129,7 +129,7 @@ let cardKey = null, cardBusy = false;
 async function onCardKey() {
   if (cardBusy || !win || win.isDestroyed()) return;
   cardBusy = true;
-  try { win.webContents.send('rqc-card-result', await cardScan.scan()); } finally { cardBusy = false; }
+  try { win.webContents.send('rqc-card-result', await cardScan.scan(alertWin && !alertWin.isDestroyed() && alertWin.isVisible() ? alertWin.getBounds() : null)); } finally { cardBusy = false; }
 }
 ipcMain.on('rqc-card-settings', (_e, s) => {
   if (cardKey) { globalShortcut.unregister(cardKey); cardKey = null; }

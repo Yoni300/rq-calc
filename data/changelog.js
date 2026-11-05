@@ -1,6 +1,10 @@
 // "What's new" under the bell in the top bar (app/news.js). Newest first. Add an entry for every change players see.
 // at: ISO time in UTC (shown in each viewer's own time zone); text: ru / uk / en.
 window.RQ_CHANGELOG = [
+  { at: '2026-11-05T17:48Z',
+    ru: 'Сканер карт точнее: берёт название из подсказки карты, а не соседнюю карту в списке аукциона или склада и не своё прошлое сообщение в углу; узнаёт название, даже если пара букв прочитана неверно. Если карту узнать не удалось, сообщение показывает, что было прочитано.',
+    uk: 'Сканер карт точніший: бере назву з підказки карти, а не сусідню карту в списку аукціону чи складу і не своє попереднє повідомлення в кутку; впізнає назву, навіть якщо кілька літер прочитано неправильно. Якщо карту не впізнано, повідомлення показує, що було прочитано.',
+    en: 'Card scanner is more accurate: it takes the name from the card tooltip, not a neighbouring card in the auction or warehouse list or its own earlier alert in the corner, and recognizes the name even with a couple of misread letters. If the card is not recognized, the alert shows what was read.' },
   { at: '2026-11-05T17:35Z',
     ru: 'Сканер карт: если в Windows нет распознавания русского текста, в сообщении теперь есть кнопка «Установить» — программа сама поставит нужный компонент Windows (попросит права администратора) и сразу проверит, что сканер заработал.',
     uk: 'Сканер карт: якщо у Windows немає розпізнавання російського тексту, у повідомленні тепер є кнопка «Встановити» — програма сама поставить потрібний компонент Windows (попросить права адміністратора) і одразу перевірить, що сканер запрацював.',
