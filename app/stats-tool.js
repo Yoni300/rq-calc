@@ -11,9 +11,9 @@ const STATS_T = {
     on: 'Показати оверлей', off: 'Вимкнути оверлей', isOn: 'Оверлей увімкнено', isOff: 'Оверлей вимкнено',
     calib: 'Виділити чат', reset: 'Нова сесія', noRegion: 'Покажіть програмі, де чат: натисніть «Виділити чат», обведіть рамкою рядки вкладки Stats і натисніть Enter.',
     keysBusy: 'Гарячі клавіші Alt+Shift+S / Alt+Shift+R зайняті іншою програмою — користуйтеся кнопками тут.',
-    setup: 'Як налаштувати гру', steps: [
-      ['Окрема вкладка чату', 'У налаштуваннях чату додайте вкладку «Stats» і ввімкніть у ній: «Нанесений урон», «Отриманий урон», «Лікування», «Досвід», «Підбір луту».'],
-      ['Історія повідомлень', 'Поставте галочку «Зберігати історію повідомлень» — тоді гра пише файл chatlogs\\Stats (РРРР.ММ).htm, і програма звіряє з ним підсумки.'],
+    setup: 'Як налаштувати гру', chatCap: 'Налаштування вкладки «Stats» у грі', steps: [
+      ['Створіть нову вкладку чату', 'Назвіть її «Stats» і поставте галочки точно як на картинці нижче: «Нанесённый урон», «Полученный урон», «Лечение», «Опыт», «Подбор лута», «Прочее» і «Сохранять историю сообщений». Решту вимкніть, щоб інші повідомлення не заважали.'],
+      ['Навіщо історія повідомлень', 'З галочкою «Сохранять историю сообщений» гра пише файл chatlogs\\Stats (РРРР.ММ).htm, і програма звіряє з ним точні підсумки.'],
       ['Покажіть, де чат', 'Увімкніть оверлей, обведіть мишкою рядки повідомлень вкладки Stats (без кнопок вкладок) і натисніть Enter.'],
     ],
     shows: 'Що показує', showsList: ['DPS за останні 10 секунд із графіком', 'Золото й досвід за сесію', 'Скільки й яких мобів убито', 'Увесь лут, окремо карти', 'Нанесений і отриманий урон, лікування, макс. удар, влучність'],
@@ -27,9 +27,9 @@ const STATS_T = {
     on: 'Показать оверлей', off: 'Выключить оверлей', isOn: 'Оверлей включён', isOff: 'Оверлей выключен',
     calib: 'Выделить чат', reset: 'Новая сессия', noRegion: 'Покажите программе, где чат: нажмите «Выделить чат», обведите рамкой строки вкладки Stats и нажмите Enter.',
     keysBusy: 'Горячие клавиши Alt+Shift+S / Alt+Shift+R заняты другой программой — пользуйтесь кнопками здесь.',
-    setup: 'Как настроить игру', steps: [
-      ['Отдельная вкладка чата', 'В настройках чата добавьте вкладку «Stats» и включите в ней: «Нанесённый урон», «Полученный урон», «Лечение», «Опыт», «Подбор лута».'],
-      ['История сообщений', 'Поставьте галочку «Сохранять историю сообщений» — тогда игра пишет файл chatlogs\\Stats (ГГГГ.ММ).htm, и программа сверяет с ним итоги.'],
+    setup: 'Как настроить игру', chatCap: 'Настройки вкладки «Stats» в игре', steps: [
+      ['Создайте новую вкладку чата', 'Назовите её «Stats» и поставьте галочки точно как на картинке ниже: «Нанесённый урон», «Полученный урон», «Лечение», «Опыт», «Подбор лута», «Прочее» и «Сохранять историю сообщений». Остальное выключите, чтобы другие сообщения не мешали.'],
+      ['Зачем история сообщений', 'С галочкой «Сохранять историю сообщений» игра пишет файл chatlogs\\Stats (ГГГГ.ММ).htm, и программа сверяет с ним точные итоги.'],
       ['Покажите, где чат', 'Включите оверлей, обведите мышкой строки сообщений вкладки Stats (без кнопок вкладок) и нажмите Enter.'],
     ],
     shows: 'Что показывает', showsList: ['DPS за последние 10 секунд с графиком', 'Золото и опыт за сессию', 'Сколько и каких мобов убито', 'Весь лут, отдельно карты', 'Нанесённый и полученный урон, лечение, макс. удар, точность'],
@@ -43,9 +43,9 @@ const STATS_T = {
     on: 'Show the overlay', off: 'Turn the overlay off', isOn: 'Overlay is on', isOff: 'Overlay is off',
     calib: 'Select the chat', reset: 'New session', noRegion: 'Show the app where the chat is: press «Select the chat», draw a frame around the lines of the Stats tab and press Enter.',
     keysBusy: 'The hotkeys Alt+Shift+S / Alt+Shift+R are taken by another program — use the buttons here.',
-    setup: 'Setting up the game', steps: [
-      ['A separate chat tab', 'In the chat settings add a «Stats» tab with: dealt damage, received damage, healing, experience, loot pickup.'],
-      ['Message history', 'Tick «Save message history» — the game then writes chatlogs\\Stats (YYYY.MM).htm and the app checks the totals against it.'],
+    setup: 'Setting up the game', chatCap: 'The «Stats» tab settings in the game', steps: [
+      ['Create a new chat tab', 'Name it «Stats» and tick exactly what the picture below shows: «Нанесённый урон», «Полученный урон», «Лечение», «Опыт», «Подбор лута», «Прочее» and «Сохранять историю сообщений». Leave the rest off so other messages do not get in the way.'],
+      ['Why the message history', 'With «Сохранять историю сообщений» ticked the game writes chatlogs\\Stats (YYYY.MM).htm and the app checks the exact totals against it.'],
       ['Show where the chat is', 'Turn the overlay on, draw a frame around the message lines of the Stats tab (without the tab buttons) and press Enter.'],
     ],
     shows: 'What it shows', showsList: ['DPS over the last 10 seconds with a chart', 'Gold and exp this session', 'How many mobs of each kind were killed', 'All the loot, cards separately', 'Dealt and received damage, healing, max hit, accuracy'],
@@ -55,6 +55,19 @@ const STATS_T = {
   },
 };
 const STT = () => STATS_T[lang] || STATS_T.ru;
+// the game's chat tab settings window: [label, ticked]; left column, right column, then the two full-width rows
+const STATS_CHAT = [
+  [['Рупор', 0], ['Локация', 0], ['Рядом', 0], ['Гильдия', 0], ['Группа', 0], ['Шепот', 0], ['Задания', 0], ['Торговый', 0]],
+  [['Системные', 0], ['Нанесённый урон', 1], ['Полученный урон', 1], ['Лечение', 1], ['Опыт', 1], ['Подбор лута', 1], ['Прочее', 1], ['Поиск группы', 0]],
+  [['Сохранять историю сообщений', 1], ['Отключить показ счетчика', 0]],
+];
+function statsChatPicture() {
+  const cb = ([label, on]) => h('div', { class: 'st-cb' + (on ? ' on' : '') }, h('i'), label);
+  return h('figure', { class: 'st-chat' },
+    h('div', { class: 'st-chat-cols' }, STATS_CHAT.slice(0, 2).map(col => h('div', null, col.map(cb)))),
+    h('div', { class: 'st-chat-wide' }, STATS_CHAT[2].map(cb)),
+    h('figcaption', null, STT().chatCap));
+}
 let statsState = { on: false, hasRegion: true, keys: true };
 
 // settings → main.js: on / off and the language; called at start and when the language changes
@@ -105,7 +118,7 @@ function drawStatsTool() {
     ctl,
     h('div', { class: 'st-grid' },
       h('section', { class: 'st-card' }, h('h3', null, t.setup),
-        h('ol', { class: 'st-steps' }, t.steps.map(([b, s]) => h('li', null, h('b', null, b), h('span', null, s))))),
+        h('ol', { class: 'st-steps' }, t.steps.map(([b, s], i) => h('li', null, h('b', null, b), h('span', null, s), i === 0 ? statsChatPicture() : null)))),
       h('div', { class: 'st-col' },
         h('section', { class: 'st-card' }, h('h3', null, t.shows), h('ul', { class: 'st-list' }, t.showsList.map(s => h('li', null, s)))),
         h('section', { class: 'st-card' }, h('h3', null, t.keys),

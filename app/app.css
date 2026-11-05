@@ -1218,3 +1218,13 @@ body.tool-timer .calc-only { display: none !important; }
 .st-keys kbd { min-width: 96px; text-align: center; padding: 2px 8px; border: 1px solid var(--line-2); border-radius: 6px; color: var(--gold-hi); font: 600 12px "Segoe UI", system-ui, sans-serif; background: var(--soft); }
 .st-note { max-width: 820px; line-height: 1.5; }
 @media (max-width: 760px) { .st-grid { grid-template-columns: 1fr; } .st-btns, .st-ctl.web .btn { margin-left: 0; } }
+/* the game's chat tab settings, as a picture with the needed ticks */
+.st-chat { grid-column: 2; margin: 10px 0 2px; padding: 12px 14px 10px; border: 1px solid var(--line-2); border-radius: 10px; background: linear-gradient(180deg, #1b1712, #110e0a); }
+.st-chat-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+.st-chat-wide { margin-top: 2px; }
+.st-cb { display: flex; align-items: center; gap: 8px; padding: 3px 0; font-family: "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif; font-size: 13.5px; color: #cfc3aa; }
+.st-cb i { flex: none; width: 13px; height: 13px; border: 1px solid #6f6553; border-radius: 2px; background: #2a241c; position: relative; }
+.st-cb.on { color: var(--fg); }
+.st-cb.on i { border-color: #86d46d; background: #1e2a17; }
+.st-cb.on i::after { content: ''; position: absolute; left: 3px; top: -1px; width: 4px; height: 9px; border: solid #9be07f; border-width: 0 2.5px 2.5px 0; transform: rotate(40deg); }
+.st-chat figcaption { margin-top: 8px; font-size: 11.5px; color: var(--dim); }
