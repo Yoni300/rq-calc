@@ -13,7 +13,8 @@ const RULES = [
   [new RegExp('^Вы нанесли ' + N + ' урона\\.?\\s*Цель:\\s*(.+?)\\s*$', 'i'), (m) => ({ type: 'dmg', amount: num(m[1]), target: m[2] })],
   [/^Вы промахнулись по цели:\s*(.+?)\s*$/i, (m) => ({ type: 'miss', target: m[1] })],
   [new RegExp('^(.+?) наносит вам ' + N + ' урона', 'i'), (m) => ({ type: 'recv', amount: num(m[2]), source: m[1] })],
-  [new RegExp('^(.+?) погибает\\.?\\s*Получено опыта:?\\s*' + N, 'i'), (m) => ({ type: 'kill', mob: m[1], exp: num(m[2]) })],
+  // at the top level the game writes only «Снежная жужа погибает.», with no experience
+  [new RegExp('^(.+?) погибает\\.?(?:\\s*Получено опыта:?\\s*' + N + ')?', 'i'), (m) => ({ type: 'kill', mob: m[1], exp: m[2] ? num(m[2]) : 0 })],
   [new RegExp('^Вы восстановили ' + N + ' здоровья', 'i'), (m) => ({ type: 'heal', amount: num(m[1]) })],
   [/^Вы достигли (\d+) уровня/i, (m) => ({ type: 'level', level: Number(m[1]) })],
   [new RegExp('^Поднято ' + N + ' золота', 'i'), (m) => ({ type: 'gold', amount: num(m[1]) })],

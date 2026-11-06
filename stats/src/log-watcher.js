@@ -93,6 +93,14 @@ class LogWatcher extends EventEmitter {
 }
 
 // Finds "...\Royal Quest Online\client_*\chatlogs" in the Steam libraries.
+// when the game last wrote to this chatlogs folder (its newest file), or throws when there is no folder
+function lastWrite(logs) {
+  let t = fs.statSync(logs).mtimeMs;
+  for (const n of fs.readdirSync(logs)) { try { t = Math.max(t, fs.statSync(path.join(logs, n)).mtimeMs); } catch { /* gone */ } }
+  return t;
+}
+
+// The game folder that was played last: Steam libraries and the B.A.S.E launcher folder.
 function findChatlogsDir() {
   const roots = ['C:\\Program Files (x86)\\Steam', 'C:\\Program Files\\Steam'];
   const libs = new Set(roots);
@@ -111,11 +119,16 @@ function findChatlogsDir() {
       const client = path.join(game, sub);
       const logs = path.join(client, 'chatlogs');
       let score = 0;
-      try { score = fs.statSync(logs).mtimeMs + 1e13; } catch {
+      try { score = lastWrite(logs) + 1e13; } catch {
         try { score = fs.statSync(path.join(client, 'config.txt')).mtimeMs; } catch { continue; }
       }
       candidates.push({ logs, score });
     }
+  }
+  // the B.A.S.E launcher installs the game into <drive>:\B.A.S.E\Games\Royal Quest
+  for (const drive of 'CDEFGH') {
+    const logs = path.join(drive + ':\\', 'B.A.S.E', 'Games', 'Royal Quest', 'chatlogs');
+    try { candidates.push({ logs, score: lastWrite(logs) + 1e13 }); } catch { /* not here */ }
   }
   candidates.sort((a, b) => b.score - a.score);
   return candidates.length ? candidates[0].logs : null;

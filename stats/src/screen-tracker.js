@@ -80,6 +80,7 @@ class ScreenTracker {
     this.history = [];
     this.started = false;
     this.anchorX = []; // where message text starts (left of it: time and chat buttons)
+    this.unread = new Set(); // new rows that did not read as a message (maybe garbled): a clean reading counts later
   }
 
   textX() {
@@ -141,16 +142,66 @@ class ScreenTracker {
     return out.filter((row) => row.key.length > 0);
   }
 
+  // Lays the reading over the end of history row by row, like a diff: OCR may drop a row, garble one,
+  // or catch a row it missed before. Rows below the last old row are new; a row between old rows
+  // that history lacks was missed earlier and is new too (it goes into history in its place).
+  // Returns { fresh, keep, tail } (history = history[0..keep) + tail) or null when it does not fit.
+  diff(c) {
+    const h = this.history;
+    const H = Math.min(h.length, c.length + 10), base = h.length - H, C = c.length;
+    const MATCH = 1, GARBLED = -1, DROPPED = -0.6, EXTRA = -1;
+    // dp[i][j]: best score of history tail rows (any start .. i) against reading rows 0 .. j
+    const dp = [], how = [];
+    for (let i = 0; i <= H; i++) { dp.push(new Array(C + 1).fill(-Infinity)); how.push(new Array(C + 1).fill(null)); }
+    for (let i = 0; i <= H; i++) { dp[i][0] = 0; how[i][0] = 'start'; }
+    for (let j = 1; j <= C; j++) { dp[0][j] = dp[0][j - 1] + EXTRA; how[0][j] = 'lead'; }
+    for (let i = 1; i <= H; i++) for (let j = 1; j <= C; j++) {
+      const eq = same(h[base + i - 1], c[j - 1].key);
+      const opts = [[dp[i - 1][j - 1] + (eq ? MATCH : GARBLED), eq ? 'match' : 'garbled'], [dp[i - 1][j] + DROPPED, 'dropped'], [dp[i][j - 1] + EXTRA, 'extra']];
+      for (const [v, op] of opts) if (v > dp[i][j]) { dp[i][j] = v; how[i][j] = op; }
+    }
+    // the old part of the reading ends where the history tail is used up; the rest is new
+    let p = 0;
+    for (let j = 1; j <= C; j++) if (dp[H][j] > dp[H][p]) p = j;
+    const ops = [];
+    for (let i = H, j = p; i > 0 || j > 0;) {
+      const op = how[i][j];
+      if (op === 'start' || op === null || op === 'lead') break;
+      ops.push([op, i, j]);
+      if (op === 'match' || op === 'garbled') { i--; j--; } else if (op === 'dropped') i--; else j--;
+    }
+    ops.reverse();
+    const matches = ops.filter(([op]) => op === 'match').length;
+    const lastMatched = ops.some(([op, i]) => op === 'match' && i === H);
+    if (matches < 2 && !(matches === 1 && C <= 2 && lastMatched)) return null;
+    const first = ops.find(([op]) => op !== 'extra');
+    const tail = [], fresh = [];
+    let seenOld = false;
+    for (const [op, i, j] of ops) {
+      if (op === 'garbled' && this.unread.has(h[base + i - 1]) && parseText(c[j - 1].text).type !== 'other') {
+        // first read with broken digits («32и6 урона»), now clean: count it this time
+        seenOld = true; this.unread.delete(h[base + i - 1]); tail.push(c[j - 1].key); fresh.push(c[j - 1]);
+      } else if (op === 'match' || op === 'garbled') { seenOld = true; tail.push(h[base + i - 1]); }
+      else if (op === 'dropped') tail.push(h[base + i - 1]);
+      else if (seenOld) { tail.push(c[j - 1].key); fresh.push(c[j - 1]); } // a row missed by earlier readings
+    }
+    for (const row of c.slice(p)) { tail.push(row.key); fresh.push(row); }
+    return { fresh, keep: base + first[1] - 1, tail };
+  }
+
   // Returns rows from `c` that were not seen before, or null when the reading cannot be matched.
   align(c) {
     const h = this.history;
     const good = (score, m) => (m >= 3 ? score >= 0.6 : score === 1);
 
     // Usual case: the top of the reading continues the end of history; rows below it are new.
+    // A long overlap with one misread row beats a short perfect one: in a fight the same hit
+    // («Вы нанесли 3226 урона…») repeats, and a short match would count old rows again.
     let best = null;
     for (let m = Math.min(c.length, h.length); m >= 1; m--) {
       const score = overlapScore(h, h.length - m, c, m);
-      if (good(score, m) && (!best || score > best.score)) best = { m, score };
+      const ok = Math.round(score * m), value = ok - 2 * (m - ok);
+      if (good(score, m) && (!best || value > best.value)) best = { m, value };
     }
     if (best) return c.slice(best.m);
     // Scrolled up or switched tabs and back: the whole reading is somewhere in recent history.
@@ -182,15 +233,26 @@ class ScreenTracker {
       this.started = true;
       return [];
     }
-    let fresh = this.align(rows);
-    if (fresh === null) fresh = this.unmatched(rows);
-    this.history.push(...fresh.map((r) => r.key));
+    let fresh;
+    const d = this.diff(rows);
+    if (d) {
+      fresh = d.fresh;
+      this.history = this.history.slice(0, d.keep).concat(d.tail);
+    } else {
+      fresh = this.align(rows);
+      if (fresh === null) fresh = this.unmatched(rows);
+      this.history.push(...fresh.map((r) => r.key));
+    }
     if (this.history.length > 600) this.history.splice(0, this.history.length - 600);
 
     const events = [];
     for (const row of fresh) {
       const ev = parseText(row.text);
-      if (ev.type === 'other') continue;
+      if (ev.type === 'other') {
+        this.unread.add(row.key);
+        if (this.unread.size > 200) this.unread.delete(this.unread.values().next().value);
+        continue;
+      }
       ev.time = frame.t;
       ev.text = row.text;
       ev.src = 'screen';
