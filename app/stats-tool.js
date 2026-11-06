@@ -24,6 +24,12 @@ const STATS_T = {
     savedTitle: 'Збережені сесії', noSaved: 'Тут з’являться сесії, які ви збережете кнопкою «Зберегти сесію» (тут або на оверлеї).',
     del: 'Видалити', delAsk: 'Видалити сесію «{name}»?', cancel: 'Скасувати', ok: 'Зберегти', savedToast: 'Сесію збережено',
     dur: 'Час', gold: 'Золото', exp: 'Досвід', kills: 'Мобів', items: 'Луту', cards: 'карт', avgDps: 'Сер. DPS', maxHit: 'Макс. удар', mobs: 'Моби', loot: 'Лут', more: 'Детальніше', less: 'Згорнути',
+    dealt: 'Нанесено', recv: 'Отримано', heal: 'Лікування', peakDps: 'Пік DPS', accuracy: 'Влучність', level: 'Рівень', on: 'по: ', perSession: 'за сесію', hitsOf: '{hits} з {tries} ударів',
+    all: 'Усе', cardsChip: 'Карти', other: 'Інше', totalKilled: 'Усього вбито', kinds: ['вид', 'види', 'видів'], noMobs: 'Мобів не вбито.', noLoot: 'Луту немає.',
+    chartTitle: 'Урон за секунду протягом сесії', max: 'макс', start: 'початок', noChart: 'Графік є лише в сесій, збережених після оновлення.',
+    imp: 'Імпорт логу чату', impTip: 'Вибрати файл історії чату гри (папка chatlogs) і зберегти його як сесії', fromLog: 'з логу',
+    impNote: 'Оверлей не обов’язковий: експортуйте історію вкладки чату в грі («Экспорт истории») або візьміть місячний файл з chatlogs — програма порахує по ньому ту саму статистику. Довгий лог ділиться на сесії там, де була перерва понад 30 хв.',
+    impAdded: 'Додано сесій: {n}', impSkipped: 'уже були: {n}', impEmpty: 'У файлі немає бою, луту чи золота', impFail: 'Не вдалося прочитати файл',
   },
   ru: {
     title: 'Статистика боя', sub: 'DPS, золото, опыт и лут поверх игры',
@@ -44,6 +50,12 @@ const STATS_T = {
     savedTitle: 'Сохранённые сессии', noSaved: 'Здесь появятся сессии, которые вы сохраните кнопкой «Сохранить сессию» (здесь или на оверлее).',
     del: 'Удалить', delAsk: 'Удалить сессию «{name}»?', cancel: 'Отмена', ok: 'Сохранить', savedToast: 'Сессия сохранена',
     dur: 'Время', gold: 'Золото', exp: 'Опыт', kills: 'Мобов', items: 'Лута', cards: 'карт', avgDps: 'Ср. DPS', maxHit: 'Макс. удар', mobs: 'Мобы', loot: 'Лут', more: 'Подробнее', less: 'Свернуть',
+    dealt: 'Нанесено', recv: 'Получено', heal: 'Лечение', peakDps: 'Пик DPS', accuracy: 'Точность', level: 'Уровень', on: 'по: ', perSession: 'за сессию', hitsOf: '{hits} из {tries} ударов',
+    all: 'Все', cardsChip: 'Карты', other: 'Прочее', totalKilled: 'Всего убито', kinds: ['вид', 'вида', 'видов'], noMobs: 'Мобов не убито.', noLoot: 'Лута нет.',
+    chartTitle: 'Урон в секунду за сессию', max: 'макс', start: 'начало', noChart: 'График есть только у сессий, сохранённых после обновления.',
+    imp: 'Импорт лога чата', impTip: 'Выбрать файл истории чата игры (папка chatlogs) и сохранить его как сессии', fromLog: 'из лога',
+    impNote: 'Оверлей не обязателен: экспортируйте историю вкладки чата в игре («Экспорт истории») или возьмите месячный файл из chatlogs — программа посчитает по нему ту же статистику. Длинный лог делится на сессии там, где был перерыв больше 30 мин.',
+    impAdded: 'Добавлено сессий: {n}', impSkipped: 'уже были: {n}', impEmpty: 'В файле нет боя, лута или золота', impFail: 'Не удалось прочитать файл',
   },
   en: {
     title: 'Combat stats', sub: 'DPS, gold, exp and loot over the game',
@@ -64,6 +76,12 @@ const STATS_T = {
     savedTitle: 'Saved sessions', noSaved: 'Sessions you save with «Save the session» (here or on the overlay) show up here.',
     del: 'Delete', delAsk: 'Delete the session «{name}»?', cancel: 'Cancel', ok: 'Save', savedToast: 'Session saved',
     dur: 'Time', gold: 'Gold', exp: 'Exp', kills: 'Mobs', items: 'Loot', cards: 'cards', avgDps: 'Avg DPS', maxHit: 'Max hit', mobs: 'Mobs', loot: 'Loot', more: 'Details', less: 'Collapse',
+    dealt: 'Dealt', recv: 'Received', heal: 'Healing', peakDps: 'Peak DPS', accuracy: 'Accuracy', level: 'Level', on: 'on: ', perSession: 'this session', hitsOf: '{hits} of {tries} hits',
+    all: 'All', cardsChip: 'Cards', other: 'Other', totalKilled: 'Killed', kinds: ['kind', 'kinds', 'kinds'], noMobs: 'No mobs killed.', noLoot: 'No loot.',
+    chartTitle: 'Damage per second over the session', max: 'max', start: 'start', noChart: 'Only sessions saved after the update have the chart.',
+    imp: 'Import a chat log', impTip: 'Pick a chat history file of the game (the chatlogs folder) and save it as sessions', fromLog: 'from log',
+    impNote: 'No overlay needed: export a chat tab’s history in the game («Экспорт истории») or take the monthly file from chatlogs — the app counts the same stats from it. A long log is split into sessions where there was a break of over 30 min.',
+    impAdded: 'Sessions added: {n}', impSkipped: 'already there: {n}', impEmpty: 'The file has no combat, loot or gold', impFail: 'Could not read the file',
   },
 };
 const STT = () => STATS_T[lang] || STATS_T.ru;
@@ -96,6 +114,17 @@ function statsSet(on) {
 }
 if (IS_APP && window.rqcApp.onStats) {
   window.rqcApp.onStats(st => {
+    // the result of «import a chat log»: open the new sessions and say how it went
+    if (st.imported) {
+      const r = st.imported, t = STT();
+      delete st.imported;
+      if (r.error) toast(t.impFail);
+      else if (!r.canceled) {
+        for (const id of r.ids || []) statsOpen.add(id);
+        toast(r.added ? t.impAdded.replace('{n}', r.added) + (r.skipped ? ' · ' + t.impSkipped.replace('{n}', r.skipped) : '')
+          : r.skipped ? t.impSkipped.replace('{n}', r.skipped) : t.impEmpty);
+      }
+    }
     statsState = { ...statsState, ...st };
     // the overlay's own ✕ turned it off
     if (!st.on && SETTINGS.statsOn) { SETTINGS.statsOn = false; saveSettings(); }
@@ -161,6 +190,68 @@ function statsSaveAsk() {
   inp.focus(); inp.select();
 }
 
+// a saved session in full: the same numbers as the overlay (combat, DPS chart, mobs, loot)
+const statsLootCat = new Map(); // session id → 'all' | 'card' | 'other'
+const statsIcon = n => h('img', { class: 'st-ic', src: `../stats/overlay/icons/${n}.png`, alt: '', onerror: e => { e.target.remove(); } });
+function statsKinds(n) {
+  const [one, few, many] = STT().kinds;
+  if (lang === 'en') return n === 1 ? one : many;
+  const a = n % 10, b = n % 100;
+  return a === 1 && b !== 11 ? one : a >= 2 && a <= 4 && (b < 12 || b > 14) ? few : many;
+}
+function statsSessBody(e) {
+  const t = STT();
+  const tries = (e.hits || 0) + (e.misses || 0);
+  const tile = (icon, label, value, cls, sub) => h('div', { class: 'st-tile' },
+    h('small', null, icon ? statsIcon(icon) : null, label), h('b', { class: cls || null }, value), sub ? h('span', null, sub) : null);
+  const tiles = h('div', { class: 'st-tiles' },
+    tile('sword', t.dealt, statsNum(e.dealt), 'st-dmg'),
+    tile('shield', t.recv, statsNum(e.recv), 'st-recv'),
+    tile('heal', t.heal, statsNum(e.heal), 'st-heal'),
+    tile(null, t.maxHit, statsNum(e.maxHit && e.maxHit.amount), null, e.maxHit && e.maxHit.target ? t.on + e.maxHit.target : null),
+    tile(null, t.avgDps, statsNum(e.avgDps), 'st-dmg', t.perSession),
+    tile(null, t.peakDps, statsNum(e.peakDps), 'st-dmg'),
+    tile(null, t.accuracy, tries ? Math.round(e.hits / tries * 100) + '%' : '—', null, tries ? t.hitsOf.replace('{hits}', statsNum(e.hits)).replace('{tries}', statsNum(tries)) : null),
+    tile('level', t.level, e.level ? e.level + (e.levelsGained ? ` (+${e.levelsGained})` : '') : '—'));
+
+  // DPS over the whole session (sessions saved before this was added have no chart)
+  const tl = e.timeline && e.timeline.values && e.timeline.values.length ? e.timeline : null;
+  let chart;
+  if (tl) {
+    const v = tl.values, mx = Math.max(...v, 1), w = 300 / v.length;
+    const svg = `<svg viewBox="0 0 300 90" preserveAspectRatio="none"><defs><linearGradient id="stBar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe066"/><stop offset="1" stop-color="#b07a0c"/></linearGradient></defs>` +
+      v.map((x, i) => { const bh = x / mx * 86; return `<rect x="${(i * w + w * .12).toFixed(2)}" y="${(90 - bh).toFixed(2)}" width="${(w * .76).toFixed(2)}" height="${bh.toFixed(2)}" fill="url(#stBar)"/>`; }).join('') + '</svg>';
+    const plot = h('div', { class: 'st-plot' }); plot.innerHTML = svg;
+    chart = h('div', { class: 'st-chart' },
+      h('div', { class: 'st-chart-h' }, h('span', null, t.chartTitle), h('span', null, t.max + ' ', h('b', null, statsNum(mx)))),
+      plot,
+      h('div', { class: 'st-chart-x' }, h('span', null, t.start), h('span', null, statsDur(v.length * tl.stepMs))));
+  } else chart = h('div', { class: 'st-chart none' }, t.noChart);
+
+  // mobs: like the overlay list, with a bar for each mob's share
+  const mobs = e.mobs || [], top = mobs.length ? Math.max(...mobs.map(m => m.count)) : 1;
+  const mobBox = h('section', { class: 'st-box' },
+    h('div', { class: 'st-box-h' }, h('h4', null, statsIcon('mobs'), t.mobs), h('span', null, t.totalKilled + ' ', h('b', null, statsNum(e.totalKills)), ` · ${mobs.length} ${statsKinds(mobs.length)}`)),
+    mobs.length ? h('div', { class: 'st-mlist' }, mobs.map(m => h('div', { class: 'st-row' },
+      h('span', { class: 'st-nm' }, statsPic(m.icon, true), m.name), h('b', null, statsNum(m.count)),
+      h('i', { class: 'st-share' }, h('i', { style: `width:${(m.count / top * 100).toFixed(1)}%` })))))
+      : h('div', { class: 'st-none' }, t.noMobs));
+
+  // loot: all / cards / other, like the overlay chips
+  const items = e.items || [], cat = statsLootCat.get(e.id) || 'all';
+  const cards = items.filter(i => i.card).length;
+  const chip = (k, label, n) => h('button', { class: 'st-chip' + (cat === k ? ' on' : ''), onclick: () => { statsLootCat.set(e.id, k); drawStatsTool(); } }, label, h('span', null, n));
+  const shown = items.filter(i => cat === 'all' || (cat === 'card') === !!i.card);
+  const lootBox = h('section', { class: 'st-box' },
+    h('div', { class: 'st-box-h' }, h('h4', null, statsIcon('loot'), t.loot),
+      h('div', { class: 'st-chips' }, chip('all', t.all, items.length), chip('card', t.cardsChip, cards), chip('other', t.other, items.length - cards))),
+    shown.length ? h('div', { class: 'st-mlist' }, shown.map(i => h('div', { class: 'st-row' + (i.card ? ' card' : '') },
+      h('span', { class: 'st-nm', style: i.rarity && !i.card ? `color:${i.rarity}` : null }, statsPic(i.icon), i.name), h('b', null, '×' + statsNum(i.qty)))))
+      : h('div', { class: 'st-none' }, t.noLoot));
+
+  return h('div', { class: 'st-sess-body' }, tiles, chart, h('div', { class: 'st-lists' }, mobBox, lootBox));
+}
+
 const statsDur = ms => { const s = Math.floor(ms / 1000), p = n => String(n).padStart(2, '0'); return `${Math.floor(s / 3600)}:${p(Math.floor(s / 60) % 60)}:${p(s % 60)}`; };
 const statsNum = n => fmtNum(Math.round(n || 0), 0);
 const statsPic = (p, mob) => p ? h('img', { class: 'st-pic' + (mob ? ' mob' : ''), src: '../data/' + p, alt: '', onerror: e => { e.target.style.visibility = 'hidden'; } }) : h('i', { class: 'st-pic none' });
@@ -171,7 +262,8 @@ function statsSavedList() {
     const fact = (label, value) => h('div', { class: 'st-fact' }, h('small', null, label), h('b', null, value));
     return h('div', { class: 'st-sess' + (open ? ' open' : '') },
       h('div', { class: 'st-sess-head', onclick: () => { if (open) statsOpen.delete(e.id); else statsOpen.add(e.id); drawStatsTool(); } },
-        h('div', { class: 'st-sess-name' }, h('b', null, e.name), h('small', null, new Date(e.savedAt).toLocaleString())),
+        h('div', { class: 'st-sess-name' }, h('b', null, e.name),
+          e.source === 'chat' ? h('small', { class: 'st-from-log', title: e.file }, h('i', null, t.fromLog), ' ' + e.file) : h('small', null, new Date(e.savedAt).toLocaleString())),
         h('div', { class: 'st-facts' },
           fact(t.dur, statsDur(e.durationMs)), fact(t.gold, statsNum(e.gold)), fact(t.exp, statsNum(e.exp)), fact(t.kills, statsNum(e.totalKills)),
           fact(t.items, statsNum(e.totalItems) + (e.cards ? ` (${e.cards} ${t.cards})` : '')), fact(t.avgDps, statsNum(e.avgDps))),
@@ -180,11 +272,11 @@ function statsSavedList() {
           if (!await confirmBox(t.delAsk.replace('{name}', e.name), { ok: t.del, danger: true })) return;
           window.rqcApp.stats({ action: 'delete', id: e.id });
         } }, '✕')),
-      open ? h('div', { class: 'st-sess-body' },
-        h('div', null, h('h4', null, t.mobs), h('div', { class: 'st-rows' }, (e.mobs || []).map(m => h('div', null, h('span', { class: 'st-nm' }, statsPic(m.icon, true), m.name), h('b', null, '×' + statsNum(m.count)))))),
-        h('div', null, h('h4', null, t.loot), h('div', { class: 'st-rows' }, (e.items || []).map(i => h('div', { class: i.card ? 'card' : '' },
-          h('span', { class: 'st-nm', style: i.rarity && !i.card ? `color:${i.rarity}` : null }, statsPic(i.icon), i.name), h('b', null, '×' + statsNum(i.qty))))))) : null);
+      open ? statsSessBody(e) : null);
   };
-  return h('section', { class: 'st-card st-saved' }, h('h3', null, t.savedTitle),
+  return h('section', { class: 'st-card st-saved' },
+    h('div', { class: 'st-saved-h' }, h('h3', null, t.savedTitle),
+      h('button', { class: 'btn small', title: t.impTip, onclick: () => window.rqcApp.stats({ action: 'import' }) }, t.imp)),
+    h('div', { class: 'st-imp-note' }, t.impNote),
     list.length ? h('div', { class: 'st-sess-list' }, list.map(card)) : h('div', { class: 'bs-empty' }, t.noSaved));
 }

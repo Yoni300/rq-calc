@@ -176,6 +176,8 @@ ipcMain.on('rqc-stats', (_e, cmd) => {
   else if (cmd.action === 'pause') { stats.pause(!!cmd.value); statsState(stats.state()); }
   else if (cmd.action === 'save') { stats.save(cmd.name); statsState(stats.state()); }
   else if (cmd.action === 'delete') { stats.remove(cmd.id); statsState(stats.state()); }
+  // a chat history file from the game → saved sessions (works with the overlay off)
+  else if (cmd.action === 'import') stats.importChat(win).then(r => statsState({ ...stats.state(), imported: r }), err => { console.error('[stats] import', err); statsState({ ...stats.state(), imported: { error: true } }); });
   else if (cmd.action === 'state') statsState(stats.state());
 });
 app.on('will-quit', () => { stats.stop(); globalShortcut.unregisterAll(); cardScan.stop(); });

@@ -5,16 +5,18 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'">
 <title>Виділіть чат</title>
 <style>
-html, body { margin: 0; height: 100%; background: rgba(5, 10, 14, .35); cursor: crosshair; font-family: "Segoe UI", system-ui, sans-serif; color: #e4ebee; user-select: none; overflow: hidden; }
-.help { position: fixed; top: 40px; left: 50%; transform: translateX(-50%); background: rgb(12 18 23 / .95); border: 1px solid rgba(180, 205, 215, .2); border-radius: 10px; padding: 14px 18px; max-width: 560px; font-size: 14px; line-height: 1.5; cursor: default; }
-.help b { color: #8fc9d6; }
-.help .keys { color: #8d9fa8; font-size: 13px; margin-top: 6px; }
-.box { position: fixed; border: 2px solid #8fc9d6; background: rgba(143, 201, 214, .08); box-shadow: 0 0 0 9999px rgba(0, 0, 0, .25); }
+/* RQ Tools look: warm blacks, bronze frame, gold accents (same as the overlay) */
+html, body { margin: 0; height: 100%; background: rgba(8, 6, 4, .35); cursor: crosshair; font-family: "Segoe UI", system-ui, sans-serif; color: #eee4cf; user-select: none; overflow: hidden; }
+.help { position: fixed; top: 40px; left: 50%; transform: translateX(-50%); background: linear-gradient(180deg, rgb(34 28 20 / .97), rgb(17 14 10 / .97)); border: 1px solid rgba(230, 184, 92, .55); border-radius: 10px; padding: 14px 18px; max-width: 560px; font-size: 14px; line-height: 1.5; cursor: default; box-shadow: inset 0 1px 0 rgba(255, 220, 150, .08), 0 10px 30px rgba(0, 0, 0, .5); }
+.help b { color: #e6b85c; }
+.help .keys { color: #a89a80; font-size: 13px; margin-top: 6px; }
+.box { position: fixed; border: 2px solid #e6b85c; background: rgba(230, 184, 92, .08); box-shadow: 0 0 0 9999px rgba(0, 0, 0, .25), 0 0 14px rgba(230, 184, 92, .35); }
 .box[hidden] { display: none; }
 .bar { position: fixed; display: flex; gap: 8px; cursor: default; }
 .bar[hidden] { display: none; }
-.bar button { font: inherit; font-size: 13px; padding: 5px 14px; border-radius: 6px; border: 1px solid rgba(180, 205, 215, .25); background: rgb(12 18 23 / .95); color: #e4ebee; cursor: pointer; }
-.bar button.ok { background: #8fc9d6; color: #0b1418; border-color: #8fc9d6; font-weight: 600; }
+.bar button { font: inherit; font-size: 13px; font-weight: 600; padding: 5px 14px; border-radius: 6px; border: 1px solid rgba(214, 168, 79, .32); background: linear-gradient(180deg, #2c2419, #1d1811); color: #eee4cf; cursor: pointer; }
+.bar button:hover { border-color: rgba(214, 168, 79, .55); }
+.bar button.ok { background: linear-gradient(180deg, #f2c771, #c9963f 55%, #a87a2f); color: #1d1407; border-color: #f5d48c; font-weight: 700; }
 </style>
 </head>
 <body>

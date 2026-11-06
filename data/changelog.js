@@ -1,6 +1,14 @@
 // "What's new" under the bell in the top bar (app/news.js). Newest first. Add an entry for every change players see.
 // at: ISO time in UTC (shown in each viewer's own time zone); text: ru / uk / en.
 window.RQ_CHANGELOG = [
+  { at: '2026-11-06T22:21Z',
+    ru: 'Статистика боя: сохранённая сессия теперь показывает всё, что и панель над игрой, — нанесённый и полученный урон, лечение, макс. удар, средний и пиковый DPS, точность, уровень, график DPS за всю сессию, мобов и лут с фильтром «Все / Карты / Прочее». Новая кнопка «Импорт лога чата»: выберите файл истории чата игры (экспорт вкладки или месячный файл из chatlogs) — программа посчитает по нему ту же статистику и сохранит как сессии, даже если оверлей не был включён.',
+    uk: 'Статистика бою: збережена сесія тепер показує все, що й панель над грою, — нанесений і отриманий урон, лікування, макс. удар, середній і піковий DPS, влучність, рівень, графік DPS за всю сесію, мобів і лут із фільтром «Усе / Карти / Інше». Нова кнопка «Імпорт логу чату»: виберіть файл історії чату гри (експорт вкладки або місячний файл із chatlogs) — програма порахує по ньому ту саму статистику й збереже як сесії, навіть якщо оверлей не був увімкнений.',
+    en: 'Combat stats: a saved session now shows everything the panel over the game does — dealt and received damage, healing, max hit, average and peak DPS, accuracy, level, a DPS chart for the whole session, mobs and loot with the «All / Cards / Other» filter. New «Import a chat log» button: pick a game chat history file (a tab export or the monthly file from chatlogs) and the app counts the same stats from it and saves them as sessions, even if the overlay was never on.' },
+  { at: '2026-11-06T21:51Z',
+    ru: 'Статистика боя: новый вид панели поверх игры — в стиле RQ Tools (тёмная с золотом), вкладки как в программе, аккуратнее график DPS и плитки боя, иконка меча без чёрного квадрата. Окно «Выделить чат» тоже в новом стиле.',
+    uk: 'Статистика бою: новий вигляд панелі поверх гри — у стилі RQ Tools (темна із золотом), вкладки як у програмі, охайніший графік DPS і плитки бою, іконка меча без чорного квадрата. Вікно «Виділити чат» теж у новому стилі.',
+    en: 'Combat stats: a new look for the panel over the game — in the RQ Tools style (dark with gold), tabs like in the app, a neater DPS chart and combat tiles, the sword icon without the black square. The «Select the chat» window has the new look too.' },
   { at: '2026-11-06T19:18Z',
     ru: 'Статистика боя: считает убитых мобов и на максимальном уровне (когда игра пишет только «… погибает» без опыта), находит историю чата игры, установленной через B.A.S.E, и больше не считает дважды одинаковые удары и золото в быстром бою.',
     uk: 'Статистика бою: рахує вбитих мобів і на максимальному рівні (коли гра пише лише «… погибает» без досвіду), знаходить історію чату гри, встановленої через B.A.S.E, і більше не рахує двічі однакові удари й золото в швидкому бою.',

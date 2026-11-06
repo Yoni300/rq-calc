@@ -66,6 +66,15 @@ function computeStats(events, start, now, activeMs) {
     }
   }
 
+  // DPS over the whole session (for saved sessions): 60 bars from the start to now; paused / closed time shows as empty bars
+  const span = Math.max(now - start, 1000);
+  const tlStep = Math.max(1000, Math.ceil(span / CHART_BUCKETS));
+  const timeline = new Array(Math.min(CHART_BUCKETS, Math.ceil(span / tlStep))).fill(0);
+  for (const d of dmg) {
+    const i = Math.floor((d.time - start) / tlStep);
+    if (i >= 0 && i < timeline.length) timeline[i] += d.amount / (tlStep / 1000);
+  }
+
   const itemList = [...items].map(([name, it]) => ({
     name, qty: it.qty, rarity: it.rarity, last: it.last, perHour: perHour(it.qty), card: /^карта/i.test(name),
   })).sort((a, b) => b.qty - a.qty || a.name.localeCompare(b.name, 'ru'));
@@ -86,6 +95,7 @@ function computeStats(events, start, now, activeMs) {
     totalItems: itemList.reduce((s, it) => s + it.qty, 0),
     cards: itemList.filter((it) => it.card).reduce((s, it) => s + it.qty, 0),
     chart,
+    timeline: { stepMs: tlStep, values: timeline },
     feed: feed.slice(-6).map((e) => ({ type: e.type, text: e.text, time: e.time })),
   };
 }

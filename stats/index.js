@@ -3,7 +3,7 @@
 // and the chat history files (chatlogs\Stats (YYYY.MM).htm, written by the game later but exactly).
 // It never touches the game. main.js turns it on / off from the «Статистика» tool page (app/stats-tool.js).
 'use strict';
-const { app, BrowserWindow, ipcMain, globalShortcut, screen } = require('electron');
+const { app, BrowserWindow, ipcMain, globalShortcut, screen, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
@@ -12,6 +12,7 @@ const { ScreenTracker } = require('./src/screen-tracker');
 const { LogWatcher, findChatlogsDir } = require('./src/log-watcher');
 const { mergeSources, exactUntil } = require('./src/merge');
 const { computeStats } = require('./src/stats');
+const { parseChatLog } = require('./src/parser');
 const { mobIcon, itemIcon, fixScreenEvent } = require('./icons');
 
 const OVERLAY_W = 410;
@@ -85,19 +86,79 @@ function writeSaved(list) {
   catch (err) { console.error('[stats] sessions save failed', err); }
 }
 function saveCurrent(name) {
-  const s = current();
-  const entry = {
-    id: Date.now().toString(36), name: String(name || '').trim().slice(0, 80) || new Date().toLocaleString(), savedAt: Date.now(),
-    start: s.start, durationMs: s.durationMs, gold: s.gold, exp: s.exp, totalKills: s.totalKills, totalItems: s.totalItems, cards: s.cards,
-    dealt: s.dealt, recv: s.recv, heal: s.heal, hits: s.hits, misses: s.misses, avgDps: s.avgDps, peakDps: s.peakDps, maxHit: s.maxHit,
-    level: s.level, levelsGained: s.levelsGained,
-    mobs: s.mobs.map(m => ({ name: m.name, count: m.count, exp: m.exp, icon: m.icon })),
-    items: s.items.map(i => ({ name: i.name, qty: i.qty, rarity: i.rarity, card: i.card, icon: i.icon })),
-  };
+  const entry = sessionEntry(current(), name);
   writeSaved([entry, ...listSaved()].slice(0, 300));
   return entry;
 }
+// what a saved session keeps (the overlay's numbers + the whole-session DPS chart)
+function sessionEntry(s, name) {
+  return {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name: String(name || '').trim().slice(0, 80) || new Date().toLocaleString(), savedAt: Date.now(),
+    start: s.start, durationMs: s.durationMs, gold: s.gold, exp: s.exp, totalKills: s.totalKills, totalItems: s.totalItems, cards: s.cards,
+    dealt: s.dealt, recv: s.recv, heal: s.heal, hits: s.hits, misses: s.misses, avgDps: s.avgDps, peakDps: s.peakDps, maxHit: s.maxHit,
+    level: s.level, levelsGained: s.levelsGained,
+    timeline: { stepMs: s.timeline.stepMs, values: s.timeline.values.map(v => Math.round(v)) },
+    mobs: s.mobs.map(m => ({ name: m.name, count: m.count, exp: m.exp, icon: m.icon })),
+    items: s.items.map(i => ({ name: i.name, qty: i.qty, rarity: i.rarity, card: i.card, icon: i.icon })),
+  };
+}
 function deleteSaved(id) { writeSaved(listSaved().filter(e => e.id !== id)); }
+
+// ---------- import: a chat history file from the game (exported or the monthly one) becomes saved sessions ----------
+// Works with the overlay off. A long log is split where the chat was quiet for 30 min, so a monthly file gives one session per play.
+const IMPORT_GAP_MS = 30 * 60_000;
+const IMPORT_T = {
+  uk: { title: 'Імпорт логу чату', file: 'Історія чату гри', name: 'Лог чату' },
+  ru: { title: 'Импорт лога чата', file: 'История чата игры', name: 'Лог чата' },
+  en: { title: 'Import a chat log', file: 'Game chat history', name: 'Chat log' },
+};
+function importFile(file) {
+  const t = IMPORT_T[lang] || IMPORT_T.ru;
+  const events = parseChatLog(fs.readFileSync(file, 'utf8'), path.basename(file))
+    .filter(e => e.type !== 'other').sort((a, b) => a.time - b.time);
+  const parts = [];
+  for (const e of events) {
+    const last = parts.length && parts[parts.length - 1];
+    if (last && e.time - last[last.length - 1].time < IMPORT_GAP_MS) last.push(e); else parts.push([e]);
+  }
+  const p2 = n => String(n).padStart(2, '0');
+  const hm = d => p2(d.getHours()) + ':' + p2(d.getMinutes());
+  const entries = [];
+  for (const part of parts) {
+    // a few stray lines are not a play session
+    if (part.length < 5 || !part.some(e => e.type === 'dmg' || e.type === 'kill' || e.type === 'item' || e.type === 'gold')) continue;
+    const start = part[0].time, end = part[part.length - 1].time + 1000;
+    const s = computeStats(part, start, end, end - start);
+    for (const m of s.mobs) m.icon = mobIcon(m.name);
+    for (const i of s.items) i.icon = itemIcon(i.name);
+    const a = new Date(start), b = new Date(end);
+    const name = `${t.name} ${p2(a.getDate())}.${p2(a.getMonth() + 1)} ${hm(a)}–${a.toDateString() === b.toDateString() ? '' : p2(b.getDate()) + '.' + p2(b.getMonth() + 1) + ' '}${hm(b)}`;
+    entries.push({ ...sessionEntry(s, name), source: 'chat', file: path.basename(file), importKey: `${start}-${end}` });
+  }
+  return entries;
+}
+/** asks for chat history files (the game's chatlogs folder first) → { added, skipped, empty } */
+async function importChat(parentWin) {
+  state();
+  const t = IMPORT_T[lang] || IMPORT_T.ru;
+  const r = await dialog.showOpenDialog(parentWin, {
+    title: t.title, defaultPath: findChatlogsDir() || undefined,
+    filters: [{ name: t.file, extensions: ['htm', 'html'] }], properties: ['openFile', 'multiSelections'],
+  });
+  if (r.canceled || !r.filePaths.length) return { canceled: true };
+  const list = listSaved();
+  const have = new Set(list.map(e => e.importKey).filter(Boolean));
+  let added = [], skipped = 0, empty = 0;
+  for (const f of r.filePaths) {
+    let entries = [];
+    try { entries = importFile(f); } catch (err) { console.error('[stats] import failed', f, err); }
+    if (!entries.length) { empty++; continue; }
+    for (const e of entries) { if (have.has(e.importKey)) skipped++; else { have.add(e.importKey); added.push(e); } }
+  }
+  added.sort((a, b) => b.start - a.start);
+  writeSaved([...added, ...list].slice(0, 300));
+  return { added: added.length, skipped, empty, ids: added.map(e => e.id) };
+}
 
 let tracker = new ScreenTracker();
 let files = { monthly: null, exported: null };
@@ -283,7 +344,13 @@ function stop() {
 }
 function state() {
   if (!loaded) { takeOverStandalone(); loadConfig(); loadSession(); loaded = true; } // the page asks before it was ever on
-  return { on, paused, hasRegion: !!(config.region), chatlogs: status.chatlogsDir || '', sessions: listSaved() };
+  // sessions saved before the pictures were added get them now
+  const sessions = listSaved();
+  for (const e of sessions) {
+    for (const m of e.mobs || []) if (!m.icon) m.icon = mobIcon(m.name);
+    for (const i of e.items || []) if (!i.icon) i.icon = itemIcon(i.name);
+  }
+  return { on, paused, hasRegion: !!(config.region), chatlogs: status.chatlogsDir || '', sessions };
 }
 function setLang(l) { lang = l; }
 
@@ -293,4 +360,5 @@ module.exports = {
   pause: v => { state(); setPaused(v); pushSnapshot(); },
   save: name => { state(); return saveCurrent(name); },
   remove: id => deleteSaved(id),
+  importChat,
 };
