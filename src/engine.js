@@ -367,13 +367,19 @@
     const filterStatsOfType = t => [...new Set(t.stats.map(s => { let st = stats.get(s.statId); while (st.parentId != null && st.type < StatType.Other) st = stats.get(st.parentId); return st; })
       .filter(st => st.isMelee != null || st.type === StatType.Primary || st.type === StatType.Energy).map(st => st.id))];
     const classAllowsStat = (cls, statId) => { const s = stats.get(statId); if (s.isMelee != null) return cls.isMelee === s.isMelee; if (s.type === StatType.Energy) return cls.energyStatId === s.id; if (s.type === StatType.Primary) return cls.primaryStatId === s.id; return true; };
-    function stampAllowed(stamp, item, classId) {
-      if (stamp.hasEquipRows && !stamp.equipTypeIds.includes(item.typeId)) return false;
+    // whether a stamp is one of this class's own stamps
+    function stampForClass(stamp, classId) {
       if (stamp.classIds.length) return stamp.classIds.includes(classId); // explicit list from the wiki
       const filter = [...new Set(stamp.variants.flatMap(v => v.bonuses.flatMap(b => filterStatsOfType(bonusTypes.get(b.typeId)))))];
       const cls = classes.get(classId);
-      if (filter.length && !filter.every(id => classAllowsStat(cls, id))) return false;
-      return true;
+      return !filter.length || filter.every(id => classAllowsStat(cls, id));
+    }
+    // Deliberate deviation from Anon's calculator (user's call, 2026-11-08, after a player's report): items up to
+    // level 60 inclusive take a stamp of any class (only the item type matters); above 60 only the class's own stamps.
+    const ANY_CLASS_STAMP_MAX_LEVEL = 60;
+    function stampAllowed(stamp, item, classId) {
+      if (stamp.hasEquipRows && !stamp.equipTypeIds.includes(item.typeId)) return false;
+      return item.level <= ANY_CLASS_STAMP_MAX_LEVEL || stampForClass(stamp, classId);
     }
 
     // --- talents, auras, buffs, elixirs, consumables, collections ---
@@ -461,7 +467,7 @@
       ids: { ATTACK, DEFENSE, HP },
       layers, statPriority, bonusTypePriority,
       editStatIds, baseStatIds, isSubsetOf, equipmentClassOf, itemClassConditions, itemAllowedForClass, itemAllowedInState,
-      cardAllowedOn, stampAllowed, math, formulas,
+      cardAllowedOn, stampAllowed, stampForClass, math, formulas,
     };
 
     // ---------- rules used by the UI ----------
