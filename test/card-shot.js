@@ -1,6 +1,6 @@
 // Saves the build picture (app/build-card.js) of the current build for each language, plus a shot of its dialog.
 // Run: SHOT_DIR=<out-dir> [RQC_USERDATA=<profile with a build>] electron test/card-shot.js
-//   → <out-dir>/card-<lang>.png (full size) and dialog.png
+//   → <out-dir>/card-<lang>.png and talents-<lang>.png (full size) and dialog.png
 'use strict';
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
@@ -19,6 +19,8 @@ app.whenReady().then(async () => { try {
     await win.webContents.executeJavaScript(`document.querySelector('.upd.site')?.remove(); lang='${lang}'; T=RQC_I18N['${lang}']; applyGameLang(); renderAll();`);
     const data = await win.webContents.executeJavaScript('drawBuildCard().then(cv => cv.toDataURL("image/png"))');
     fs.writeFileSync(path.join(outDir, `card-${lang}.png`), Buffer.from(data.split(',')[1], 'base64'));
+    const tal = await win.webContents.executeJavaScript('drawTalentCard().then(cv => cv.toDataURL("image/png"))');
+    fs.writeFileSync(path.join(outDir, `talents-${lang}.png`), Buffer.from(tal.split(',')[1], 'base64'));
   }
   await win.webContents.executeJavaScript('openBuildCard()');
   await new Promise(r => setTimeout(r, 800));

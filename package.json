@@ -1,6 +1,6 @@
 {
   "name": "rq-calc",
-  "version": "1.0.19",
+  "version": "1.0.20",
   "description": "Royal Quest character stat calculator",
   "main": "main.js",
   "private": true,

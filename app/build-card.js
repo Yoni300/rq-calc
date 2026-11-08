@@ -1,6 +1,6 @@
 'use strict';
 /* global ctx, ch, T, buildName, IMG, DOLL_POS, MODEL_BGS, modelBg, allowedSets, slotLockedByTwoHander, recalc, lastResult,
-   fmtNum, fmtStat, descNote, h, openModal, closeModal, toast, buildLink, copyText, SLOT_ORDER */
+   fmtNum, fmtStat, descNote, h, openModal, closeModal, toast, buildLink, copyText, SLOT_ORDER, validTalents */
 
 // Build card: a picture of the current build (character window, key numbers, the gear list with upgrades, stamps and
 // cards) to post in Discord or on the forum. Drawn on a canvas at 2x, so the PNG stays sharp after Discord shrinks it.
@@ -49,6 +49,65 @@ function cardCover(g, im, x, y, w, hh, size, pos) {
   g.drawImage(im, x + (w - dw) * (px || 0), y + (hh - dh) * (py || 0), dw, dh);
 }
 
+// background with a soft gold glow and the double bronze frame
+function cardFrame(g, H) {
+  g.fillStyle = CARD_C.bg; g.fillRect(0, 0, CARD_W, H);
+  let gr = g.createRadialGradient(330, 60, 0, 330, 60, 700);
+  gr.addColorStop(0, 'rgba(230,184,92,.10)'); gr.addColorStop(1, 'rgba(230,184,92,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, CARD_W, H);
+  gr = g.createRadialGradient(950, 700, 0, 950, 700, 600);
+  gr.addColorStop(0, 'rgba(230,184,92,.06)'); gr.addColorStop(1, 'rgba(230,184,92,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, CARD_W, H);
+  cardRound(g, 10.5, 10.5, CARD_W - 21, H - 21, 14);
+  g.strokeStyle = 'rgba(214,168,79,.45)'; g.lineWidth = 1; g.stroke();
+  cardRound(g, 15.5, 15.5, CARD_W - 31, H - 31, 11);
+  g.strokeStyle = 'rgba(214,168,79,.14)'; g.stroke();
+}
+// «◆ RQ TOOLS», the build name, the class line and a gold rule under it → y of the rule
+function cardTitle(g, rx, rw, clsIm) {
+  const cls = ctx.classes.get(ch.classId);
+  const gender = ctx.genders.find(x => x.Id === ch.genderId);
+  let y = 74;
+  g.font = `600 13px ${CARD_FONT.body}`; g.fillStyle = CARD_C.gold3;
+  g.letterSpacing = '3px';
+  g.fillText('◆ RQ TOOLS', rx, y);
+  g.letterSpacing = '0px';
+
+  const title = (buildName || '').trim() || `${cls.name} ${ch.level}`;
+  y += 52;
+  cardFit(g, title, sz => `700 ${sz}px ${CARD_FONT.display}`, 46, rw, 24);
+  let gr = g.createLinearGradient(0, y - 40, 0, y + 4);
+  gr.addColorStop(0, CARD_C.goldHi); gr.addColorStop(1, CARD_C.gold2);
+  g.shadowColor = 'rgba(230,184,92,.25)'; g.shadowBlur = 18;
+  g.fillStyle = gr; g.fillText(title, rx, y);
+  g.shadowBlur = 0;
+
+  y += 18;
+  const iconS = 34;
+  if (clsIm) {
+    g.save(); cardRound(g, rx, y, iconS, iconS, 7); g.clip(); g.drawImage(clsIm, rx, y, iconS, iconS); g.restore();
+    cardRound(g, rx + .5, y + .5, iconS - 1, iconS - 1, 7); g.strokeStyle = 'rgba(214,168,79,.45)'; g.stroke();
+  }
+  const sub = [cls.name, `${T.level} ${ch.level}`, gender?.Name].filter(Boolean).join(' · ');
+  g.fillStyle = CARD_C.fg; cardFit(g, sub, sz => `${sz}px ${CARD_FONT.body}`, 18, rw - iconS - 12, 12);
+  g.fillText(sub, rx + iconS + 12, y + 23);
+  y += iconS + 20;
+
+  gr = g.createLinearGradient(rx, 0, rx + rw, 0);
+  gr.addColorStop(0, 'rgba(201,150,63,.8)'); gr.addColorStop(1, 'rgba(201,150,63,0)');
+  g.fillStyle = gr; g.fillRect(rx, y, rw, 1);
+  return y;
+}
+// «rqcalc.com» and «made in RQ Tools» along the bottom
+function cardFooter(g, H, x1, x2) {
+  const fy = H - 44;
+  g.font = `700 17px ${CARD_FONT.display}`; g.fillStyle = CARD_C.gold;
+  g.fillText('rqcalc.com', x1, fy);
+  g.font = `12px ${CARD_FONT.body}`; g.fillStyle = CARD_C.dim; g.textAlign = 'right';
+  g.fillText(T.cardFoot, x2, fy);
+  g.textAlign = 'left';
+}
+
 async function drawBuildCard() {
   const r = lastResult || recalc();
   const cls = ctx.classes.get(ch.classId);
@@ -91,18 +150,8 @@ async function drawBuildCard() {
   g.imageSmoothingQuality = 'high';
   g.textBaseline = 'alphabetic';
 
-  // ---- background and frame
-  g.fillStyle = CARD_C.bg; g.fillRect(0, 0, CARD_W, H);
-  let gr = g.createRadialGradient(330, 60, 0, 330, 60, 700);
-  gr.addColorStop(0, 'rgba(230,184,92,.10)'); gr.addColorStop(1, 'rgba(230,184,92,0)');
-  g.fillStyle = gr; g.fillRect(0, 0, CARD_W, H);
-  gr = g.createRadialGradient(950, 700, 0, 950, 700, 600);
-  gr.addColorStop(0, 'rgba(230,184,92,.06)'); gr.addColorStop(1, 'rgba(230,184,92,0)');
-  g.fillStyle = gr; g.fillRect(0, 0, CARD_W, H);
-  cardRound(g, 10.5, 10.5, CARD_W - 21, H - 21, 14);
-  g.strokeStyle = 'rgba(214,168,79,.45)'; g.lineWidth = 1; g.stroke();
-  cardRound(g, 15.5, 15.5, CARD_W - 31, H - 31, 11);
-  g.strokeStyle = 'rgba(214,168,79,.14)'; g.stroke();
+  cardFrame(g, H);
+  let gr;
 
   // ---- character window (same grid as the gear tab)
   const s = 64, gx = 10, gy = 12, mw = 236, pad = 20;
@@ -199,36 +248,7 @@ async function drawBuildCard() {
 
   // ---- right side: name, class, numbers
   const rx = wx + winW + 44, rw = CARD_W - rx - 44;
-  let y = 74;
-  g.font = `600 13px ${CARD_FONT.body}`; g.fillStyle = CARD_C.gold3;
-  g.letterSpacing = '3px';
-  g.fillText('◆ RQ TOOLS', rx, y);
-  g.letterSpacing = '0px';
-
-  const title = (buildName || '').trim() || `${cls.name} ${ch.level}`;
-  y += 52;
-  cardFit(g, title, sz => `700 ${sz}px ${CARD_FONT.display}`, 46, rw, 24);
-  gr = g.createLinearGradient(0, y - 40, 0, y + 4);
-  gr.addColorStop(0, CARD_C.goldHi); gr.addColorStop(1, CARD_C.gold2);
-  g.shadowColor = 'rgba(230,184,92,.25)'; g.shadowBlur = 18;
-  g.fillStyle = gr; g.fillText(title, rx, y);
-  g.shadowBlur = 0;
-
-  y += 18;
-  const iconS = 34;
-  if (clsIm) {
-    g.save(); cardRound(g, rx, y, iconS, iconS, 7); g.clip(); g.drawImage(clsIm, rx, y, iconS, iconS); g.restore();
-    cardRound(g, rx + .5, y + .5, iconS - 1, iconS - 1, 7); g.strokeStyle = 'rgba(214,168,79,.45)'; g.stroke();
-  }
-  const sub = [cls.name, `${T.level} ${ch.level}`, gender?.Name].filter(Boolean).join(' · ');
-  g.fillStyle = CARD_C.fg; cardFit(g, sub, sz => `${sz}px ${CARD_FONT.body}`, 18, rw - iconS - 12, 12);
-  g.fillText(sub, rx + iconS + 12, y + 23);
-  y += iconS + 20;
-
-  gr = g.createLinearGradient(rx, 0, rx + rw, 0);
-  gr.addColorStop(0, 'rgba(201,150,63,.8)'); gr.addColorStop(1, 'rgba(201,150,63,0)');
-  g.fillStyle = gr; g.fillRect(rx, y, rw, 1);
-  y += 20;
+  let y = cardTitle(g, rx, rw, clsIm) + 20;
 
   // three big numbers
   const val = id => r.stats.get(id);
@@ -365,42 +385,172 @@ async function drawBuildCard() {
     });
   }
 
-  // footer
-  const fy = H - 44;
-  g.font = `700 17px ${CARD_FONT.display}`; g.fillStyle = CARD_C.gold;
-  const fx = gearList.length ? 40 : rx, fx2 = gearList.length ? CARD_W - 40 : rx + rw; // under the gear list: full width
-  g.fillText('rqcalc.com', fx, fy);
-  g.font = `12px ${CARD_FONT.body}`; g.fillStyle = CARD_C.dim; g.textAlign = 'right';
-  g.fillText(T.cardFoot, fx2, fy);
+  // footer: under the gear list it is full width
+  cardFooter(g, H, gearList.length ? 40 : rx, gearList.length ? CARD_W - 40 : rx + rw);
+  return cv;
+}
+
+// ---- the second picture: the talent trees (chosen talents in colour, the rest grey) and the chosen talents by name
+const TAL_S = 52, TAL_GAP = 10, TAL_STEP = 66, TAL_BLOCK = 2 * TAL_S + TAL_GAP + 30, TAL_LINE = 27;
+async function drawTalentCard() {
+  const cls = ctx.classes.get(ch.classId);
+  const branches = ctx.classBranches(ch.classId);
+  const valid = new Set(validTalents(ch));
+  const total = ctx.talentPoints(ch);
+  const gts = ch.guildTalents || {};
+  const guild = ctx.guildBranches.flatMap(br => br.talents.filter(t => gts[t.id] > 0).map(t => ({ t, pts: gts[t.id], max: br.maxPoints })));
+  const all = branches.flatMap(b => b.talents);
+  const [clsIm, ...ims] = await Promise.all([cardImage(IMG(cls.imageId)), ...all.map(t => cardImage(IMG(t.imageId))), ...guild.map(x => cardImage(IMG(x.t.imageId)))]);
+  const imOf = new Map(all.map((t, i) => [t.id, ims[i]]));
+  const guildIms = ims.slice(all.length);
+
+  const x0 = 44, w0 = CARD_W - 88;
+  const headEnd = 218, GUILD_ROW = 44;
+  const guildRows = guild.length ? Math.ceil(guild.length / 3) : 0;
+  const H = headEnd + 16 + branches.length * TAL_BLOCK + (guild.length ? 56 + guildRows * GUILD_ROW : 0) + 80;
+  const cv = document.createElement('canvas');
+  cv.width = CARD_W * CARD_SCALE; cv.height = H * CARD_SCALE;
+  const g = cv.getContext('2d');
+  g.scale(CARD_SCALE, CARD_SCALE);
+  g.imageSmoothingQuality = 'high';
+  cardFrame(g, H);
+  cardTitle(g, x0, w0 - 220, clsIm);
+
+  // chosen / all talent points, top right
+  g.textAlign = 'right';
+  g.font = `600 12px ${CARD_FONT.body}`; g.fillStyle = CARD_C.muted; g.letterSpacing = '2px';
+  g.fillText(T.tabTalents.toUpperCase(), x0 + w0, 92);
+  g.letterSpacing = '0px';
+  g.font = `700 44px ${CARD_FONT.body}`;
+  const pts = `${valid.size} / ${total}`;
+  let gr = g.createLinearGradient(0, 100, 0, 140);
+  gr.addColorStop(0, CARD_C.goldHi); gr.addColorStop(1, CARD_C.gold2);
+  g.fillStyle = gr; g.fillText(pts, x0 + w0, 140);
   g.textAlign = 'left';
+
+  // a talent picture: passive = circle, active = rounded square; chosen ones in colour with a gold ring
+  const hasFilter = 'filter' in g;
+  const icon = (im, t, x, y, s, on) => {
+    const shape = () => (t.active ? cardRound(g, x, y, s, s, 7) : (g.beginPath(), g.arc(x + s / 2, y + s / 2, s / 2, 0, Math.PI * 2)));
+    g.save();
+    if (on) { g.shadowColor = 'rgba(230,184,92,.65)'; g.shadowBlur = 14; }
+    shape(); g.fillStyle = '#000'; g.fill();
+    g.restore();
+    if (im) {
+      g.save(); shape(); g.clip();
+      if (!on) { if (hasFilter) g.filter = 'grayscale(1) brightness(.5)'; else g.globalAlpha = .35; }
+      g.drawImage(im, x, y, s, s);
+      g.restore();
+    }
+    shape(); g.lineWidth = on ? 2.5 : 2; g.strokeStyle = on ? CARD_C.gold : '#3a3227'; g.stroke(); g.lineWidth = 1;
+  };
+
+  let y = headEnd + 16;
+  const treeX = x0 + 196, listX = treeX + 7 * TAL_STEP + 34, listW = x0 + w0 - listX, listColW = (listW - 20) / 2;
+  branches.forEach((br, bi) => {
+    const rows = [...new Set(br.talents.map(t => t.h))].sort((a, b) => a - b);
+    const chosen = br.talents.filter(t => valid.has(t.id)).sort((a, b) => a.h - b.h);
+    const top = y + 15, mid = top + TAL_S + TAL_GAP / 2;
+    if (bi) { g.fillStyle = 'rgba(214,168,79,.12)'; g.fillRect(x0, y, w0, 1); }
+    // branch name with its colour bar and the number of chosen talents
+    g.fillStyle = br.color || '#555'; cardRound(g, x0, mid - 26, 4, 52, 2); g.fill();
+    g.fillStyle = CARD_C.fg; cardFit(g, br.name, sz => `700 ${sz}px ${CARD_FONT.display}`, 20, 170, 13);
+    g.fillText(br.name, x0 + 16, mid - 3);
+    const n = String(chosen.length);
+    g.font = `700 12px ${CARD_FONT.body}`;
+    const pw = g.measureText(n).width + 14;
+    cardRound(g, x0 + 16, mid + 9, pw, 18, 9); g.fillStyle = chosen.length ? CARD_C.gold2 : '#3a3227'; g.fill();
+    g.fillStyle = chosen.length ? CARD_C.onGold : CARD_C.muted; g.textAlign = 'center'; g.fillText(n, x0 + 16 + pw / 2, mid + 22); g.textAlign = 'left';
+    // the tree: one column per row of the branch, one or two talents in it
+    rows.forEach((r, ci) => {
+      const ts = br.talents.filter(t => t.h === r).sort((a, b) => a.v - b.v);
+      const x = treeX + ci * TAL_STEP;
+      ts.forEach((t, k) => {
+        const ty = ts.length === 1 ? mid - TAL_S / 2 : top + k * (TAL_S + TAL_GAP);
+        icon(imOf.get(t.id), t, x, ty, TAL_S, valid.has(t.id));
+      });
+    });
+    // the chosen talents by name, in two columns
+    const per = Math.ceil(chosen.length / 2) || 1;
+    const ly = mid - (per * TAL_LINE) / 2 + 4;
+    if (!chosen.length) { g.font = `14px ${CARD_FONT.body}`; g.fillStyle = CARD_C.dim; g.fillText('—', listX, mid + 5); }
+    chosen.forEach((t, i) => {
+      const x = listX + Math.floor(i / per) * (listColW + 20), yy = ly + (i % per) * TAL_LINE;
+      icon(imOf.get(t.id), t, x, yy, 20, true);
+      g.font = `600 14px ${CARD_FONT.body}`; g.fillStyle = t.active ? CARD_C.goldHi : CARD_C.fg;
+      g.fillText(cardEllipsis(g, t.name, listColW - 30), x + 28, yy + 15);
+    });
+    y += TAL_BLOCK;
+  });
+
+  // guild talents: picture, name and points
+  if (guild.length) {
+    gr = g.createLinearGradient(x0, 0, x0 + w0, 0);
+    gr.addColorStop(0, 'rgba(201,150,63,0)'); gr.addColorStop(.5, 'rgba(201,150,63,.6)'); gr.addColorStop(1, 'rgba(201,150,63,0)');
+    g.fillStyle = gr; g.fillRect(x0, y + 4, w0, 1);
+    g.font = `700 17px ${CARD_FONT.display}`; g.fillStyle = CARD_C.gold;
+    g.fillText(T.guildTalents, x0, y + 38);
+    const gw = (w0 - 2 * 24) / 3;
+    guild.forEach(({ t, pts: p, max }, i) => {
+      const x = x0 + (i % 3) * (gw + 24), yy = y + 56 + Math.floor(i / 3) * GUILD_ROW;
+      icon(guildIms[i], t, x, yy, 32, true);
+      g.font = `600 14px ${CARD_FONT.body}`; g.fillStyle = CARD_C.fg;
+      const tail = max > 1 ? ` ${p}/${max}` : '';
+      g.font = `700 13px ${CARD_FONT.body}`; const tw = tail ? g.measureText(tail).width : 0;
+      g.font = `600 14px ${CARD_FONT.body}`;
+      const name = cardEllipsis(g, t.name, gw - 44 - tw - 6);
+      g.fillText(name, x + 42, yy + 21);
+      if (tail) { const nx = x + 42 + g.measureText(name).width; g.font = `700 13px ${CARD_FONT.body}`; g.fillStyle = CARD_C.gold; g.fillText(tail, nx, yy + 21); }
+    });
+  }
+
+  cardFooter(g, H, x0, x0 + w0);
   return cv;
 }
 
 const cardBlob = cv => new Promise((res, rej) => cv.toBlob(b => (b ? res(b) : rej(new Error('toBlob'))), 'image/png'));
 const cardFileName = () => (((buildName || '').trim() || `${ctx.classes.get(ch.classId).name} ${ch.level}`).replace(/[\\/:*?"<>|]+/g, ' ').trim() || 'build') + '.png';
 
+// the dialog: two pages (gear / talents); copy, save and share act on the page shown
 async function openBuildCard() {
-  let cv, blob;
-  try { cv = await drawBuildCard(); blob = await cardBlob(cv); } catch (e) { console.error(e); toast(T.cardFailed); return; }
-  const url = cv.toDataURL("image/png"); // the page CSP allows data: pictures, not blob:
-  const file = new File([blob], cardFileName(), { type: 'image/png' });
-  const canShare = !!window.RQC_WEB && !!navigator.canShare && navigator.canShare({ files: [file] });
+  const hasTalents = ctx.classBranches(ch.classId).length > 0;
+  let pages;
+  try {
+    const cvs = await Promise.all([drawBuildCard(), hasTalents ? drawTalentCard() : null]);
+    const base = cardFileName().replace(/\.png$/, '');
+    pages = await Promise.all(cvs.map(async (cv, i) => {
+      if (!cv) return null;
+      const blob = await cardBlob(cv);
+      const name = i ? `${base} — ${T.tabTalents}.png` : `${base}.png`;
+      // the page CSP allows data: pictures, not blob:
+      return { label: i ? T.tabTalents : T.tabGear, url: cv.toDataURL('image/png'), blob, file: new File([blob], name, { type: 'image/png' }) };
+    }));
+    pages = pages.filter(Boolean);
+  } catch (e) { console.error(e); toast(T.cardFailed); return; }
+  let cur = pages[0];
+  const canShare = !!window.RQC_WEB && !!navigator.canShare && navigator.canShare({ files: [cur.file] });
   const copy = async () => {
-    try { await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]); toast(T.cardCopied); } catch { toast(T.copyFailed); }
+    try { await navigator.clipboard.write([new ClipboardItem({ 'image/png': cur.blob })]); toast(T.cardCopied); } catch { toast(T.copyFailed); }
   };
   const save = () => {
-    const a = h('a', { href: url, download: file.name });
+    const a = h('a', { href: cur.url, download: cur.file.name });
     document.body.append(a); a.click(); a.remove();
   };
+  const preview = h('img', { class: 'card-preview', src: cur.url, alt: '' });
+  const seg = pages.length > 1 ? h('div', { class: 'seg card-pages' }, pages.map(p => h('button', {
+    type: 'button', class: p === cur ? 'on' : '',
+    onclick: e => { cur = p; preview.src = p.url; for (const b of seg.children) b.classList.toggle('on', b === e.currentTarget); },
+  }, p.label))) : null;
   openModal(h('div', { class: 'dialog narrow card-dlg' },
     h('div', { class: 'dialog-head' }, h('h3', null, T.cardTitle), h('button', { class: 'btn small ghost', onclick: closeModal }, '✕')),
     h('div', { class: 'dialog-body' },
-      h('img', { class: 'card-preview', src: url, alt: '' }),
+      seg,
+      preview,
       h('div', { class: 'hint', style: 'margin:10px 0 0' }, T.cardHint)),
     h('div', { class: 'dialog-foot' },
       h('button', { class: 'btn', title: T.linkTip, onclick: async () => copyText(await buildLink(), T.linkCopied) }, T.copyLink),
       h('div', { class: 'spacer' }),
-      canShare ? h('button', { class: 'btn', onclick: () => navigator.share({ files: [file] }).catch(() => {}) }, T.cardShare) : null,
+      canShare ? h('button', { class: 'btn', onclick: () => navigator.share({ files: [cur.file] }).catch(() => {}) }, T.cardShare) : null,
       h('button', { class: 'btn', onclick: save }, T.cardSave),
       h('button', { class: 'btn primary', onclick: copy }, T.cardCopy))));
 }
