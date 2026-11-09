@@ -1294,3 +1294,48 @@ body.tool-timer .calc-only { display: none !important; }
 .card-pages { width: 260px; margin: 0 auto 10px; }
 .card-pages button { font-size: 13px; padding: 5px 10px; }
 .card-pages ~ .card-preview { max-height: calc(100vh - 276px); }
+/* «База»: the crafting tree on a recipe page */
+.ct-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.ct-ctl { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12.5px; flex-wrap: wrap; }
+.ct-qty { width: 76px; text-align: center; padding: 4px 6px; }
+.ct-step { min-width: 28px; padding: 3px 8px; }
+.ct-chance { margin: 0 0 0 8px; }
+.ct-tree { margin-top: 8px; display: flex; flex-direction: column; gap: 3px; }
+.ct-row { display: flex; align-items: center; gap: 8px; min-height: 30px; padding-left: calc(var(--d) * 22px); position: relative; }
+.ct-row:not(.root)::before { content: ''; position: absolute; left: calc(var(--d) * 22px - 13px); top: -3px; bottom: 50%; width: 9px; border-left: 1px solid var(--line-2); border-bottom: 1px solid var(--line-2); border-bottom-left-radius: 4px; }
+.ct-row.root .bs-chip { font-size: 13.5px; font-weight: 700; border-color: var(--gold-3); }
+.ct-tog { width: 18px; height: 18px; flex: none; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--line-2); border-radius: 4px; background: rgba(0, 0, 0, .4); color: var(--gold); font-size: 10px; cursor: pointer; padding: 0; }
+.ct-tog:hover { border-color: var(--gold); color: var(--gold-hi); }
+.ct-tog.off { color: var(--dim); border-style: dashed; }
+.ct-tog.none { border: 0; background: none; cursor: default; }
+.ct-info { display: inline-flex; align-items: center; gap: 6px; min-width: 0; color: var(--dim); font-size: 11.5px; }
+.ct-info.none { color: #a8684f; }
+.ct-rlink { background: none; border: 0; padding: 0; color: var(--muted); font-size: 11.5px; cursor: pointer; }
+.ct-rlink:hover { color: var(--gold-hi); text-decoration: underline; }
+.ct-alt { font-size: 11.5px; padding: 2px 4px; max-width: 220px; }
+.ct-note { margin-top: 6px; font-size: 11.5px; }
+.ct-tot { display: grid; grid-template-columns: minmax(0, auto) auto minmax(0, 1fr) 92px minmax(70px, auto); gap: 4px 10px; align-items: center; }
+.ct-tot > div { display: contents; }
+.ct-tot small { color: var(--dim); font-size: 11.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ct-tot small.none { color: #a8684f; }
+.ct-n { color: var(--gold-hi); font-variant-numeric: tabular-nums; text-align: right; font-size: 12.5px; }
+.ct-sum { display: flex; justify-content: space-between; gap: 10px; margin-top: 8px; padding-top: 6px; border-top: 1px dashed var(--line); color: var(--muted); font-size: 12.5px; }
+@media (max-width: 760px) { .ct-tot { grid-template-columns: minmax(0, 1fr) auto 72px auto; } .ct-tot small, .ct-tot-h span:nth-child(3) { display: none; } .ct-row { padding-left: calc(var(--d) * 10px); flex-wrap: wrap; row-gap: 1px; } .ct-info { flex-basis: 100%; padding-left: 26px; flex-wrap: wrap; } .ct-row.root .ct-info { padding-left: 4px; } .ct-row:not(.root)::before { display: none; } .ct-alt { max-width: 140px; } }
+/* «База»: a station recipe on an item page — station = components, fee */
+.bs-strow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 5px; }
+.bs-strow .bs-chips { display: contents; }
+.bs-st-eq { color: var(--dim); }
+.ct-fees { display: inline-flex; gap: 12px; }
+/* crafting tree: own prices per resource → the crafting cost */
+.ct-tot-h { display: contents; }
+.ct-tot-h span { font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 700; text-align: right; }
+.ct-price { width: 100%; padding: 3px 6px; text-align: right; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.ct-price::placeholder { color: var(--dim); }
+.ct-line { text-align: right; }
+.ct-total { font-size: 14px; color: var(--fg); font-weight: 700; border-top: 1px solid var(--line-2); }
+.ct-total small { font-weight: 400; color: var(--dim); font-size: 11.5px; }
+.ct-total .bs-price { font-size: 15px; }
+/* no browser spin arrows in the crafting tree's number fields (the quantity has its own − / +) */
+.ct-price, .ct-qty { appearance: textfield; -moz-appearance: textfield; }
+.ct-price::-webkit-inner-spin-button, .ct-price::-webkit-outer-spin-button,
+.ct-qty::-webkit-inner-spin-button, .ct-qty::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }

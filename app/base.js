@@ -23,7 +23,8 @@ const BASE_T = {
     aggro: 'Агресивний', yes: 'так', no: 'ні', event: 'Івент', group: 'Група', quest: 'Завдання', summoned: 'Призивається', type: 'Тип',
     boss: 'бос', elite: 'еліта', where: 'Де живе', resp: 'респаун', toTimer: 'У таймер',
     drops: { equip: 'Спорядження', cards: 'Карти', drop: 'Видобуток', cons: 'Розхідники', questDrop: 'Для завдань', recipes: 'Рецепти', summon: 'Призов' },
-    src: { drop: 'Хто дропає', node: 'Збір', shop: 'Продають', quest: 'Нагорода за завдання', craft: 'Створюється за рецептом', box: 'Міститься в', given: 'Видає', event: 'Івент', edition: 'Видання гри', season: 'Сезонна пригода', other: 'Ще', station: 'Створюється на верстаті', from: 'Створюється з', start: 'Початкове спорядження класу' },
+    src: { drop: 'Хто дропає', node: 'Збір', shop: 'Продають', quest: 'Нагорода за завдання', craft: 'Створюється за рецептом', box: 'Міститься в', given: 'Видає', event: 'Івент', edition: 'Видання гри', season: 'Сезонна пригода', other: 'Ще', station: 'Створюється на верстаті', from: 'Створюється з', start: 'Початкове спорядження класу', card: 'Шанс з карти (бонус карти)' },
+    notes: { leaders: 'Падає з вожаків (будь-яких)' },
     use: { recipe: 'Потрібно для рецептів', quest: 'Потрібно для завдань', coll: 'Потрібно для колекцій', station: 'Компонент на верстаті', made: 'З цього роблять' },
     ev: { cat: 'Івенти', yearly: 'Проводиться регулярно', past: 'Більше не проводиться', status: 'Статус', usual: 'Зазвичай', last: 'Останній раз', since: 'Уведено', now: 'Іде зараз', left: 'ще {t}', soon: 'Почнеться {d}', how: 'Як це працює', history: 'Коли проводився', toCal: 'Календар', groups: { monsters: 'Монстри', npcs: 'НПС', locs: 'Локації', quests: 'Завдання', chains: 'Ланцюжки завдань', mounts: 'Вихованці та їздові', gear: 'Спорядження', cards: 'Карти', transmog: 'Преобразці', boxes: 'Коробки та скрині', cons: 'Витратні та їжа', trophies: 'Трофеї' } },
     whereGet: 'Де взяти', usedFor: 'Де потрібно', nobody: 'У вікі немає, звідки це береться',
@@ -34,6 +35,12 @@ const BASE_T = {
     from: 'Видає', to: 'Здати', chain: 'Ланцюжок', prev: 'Перед цим', next: 'Далі', cls: 'Клас',
     task: 'Що зробити', kill: 'Убити', need: 'Принести', useIt: 'Використати', bring: 'Віднести', reward: 'Нагорода', choice: 'На вибір', gold: 'Золото',
     result: 'Результат', chance: 'Шанс', ingredients: 'Ресурси', recipeFrom: 'Де взяти рецепт',
+    ct: { title: 'Дерево крафту', make: 'Зробити', pcs: 'шт.', chance: 'З урахуванням шансу', chanceTip: 'У середньому: скільки спроб і ресурсів піде, якщо частина крафтів не вдасться',
+      fold: 'Згорнути: візьму цей предмет готовим', unfold: 'Розгорнути рецепт', recipe: 'рецепт', crafts: 'крафтів: {n}', tries: '≈ спроб: {n}', gives: 'вийде {n}',
+      total: 'Усього зібрати', hint: '▾ згортає підрецепт — тоді предмет рахується як готовий',
+      shop: 'НПС', node: 'Збір', drop: 'Дроп', quest: 'Завдання', box: 'З', event: 'Івент', craft: 'Можна скрафтити', none: 'невідомо, де взяти', fee: 'Обробка на верстатах',
+      pricePer: 'Ціна за шт.', cost: 'Разом', pricePh: 'ціна', priceTip: 'Ваша ціна за 1 шт. — запам\x27ятовується для всіх рецептів', priceNpc: 'Порожньо — ціна НПС; впишіть свою, якщо купуєте в гравців',
+      craftCost: 'Вартість крафту', priced: '(ціна є для {n} з {all} ресурсів)' },
     nodeKind: { gather: 'Точка збору', ore: 'Рудне родовище', fish: 'Рибне місце' }, bait: 'Наживка', yields: 'Що дає', locsOf: 'Де є',
     marks: { npc: 'НПС', shop: 'Торговець', exit: 'Перехід', fish: 'Рибалка', craft: 'Майстерня', post: 'Пошта', infanta: 'Інфанта' },
     questsN: 'завдань: {n}', sellsN: 'товарів: {n}', andMore: '…і ще {n}',
@@ -48,7 +55,8 @@ const BASE_T = {
     aggro: 'Агрессивный', yes: 'да', no: 'нет', event: 'Ивент', group: 'Группа', quest: 'Задание', summoned: 'Призывается', type: 'Тип',
     boss: 'босс', elite: 'элита', where: 'Где живёт', resp: 'респаун', toTimer: 'В таймер',
     drops: { equip: 'Снаряжение', cards: 'Карты', drop: 'Добыча', cons: 'Расходники', questDrop: 'Для заданий', recipes: 'Рецепты', summon: 'Призыв' },
-    src: { drop: 'Кто дропает', node: 'Сбор', shop: 'Продают', quest: 'Награда за задание', craft: 'Создаётся по рецепту', box: 'Содержится в', given: 'Выдаёт', event: 'Ивент', edition: 'Издание игры', season: 'Сезонное приключение', other: 'Ещё', station: 'Создаётся на станке', from: 'Создаётся из', start: 'Начальная экипировка класса' },
+    src: { drop: 'Кто дропает', node: 'Сбор', shop: 'Продают', quest: 'Награда за задание', craft: 'Создаётся по рецепту', box: 'Содержится в', given: 'Выдаёт', event: 'Ивент', edition: 'Издание игры', season: 'Сезонное приключение', other: 'Ещё', station: 'Создаётся на станке', from: 'Создаётся из', start: 'Начальная экипировка класса', card: 'Шанс с карты (бонус карты)' },
+    notes: { leaders: 'Падает с вожаков (любых)' },
     use: { recipe: 'Нужно для рецептов', quest: 'Нужно для заданий', coll: 'Нужно для коллекций', station: 'Компонент на станке', made: 'Из этого делают' },
     ev: { cat: 'Ивенты', yearly: 'Проводится регулярно', past: 'Больше не проводится', status: 'Статус', usual: 'Обычно', last: 'Последний раз', since: 'Введён', now: 'Идёт сейчас', left: 'ещё {t}', soon: 'Начнётся {d}', how: 'Как это работает', history: 'Когда проводился', toCal: 'Календарь', groups: { monsters: 'Монстры', npcs: 'НПС', locs: 'Локации', quests: 'Задания', chains: 'Цепочки заданий', mounts: 'Питомцы и ездовые', gear: 'Снаряжение', cards: 'Карты', transmog: 'Преобразцы', boxes: 'Коробки и сундуки', cons: 'Расходники и еда', trophies: 'Трофеи' } },
     whereGet: 'Где взять', usedFor: 'Где нужно', nobody: 'В вики нет, откуда это берётся',
@@ -59,6 +67,12 @@ const BASE_T = {
     from: 'Выдаёт', to: 'Сдать', chain: 'Цепочка', prev: 'Перед этим', next: 'Дальше', cls: 'Класс',
     task: 'Что сделать', kill: 'Убить', need: 'Принести', useIt: 'Использовать', bring: 'Отнести', reward: 'Награда', choice: 'На выбор', gold: 'Золото',
     result: 'Результат', chance: 'Шанс', ingredients: 'Ресурсы', recipeFrom: 'Где взять рецепт',
+    ct: { title: 'Дерево крафта', make: 'Сделать', pcs: 'шт.', chance: 'С учётом шанса', chanceTip: 'В среднем: сколько попыток и ресурсов уйдёт, если часть крафтов не удастся',
+      fold: 'Свернуть: возьму этот предмет готовым', unfold: 'Развернуть рецепт', recipe: 'рецепт', crafts: 'крафтов: {n}', tries: '≈ попыток: {n}', gives: 'выйдет {n}',
+      total: 'Всего собрать', hint: '▾ сворачивает подрецепт — тогда предмет считается готовым',
+      shop: 'НПС', node: 'Сбор', drop: 'Дроп', quest: 'Задание', box: 'Из', event: 'Ивент', craft: 'Можно скрафтить', none: 'неизвестно, где взять', fee: 'Обработка на станках',
+      pricePer: 'Цена за шт.', cost: 'Итого', pricePh: 'цена', priceTip: 'Ваша цена за 1 шт. — запоминается для всех рецептов', priceNpc: 'Пусто — цена НПС; впишите свою, если покупаете у игроков',
+      craftCost: 'Стоимость крафта', priced: '(цена есть для {n} из {all} ресурсов)' },
     nodeKind: { gather: 'Точка сбора', ore: 'Рудное месторождение', fish: 'Рыбное место' }, bait: 'Наживка', yields: 'Что даёт', locsOf: 'Где есть',
     marks: { npc: 'НПС', shop: 'Торговец', exit: 'Переход', fish: 'Рыбалка', craft: 'Мастерская', post: 'Почта', infanta: 'Инфанта' },
     questsN: 'заданий: {n}', sellsN: 'товаров: {n}', andMore: '…и ещё {n}',
@@ -73,7 +87,8 @@ const BASE_T = {
     aggro: 'Aggressive', yes: 'yes', no: 'no', event: 'Event', group: 'Group', quest: 'Quest', summoned: 'Summoned by', type: 'Type',
     boss: 'boss', elite: 'elite', where: 'Lives in', resp: 'respawn', toTimer: 'To the timer',
     drops: { equip: 'Gear', cards: 'Cards', drop: 'Loot', cons: 'Consumables', questDrop: 'Quest items', recipes: 'Recipes', summon: 'Summons' },
-    src: { drop: 'Dropped by', node: 'Gathering', shop: 'Sold by', quest: 'Quest reward', craft: 'Crafted by recipe', box: 'Found in', given: 'Given by', event: 'Event', edition: 'Game edition', season: 'Seasonal adventure', other: 'Also', station: 'Made on a station', from: 'Made from', start: 'Starting gear of' },
+    src: { drop: 'Dropped by', node: 'Gathering', shop: 'Sold by', quest: 'Quest reward', craft: 'Crafted by recipe', box: 'Found in', given: 'Given by', event: 'Event', edition: 'Game edition', season: 'Seasonal adventure', other: 'Also', station: 'Made on a station', from: 'Made from', start: 'Starting gear of', card: 'Chance from a card (card bonus)' },
+    notes: { leaders: 'Drops from pack leaders (any)' },
     use: { recipe: 'Used in recipes', quest: 'Needed for quests', coll: 'Needed for collections', station: 'Station component', made: 'Made into' },
     ev: { cat: 'Events', yearly: 'Runs regularly', past: 'No longer runs', status: 'Status', usual: 'Usually', last: 'Last time', since: 'Added', now: 'Running now', left: '{t} left', soon: 'Starts {d}', how: 'How it works', history: 'When it ran', toCal: 'Calendar', groups: { monsters: 'Monsters', npcs: 'NPCs', locs: 'Locations', quests: 'Quests', chains: 'Quest chains', mounts: 'Pets and mounts', gear: 'Gear', cards: 'Cards', transmog: 'Transmogs', boxes: 'Boxes and chests', cons: 'Consumables and food', trophies: 'Trophies' } },
     whereGet: 'Where to get', usedFor: 'Used for', nobody: 'The wiki does not say where it comes from',
@@ -84,6 +99,12 @@ const BASE_T = {
     from: 'Given by', to: 'Turn in to', chain: 'Chain', prev: 'Before', next: 'Next', cls: 'Class',
     task: 'To do', kill: 'Kill', need: 'Bring', useIt: 'Use', bring: 'Deliver to', reward: 'Reward', choice: 'Choice of', gold: 'Gold',
     result: 'Result', chance: 'Chance', ingredients: 'Resources', recipeFrom: 'Where to get the recipe',
+    ct: { title: 'Crafting tree', make: 'Make', pcs: 'pcs', chance: 'Count the chance', chanceTip: 'On average: how many tries and resources it takes when some crafts fail',
+      fold: 'Collapse: I\'ll get this item ready-made', unfold: 'Expand the recipe', recipe: 'recipe', crafts: '{n} crafts', tries: '≈ {n} tries', gives: 'makes {n}',
+      total: 'Total to gather', hint: '▾ collapses a sub-recipe — the item then counts as ready-made',
+      shop: 'NPC', node: 'Gathering', drop: 'Drop', quest: 'Quest', box: 'From', event: 'Event', craft: 'Can be crafted', none: 'source unknown', fee: 'Station fees',
+      pricePer: 'Price each', cost: 'Total', pricePh: 'price', priceTip: 'Your price for 1 piece — remembered for every recipe', priceNpc: 'Empty — the NPC price; type your own if you buy from players',
+      craftCost: 'Crafting cost', priced: '(priced: {n} of {all} resources)' },
     nodeKind: { gather: 'Gathering point', ore: 'Ore vein', fish: 'Fishing spot' }, bait: 'Bait', yields: 'Yields', locsOf: 'Found in',
     marks: { npc: 'NPC', shop: 'Vendor', exit: 'Exit', fish: 'Fishing', craft: 'Workshop', post: 'Post', infanta: 'Infanta' },
     questsN: 'quests: {n}', sellsN: 'goods: {n}', andMore: '…and {n} more',
@@ -173,6 +194,8 @@ const wikiSrc = name => {
   const a = bnorm(name), b = bnorm(bstrip(name));
   return [...(WSN.get(a) || []), ...(b !== a ? WSN.get(b) || [] : [])];
 };
+// name → a kind of source from BTX().notes (the wiki page says «Выпадают из вожаков» and names no monsters)
+const SRC_NOTES = { 'осколок хрустальной реки': 'leaders' };
 function sourcesOf(name) {
   const ck = bnorm(name);
   if (srcCache.has(ck)) return srcCache.get(ck);
@@ -182,7 +205,8 @@ function sourcesOf(name) {
   for (const [k, v] of Object.entries(own)) out[k] = v.slice();
   const add = (k, v, same = eqv) => { const l = (out[k] ||= []); if (!l.some(x => same(x, v))) l.push(v); };
   for (const [src, how, kind] of wikiSrc(name)) {
-    if (kind === 'k' || kind === 'z') continue; // a collection needs the item; a card page lists its monster's drops
+    if (kind === 'k') continue; // a collection needs the item
+    if (kind === 'z') { add('card', src); continue; } // a card whose bonus gives a chance at the item
     const page = src.replace(/^Монстр\s+/, '').replace(/^Задание\s*[—-]\s*/, '');
     const g = X.goodBy.get(bnorm(src)), n = X.nodeBy.get(bnorm(src.replace(/\s*\(ресурс\)$/, '')));
     if (how === 'd' && kind === 'm') { const m = X.monBy.get(bnorm(page)); m ? add('drop', m) : add('other', src); }
@@ -206,6 +230,8 @@ function sourcesOf(name) {
     if (ev) add('event', ev);
     else for (const e of X.events) if (Object.values(e).some(v => Array.isArray(v) && v.includes(name))) { add('event', e.name); break; }
   }
+  // a source the wiki only states in a note, with no list of monsters
+  if (!Object.keys(out).length && SRC_NOTES[bnorm(name)]) add('note', SRC_NOTES[bnorm(name)]);
   srcCache.set(ck, out);
   return out;
 }
@@ -308,8 +334,14 @@ function openBase(kind, key, { push = true } = {}) {
   BS.sel = { kind, key };
   store.set('baseSel', BS.sel);
   if (tab !== 'base') { switchTool('base'); return; }
-  drawBaseList();
+  markBaseList();
   drawBaseDetail();
+}
+// only move the highlight in the list: rebuilding its 300 rows makes every icon load again and the page blink
+function markBaseList() {
+  const el = document.getElementById('baseList');
+  if (!el) return;
+  for (const r of el.children) if (r._bs) r.classList.toggle('on', !!BS.sel && BS.sel.kind === r._bs.kind && BS.sel.key === r._bs.key);
 }
 
 function renderBase(el) {
@@ -330,9 +362,11 @@ function renderBase(el) {
 
 function baseRow(e, showCat, onclick) {
   const on = BS.sel && BS.sel.kind === e.kind && BS.sel.key === e.key;
-  return h('div', { class: 'bs-row' + (on ? ' on' : ''), onclick: onclick || (() => openBase(e.kind, e.key, { push: false })) },
-    e.icon ? h('img', { class: 'bs-ic' + (e.round ? ' round' : '') + (e.cover ? ' cover' : ''), src: e.icon, loading: 'lazy', draggable: 'false', onerror: hideImg }) : h('span', { class: 'bs-ic ph' }, iconEl(ph(e.kind))),
+  const row = h('div', { class: 'bs-row' + (on ? ' on' : ''), onclick: onclick || (() => openBase(e.kind, e.key, { push: false })) },
+    e.icon ? h('img', { class: 'bs-ic' + (e.round ? ' round' : '') + (e.cover ? ' cover' : ''), src: e.icon, loading: 'lazy', decoding: 'sync', draggable: 'false', onerror: hideImg }) : h('span', { class: 'bs-ic ph' }, iconEl(ph(e.kind))),
     h('div', { class: 'bs-name' }, e.name, h('small', null, (showCat ? BTX().cats[e.kind] + ' · ' : '') + (e.meta || ''))));
+  row._bs = e;
+  return row;
 }
 
 function drawBaseList() {
@@ -364,7 +398,7 @@ function bchip(name, link, { count, extra, icon } = {}) {
   const ic = icon || (f && f.e.icon);
   const sl = typeof name === 'string' ? slotsOf(name) : null;
   return h(link ? 'button' : 'span', { class: 'bs-chip' + (link ? ' link' : ''), onclick: link ? () => openBase(link.kind, link.key) : null },
-    ic ? h('img', { src: ic, loading: 'lazy', draggable: 'false', class: f && f.e.round ? 'round' : '', onerror: hideImg }) : null,
+    ic ? h('img', { src: ic, decoding: 'sync', draggable: 'false', class: f && f.e.round ? 'round' : '', onerror: hideImg }) : null,
     sl ? sl.name : name, sl ? slotIcons(sl.n) : null,
     count && count > 1 ? h('b', { class: 'bs-n' }, '×' + fmtNum(count)) : null, extra ? h('small', null, extra) : null);
 }
@@ -374,12 +408,169 @@ const qchip = q => bchip(`${q.name}${q.level != null ? ` · ${BTX().lvl} ${q.lev
 const fmtMin = min => { const hh = Math.floor(min / 60), mm = min % 60; return (hh ? `${hh} ${T.hShort} ` : '') + (mm || !hh ? `${mm} ${T.mShort}` : ''); };
 const wikiLink = title => h('a', { class: 'bs-wiki', href: `https://royalquest.info/ru/${encodeURIComponent(title.replace(/ /g, '_'))}`, target: '_blank', rel: 'noopener' }, BTX().wiki + ' ↗');
 
+// ---------- «Дерево крафта»: a recipe with its sub-recipes for N pieces, and the total of what to gather ----------
+// State of the open recipe: how many to make, collapsed sub-recipes (taken ready-made), the chosen recipe where there are several.
+// Station recipes (data/base-stations.js) join in as recipes with a fee. A conversion for runes (Элениумный преобразователь)
+// is only an alternative and stays folded until opened — otherwise an ore you dig would turn into a cheaper ore.
+const CRAFT = { key: null, qty: 1, chance: bget2('craftChance', false), off: new Set(), on: new Set(), pick: new Map(), prices: bget2('craftPrices', {}) || {} };
+const feeOf = r => { const m = String(r.fee || '').trim().match(/^(\d+)\s*(\S*)$/); return m ? { n: +m[1], cur: m[2] } : null; };
+const stationRecipes = () => (window.RQ_BASE_STATIONS || []).flatMap(st => st.items.map(it => ({
+  name: `${st.name}: ${it.n}`, result: it.n, count: 1, chance: 100, res: it.res, station: st.name, fee: it.price, conv: !/^\d+$/.test(String(it.price).trim()) })));
+let RBY = null;
+// result name → the recipes that make it: the plain recipe, «(Очистка)», a station for gold, a conversion for runes
+function recipesFor(name) {
+  if (!RBY) {
+    RBY = new Map();
+    for (const r of [...baseIndex().recipes, ...stationRecipes()]) if (r.result) { const k = bnorm(bstrip(r.result)); if (!RBY.has(k)) RBY.set(k, []); RBY.get(k).push(r); }
+    const rank = r => r.conv ? 3 : r.station ? 2 : /\(Очистка\)/.test(r.name) ? 1 : 0;
+    for (const l of RBY.values()) l.sort((a, b) => rank(a) - rank(b));
+  }
+  return RBY.get(bnorm(bstrip(name))) || [];
+}
+// the station recipes that make a name / that take it as a component
+const stationMaking = name => recipesFor(name).filter(r => r.station);
+const stationUsing = name => stationRecipes().filter(r => r.res.some(x => bnorm(x.n) === bnorm(name)));
+// one node: need = pieces wanted; a craftable node holds its recipe, the number of crafts and its ingredients
+function craftNode(name, need, path, seen, recipe) {
+  const alts = recipe ? [recipe] : recipesFor(name).filter(r => !seen.has(bnorm(r.name)));
+  const node = { name, need, path, craftable: alts.length > 0 };
+  if (!alts.length) return node;
+  const ri = Math.min(CRAFT.pick.get(path) || 0, alts.length - 1), r = alts[ri];
+  if (!recipe && (CRAFT.off.has(path) || (r.conv && !CRAFT.on.has(path)))) return node;
+  const per = r.count || 1, crafts = Math.ceil(need / per - 1e-9);
+  // with the chance: the average number of tries (not rounded — only the resource counts are rounded up)
+  const tries = CRAFT.chance && r.chance && r.chance < 100 ? crafts * 100 / r.chance : crafts;
+  const s2 = new Set(seen).add(bnorm(r.name));
+  Object.assign(node, { recipe: r, alts: recipe ? [] : alts, crafts, tries, made: crafts * per,
+    kids: (r.res || []).map((x, i) => craftNode(x.n, (x.c || 1) * tries, `${path}>${ri}.${i}`, s2)) });
+  return node;
+}
+// a short «where to get it» for a resource; the cheapest NPC price in gold when someone sells it
+function craftHint(name, craftable) {
+  // every way to get it, one part per kind: «Збір: X; Дроп: Y · рів. 60 +2; Карта: Z» (the whole list in the tooltip)
+  const c = BTX().ct, s = sourcesOf(name), parts = [];
+  const more = l => l.length > 1 ? ` +${l.length - 1}` : '';
+  let gold = null;
+  if (s.shop) {
+    const best = s.shop.map(x => ({ x, p: goldNum(x.price) })).sort((a, b) => (a.p ?? Infinity) - (b.p ?? Infinity))[0];
+    gold = best.p; parts.push(`${c.shop}: ${best.x.npc.name}${more(s.shop)}`);
+  }
+  if (s.node) parts.push(`${c.node}: ${s.node[0].name}${more(s.node)}`);
+  if (s.note) parts.push(BTX().notes[s.note[0]] || s.note[0]);
+  if (s.drop) { const m = s.drop.slice().sort((a, b) => (a.level ?? 999) - (b.level ?? 999))[0]; parts.push(`${c.drop}: ${m.name}${m.level != null ? ` · ${BTX().lvl} ${m.level}` : ''}${more(s.drop)}`); }
+  if (s.card) parts.push(`${s.card[0]}${more(s.card)}`); // the name already says «Карта …»
+  if (s.quest) parts.push(`${c.quest}: ${s.quest[0].name}${more(s.quest)}`);
+  if (s.box) parts.push(`${c.box}: ${s.box[0].name}${more(s.box)}`);
+  if (s.event) parts.push(`${c.event}: ${s.event[0]}`);
+  if (!parts.length && craftable) parts.push(c.craft);
+  if (!parts.length) for (const k of ['given', 'season', 'station', 'from', 'other']) if (s[k]) { parts.push(String(s[k][0])); break; }
+  if (!parts.length) return { text: c.none, none: true };
+  return { text: parts.join('; '), gold };
+}
+function craftBlock(x) {
+  const t = BTX(), c = t.ct;
+  if (CRAFT.key !== x.name) Object.assign(CRAFT, { key: x.name, qty: x.count || 1, off: new Set(), on: new Set(), pick: new Map() });
+  const body = h('div');
+  const qty = h('input', { class: 'inp ct-qty', type: 'number', min: 1, max: 99999, value: CRAFT.qty });
+  const setQty = v => { CRAFT.qty = clamp(Math.round(+v) || 1, 1, 99999); qty.value = CRAFT.qty; draw(); };
+  qty.addEventListener('input', () => { if (+qty.value >= 1) { CRAFT.qty = Math.min(Math.round(+qty.value), 99999); draw(); } });
+  qty.addEventListener('change', () => setQty(qty.value));
+  const step = d => h('button', { class: 'btn small ghost ct-step', onclick: () => setQty(CRAFT.qty + d * (x.count || 1)) }, d > 0 ? '+' : '−');
+  const chk = h('label', { class: 'check ct-chance', title: c.chanceTip }, h('input', { type: 'checkbox', checked: CRAFT.chance,
+    onchange: e => { CRAFT.chance = e.target.checked; store.set('craftChance', CRAFT.chance); draw(); } }), c.chance);
+  function draw() {
+    const root = craftNode(x.result || x.name, CRAFT.qty, 'r', new Set(), x);
+    const rows = [], tot = new Map(), fees = new Map();
+    let unsure = false, foldable = false;
+    const walk = (n, d) => {
+      if (n.recipe && n.recipe.chance != null && n.recipe.chance < 100) unsure = true;
+      if (d > 0 && n.craftable) foldable = true;
+      const tog = d === 0 ? null : n.recipe
+        ? h('button', { class: 'ct-tog', title: c.fold, onclick: () => { CRAFT.off.add(n.path); CRAFT.on.delete(n.path); draw(); } }, '▾')
+        : n.craftable ? h('button', { class: 'ct-tog off', title: c.unfold, onclick: () => { CRAFT.off.delete(n.path); CRAFT.on.add(n.path); draw(); } }, '▸') : h('span', { class: 'ct-tog none' });
+      let info;
+      if (n.recipe) {
+        const st = n.recipe.station, fee = feeOf(n.recipe);
+        const bits = [st || `${c.recipe} ${n.recipe.chance ?? '?'}%`, fmtT(c.crafts, { n: fmtNum(n.crafts) })];
+        if (n.tries !== n.crafts) bits.push(fmtT(c.tries, { n: fmtNum(n.tries, n.tries % 1 ? 1 : 0) }));
+        if (n.made !== Math.ceil(n.need - 1e-9)) bits.push(fmtT(c.gives, { n: fmtNum(n.made) }));
+        if (fee) fees.set(fee.cur, (fees.get(fee.cur) || 0) + fee.n * n.crafts);
+        info = h('span', { class: 'ct-info' },
+          d === 0 || st ? h('small', null, bits.join(' · ')) : h('button', { class: 'ct-rlink', onclick: () => openBase('recipe', n.recipe.name) }, bits.join(' · ')),
+          fee ? h('span', { class: 'bs-price' }, priceEl(fee.cur ? `${fee.n * n.crafts} ${fee.cur}` : fee.n * n.crafts)) : null,
+          n.alts.length > 1 ? h('select', { class: 'inp ct-alt', onchange: e => { CRAFT.pick.set(n.path, +e.target.value); draw(); } },
+            n.alts.map((r, i) => h('option', { value: i, selected: r === n.recipe }, r.station ? `${r.station} · ${r.fee}` : r.name.replace(/^Рецепт:\s*/, '')))) : null);
+      } else {
+        const hn = craftHint(n.name, n.craftable);
+        const k = bnorm(n.name);
+        const o = tot.get(k) || { name: n.name, n: 0, hint: hn };
+        o.n += n.need; tot.set(k, o);
+        info = h('small', { class: 'ct-info' + (hn.none ? ' none' : ''), title: hn.text }, hn.text);
+      }
+      rows.push(h('div', { class: 'ct-row' + (d === 0 ? ' root' : ''), style: `--d:${d}` }, tog, bchip(n.name, undefined, { count: d === 0 ? n.made : Math.ceil(n.need - 1e-9) }), info));
+      for (const k of n.kids || []) walk(k, d + 1);
+    };
+    walk(root, 0);
+    chk.style.display = unsure ? '' : 'none';
+    const list = [...tot.values()].sort((a, b) => b.n - a.n);
+    for (const o of list) o.n = Math.ceil(o.n - 1e-9);
+    // a price per piece for every resource: the player's own (remembered for every recipe) or else the NPC price;
+    // typing only refreshes the sums, so the field keeps its focus
+    const priceOf = o => { const v = CRAFT.prices[bnorm(o.name)]; return v != null ? v : o.hint.gold ?? null; };
+    const lineEls = new Map();
+    const sumEl = h('span', { class: 'bs-price' }), sumNote = h('small');
+    const goldFee = fees.get('') || 0;
+    const recount = () => {
+      let sum = goldFee, priced = 0;
+      for (const o of list) {
+        const p = priceOf(o), el = lineEls.get(o);
+        el.replaceChildren(p != null ? priceEl(p * o.n) : '');
+        if (p != null) { sum += p * o.n; priced++; }
+      }
+      sumEl.replaceChildren(priceEl(sum));
+      sumNote.textContent = priced < list.length ? ' ' + fmtT(c.priced, { n: priced, all: list.length }) : '';
+    };
+    const priceInput = o => {
+      const own = CRAFT.prices[bnorm(o.name)];
+      const inp = h('input', { class: 'inp ct-price', type: 'number', min: 0, step: 'any', inputmode: 'decimal', value: own ?? '',
+        placeholder: o.hint.gold != null ? fmtNum(o.hint.gold) : c.pricePh, title: o.hint.gold != null ? c.priceNpc : c.priceTip });
+      inp.addEventListener('input', () => {
+        const v = inp.value.trim() === '' ? null : +inp.value;
+        if (v == null || !isFinite(v) || v < 0) delete CRAFT.prices[bnorm(o.name)]; else CRAFT.prices[bnorm(o.name)] = v;
+        store.set('craftPrices', CRAFT.prices);
+        recount();
+      });
+      return inp;
+    };
+    body.replaceChildren(
+      h('div', { class: 'ct-tree' }, rows),
+      foldable ? h('div', { class: 'hint ct-note' }, c.hint) : null,
+      bsec(c.total, h('div', { class: 'ct-tot' },
+        h('div', { class: 'ct-tot-h' }, h('span'), h('span'), h('span'), h('span', null, c.pricePer), h('span', null, c.cost)),
+        list.map(o => { const line = h('span', { class: 'bs-price ct-line' }); lineEls.set(o, line); return h('div', null,
+          bchip(o.name), h('b', { class: 'ct-n' }, '×' + fmtNum(o.n)),
+          h('small', { class: o.hint.none ? 'none' : '', title: o.hint.text }, o.hint.text),
+          priceInput(o), line); }))),
+      goldFee ? h('div', { class: 'ct-sum' }, h('span', null, c.fee), h('span', { class: 'bs-price' }, priceEl(goldFee))) : null,
+      [...fees].filter(([cur]) => cur).map(([cur, v]) => h('div', { class: 'ct-sum' }, h('span', null, c.fee), h('span', { class: 'bs-price' }, priceEl(`${v} ${cur}`)))),
+      h('div', { class: 'ct-sum ct-total' }, h('span', null, c.craftCost, sumNote), sumEl));
+    recount();
+  }
+  draw();
+  return h('div', { class: 'bs-group ct' },
+    h('div', { class: 'ct-head' }, h('h3', null, c.title),
+      h('div', { class: 'ct-ctl' }, h('span', null, c.make), step(-1), qty, step(1), h('span', null, c.pcs), chk)),
+    body);
+}
+
 /** «Где взять» and «Где нужно» for any name. */
 function whereBlocks(name) {
   const t = BTX(), s = sourcesOf(name), u = usesOf(name);
   const out = [];
   const parts = [];
   if (s.drop) parts.push(bsec(t.src.drop, chips(s.drop.slice().sort((a, b) => (a.level ?? 999) - (b.level ?? 999)), mchip)));
+  if (s.note) parts.push(bsec(t.src.drop, chips(s.note, k => bchip(t.notes[k] || k, null))));
+  if (s.card) parts.push(bsec(t.src.card, chips(s.card, n => bchip(n))));
   if (s.node) parts.push(bsec(t.src.node, chips(s.node, n => bchip(n.name, { kind: 'res', key: n.name }, { extra: t.nodeKind[n.kind] }))));
   if (s.shop) parts.push(bsec(t.src.shop, chips(s.shop, x => bchip(x.npc.name, { kind: 'npc', key: x.npc.name }, { extra: priceEl(x.price) }))));
   if (s.quest) parts.push(bsec(t.src.quest, chips(s.quest, qchip)));
@@ -389,7 +580,13 @@ function whereBlocks(name) {
   if (s.season) parts.push(bsec(t.src.season, chips(s.season, n => bchip(n, null))));
   if (s.edition) parts.push(bsec(t.src.edition, chips(s.edition, n => bchip(n, null))));
   if (s.craft) parts.push(bsec(t.src.craft, chips(s.craft, r => bchip(r.name.replace(/^Рецепт:\s*/, ''), { kind: 'recipe', key: r.name }, { extra: `${r.chance ?? '?'}%` }))));
-  if (s.station) parts.push(bsec(t.src.station, chips(s.station, n => bchip(n))));
+  if (s.station) {
+    // with the station's table: what goes in and the fee per piece; a station without one (Расщепитель) stays a chip
+    const made = stationMaking(name), rest = s.station.filter(n => !made.some(r => r.station === n));
+    parts.push(bsec(t.src.station, made.map(r => h('div', { class: 'bs-strow' }, bchip(r.station, null), h('span', { class: 'bs-st-eq' }, '='),
+      chips(r.res, x => bchip(x.n, undefined, { count: x.c })), h('span', { class: 'bs-price' }, priceEl(r.fee)))),
+      rest.length ? chips(rest, n => bchip(n)) : null));
+  }
   if (s.from) parts.push(bsec(t.src.from, chips(s.from, n => bchip(n))));
   if (s.start) parts.push(bsec(t.src.start, chips(s.start, n => bchip(n, null))));
   if (s.other) parts.push(bsec(t.src.other, chips(s.other, n => bchip(n))));
@@ -398,7 +595,11 @@ function whereBlocks(name) {
   if (u.recipe) uses.push(bsec(t.use.recipe, chips(u.recipe, r => bchip(r.name.replace(/^Рецепт:\s*/, ''), { kind: 'recipe', key: r.name }, { count: (r.res.find(x => bnorm(x.n) === bnorm(name)) || {}).c }))));
   if (u.quest) uses.push(bsec(t.use.quest, chips(u.quest, qchip)));
   if (u.coll) uses.push(bsec(t.use.coll, chips(u.coll, n => bchip(n, null))));
-  if (u.station) uses.push(bsec(t.use.station, chips(u.station, n => bchip(n))));
+  if (u.station) {
+    const into = stationUsing(name), rest = u.station.filter(n => !into.some(r => r.station === n));
+    uses.push(bsec(t.use.station, into.length ? chips(into, r => bchip(r.result, undefined, { extra: `${r.station} · ${(r.res.find(x => bnorm(x.n) === bnorm(name)) || {}).c} ${t.ct.pcs}` })) : null,
+      rest.length ? chips(rest, n => bchip(n)) : null));
+  }
   if (u.made) uses.push(bsec(t.use.made, chips(u.made, n => bchip(n))));
   if (uses.length) out.push(h('div', { class: 'bs-group' }, h('h3', null, t.usedFor), uses));
   return out;
@@ -584,8 +785,7 @@ function drawBaseDetail() {
     el.append(h('div', { class: 'bs-foot' }, wikiLink('Задание — ' + x.name)));
   } else if (e.kind === 'recipe') {
     el.append(bfacts([[t.chance, x.chance != null ? `${x.chance}%` : null]]));
-    if (x.result) el.append(bsec(t.result, chips([x.result], n => bchip(n, undefined, { count: x.count }))));
-    el.append(bsec(t.ingredients, chips(x.res || [], r => bchip(r.n, undefined, { count: r.c }))));
+    el.append(craftBlock(x));
     const s = sourcesOf(x.name);
     const parts = [];
     if (s.drop) parts.push(bsec(t.src.drop, chips(s.drop.slice().sort((a, b) => (a.level ?? 999) - (b.level ?? 999)), mchip)));
