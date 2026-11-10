@@ -50,4 +50,15 @@
     en: { updIn: 'The page reloads in {s} s. Your build is saved.', updWaiting: 'The reload waits until you finish editing.', updLater: 'It updates when you reload the page.', updDone: 'Updated to v{v}' },
   };
   for (const [k, t] of Object.entries(texts)) if (window.RQC_I18N && RQC_I18N[k]) Object.assign(RQC_I18N[k], t);
+
+  // a link to a tool (rqcalc.com/#timer, #base, #calendar, #calc — the buttons on the search pages): open it, then clean the address
+  const TOOL_LINKS = ['calc', 'timer', 'base', 'calendar', 'steam'];
+  const openToolLink = () => {
+    const id = location.hash.slice(1);
+    if (!TOOL_LINKS.includes(id) || typeof switchTool !== 'function') return;
+    history.replaceState(null, '', location.pathname + location.search);
+    switchTool(id);
+  };
+  document.addEventListener('DOMContentLoaded', openToolLink);
+  window.addEventListener('hashchange', openToolLink);
 })();

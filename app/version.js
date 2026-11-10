@@ -1,1 +1,1 @@
-window.RQC_VERSION = {"version":"1.0.21","date":"09.11.2026"};
+window.RQC_VERSION = {"version":"1.0.22","date":"10.11.2026"};

@@ -1,0 +1,66 @@
+/* Pages for search engines (tools/build-landing.mjs): the app's dark fantasy look — warm blacks, bronze lines, gold accents */
+:root {
+  --bg: #0b0a08; --panel: #16130f; --raise: #1c1813;
+  --line: rgba(214, 168, 79, .16); --line-2: rgba(214, 168, 79, .32);
+  --fg: #eee4cf; --muted: #a89a80;
+  --gold: #e6b85c; --gold-2: #c9963f; --gold-hi: #ffe2a0; --on-gold: #1d1407;
+  --f-display: "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
+  --f-body: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; color: var(--fg); font: 16px/1.6 var(--f-body);
+  background: radial-gradient(1200px 600px at 50% -10%, rgba(230, 184, 92, .08), transparent 60%), var(--bg);
+}
+a { color: var(--gold); }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+
+.top { border-bottom: 1px solid var(--line-2); background: rgba(11, 10, 8, .85); position: sticky; top: 0; z-index: 2; backdrop-filter: blur(6px); }
+.top .wrap { display: flex; align-items: center; gap: 20px; min-height: 56px; flex-wrap: wrap; }
+.brand { font: 700 20px var(--f-display); color: var(--gold); text-decoration: none; white-space: nowrap; }
+.brand .logo { font-size: 14px; }
+.top nav { display: flex; gap: 4px 16px; flex-wrap: wrap; }
+.top nav a { color: var(--muted); text-decoration: none; font-size: 14px; padding: 4px 0; }
+.top nav a:hover, .top nav a[aria-current] { color: var(--gold-hi); }
+
+.hero { padding: 48px 0 28px; }
+h1, h2, h3 { font-family: var(--f-display); color: var(--gold); line-height: 1.2; }
+h1 { font-size: clamp(32px, 6vw, 52px); margin: 0 0 14px; }
+h2 { font-size: 26px; margin: 48px 0 18px; }
+h3 { font-size: 18px; margin: 0 0 6px; color: var(--gold-hi); }
+.lead { font-size: 19px; color: var(--fg); max-width: 760px; margin: 0 0 24px; opacity: .92; }
+.cta { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn {
+  display: inline-block; padding: 12px 22px; border-radius: 8px; text-decoration: none; font-weight: 600;
+  border: 1px solid var(--line-2); color: var(--fg); background: var(--raise);
+}
+.btn:hover { border-color: var(--gold); }
+.btn.gold { background: linear-gradient(#f2c771, #c9963f); color: var(--on-gold); border-color: #f5d48c; }
+.btn.gold:hover { filter: brightness(1.08); }
+
+.shot { margin: 8px 0 0; }
+.shot img { display: block; width: 100%; height: auto; border-radius: 10px; border: 1px solid var(--line-2); box-shadow: 0 12px 40px rgba(0, 0, 0, .5); }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 14px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px; }
+.card p { margin: 0; color: var(--muted); font-size: 15px; }
+
+.faq details { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; margin-bottom: 10px; }
+.faq summary { cursor: pointer; font-weight: 600; color: var(--gold-hi); }
+.faq p { margin: 8px 0 0; color: var(--muted); }
+
+.links { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 12px; }
+.links a { display: block; text-decoration: none; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+.links a:hover { border-color: var(--gold-2); }
+.links b { display: block; color: var(--gold); font-family: var(--f-display); font-size: 17px; }
+.links span { color: var(--muted); font-size: 14px; }
+
+footer { margin-top: 56px; padding-top: 20px; padding-bottom: 32px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
+
+@media (max-width: 600px) {
+  .hero { padding-top: 28px; }
+  .lead { font-size: 17px; }
+  h2 { margin-top: 36px; }
+  .btn { flex: 1 1 100%; text-align: center; }
+}

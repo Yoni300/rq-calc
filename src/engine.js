@@ -273,6 +273,9 @@
     const eqBonusRows = group(T.EquipmentBonus, 'Equipment_Id');
     const eqBonusVars = group(T.EquipmentBonusVariable, 'EquipmentBonus_Id');
     const toArr = (rows, idxKey = 'Index', valKey = 'Value') => { const a = []; for (const r of rows) a[r[idxKey]] = r[valKey]; for (let i = 0; i < a.length; i++) if (a[i] == null) a[i] = 0; return a; };
+    // the game data puts the switch on the wrong bonus of Ашкалотский тотем: «+4 к Удаче» (always on) instead of its dodge proc
+    const ACTIVATE_FIX = { 781: null, 782: 1 };
+    const activateOf = b => { const v = b.Id in ACTIVATE_FIX ? ACTIVATE_FIX[b.Id] : b.Activate; return v == null ? null : !!v; };
     const equipment = new Map();
     for (const e of T.Equipment || []) {
       let info = null;
@@ -284,7 +287,7 @@
         isPersonal: !!e.IsPersonal, imageId: e.Image_Id ?? null, costumeImageId: e.CostumeImage_Id ?? null, primaryCardId: e.PrimaryCard_Id ?? null,
         startVersion: e.StartVersion_Id, endVersion: e.EndVersion_Id, inVersion: inVersion(e), isCostume: e.CostumeImage_Id != null,
         conditionClassIds: g(eqConds, e.Id).map(c => c.Class_Id),
-        bonuses: g(eqBonusRows, e.Id).map(b => ({ typeId: b.Type_Id, orderIndex: b.OrderIndex, activate: b.Activate == null ? null : !!b.Activate, vars: toArr(g(eqBonusVars, b.Id)) })).sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0)),
+        bonuses: g(eqBonusRows, e.Id).map(b => ({ typeId: b.Type_Id, orderIndex: b.OrderIndex, activate: activateOf(b), vars: toArr(g(eqBonusVars, b.Id)) })).sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0)),
       });
     }
     const forges = []; for (const f of T.EquipmentForge || []) forges[f.Level] = f;

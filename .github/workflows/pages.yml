@@ -55,6 +55,11 @@ jobs:
           rm _site/app/index.html
           grep -q 'web.js?v=' _site/index.html && grep -q '<base href="app/">' _site/index.html && grep -q 'rel="icon"' _site/index.html
 
+      - name: Pages for search engines, sitemap, robots.txt
+        run: |
+          node tools/build-landing.mjs _site
+          test -f _site/calculator/index.html && test -f _site/sitemap.xml && grep -q 'og:image' _site/index.html
+
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
