@@ -1339,3 +1339,177 @@ body.tool-timer .calc-only { display: none !important; }
 .ct-price, .ct-qty { appearance: textfield; -moz-appearance: textfield; }
 .ct-price::-webkit-inner-spin-button, .ct-price::-webkit-outer-spin-button,
 .ct-qty::-webkit-inner-spin-button, .ct-qty::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+/* «Справочник» of the Base: tables of a mechanic (experience, elements, upgrade chances…) */
+.rf-wrap { display: inline-block; max-width: 100%; overflow-x: auto; vertical-align: top; margin: 2px 0 10px; border: 1px solid var(--line); border-radius: 8px; background: rgba(0, 0, 0, .25); }
+.rf { border-collapse: collapse; font-size: 12.5px; }
+.rf th { text-align: left; padding: 6px 12px; background: rgba(0, 0, 0, .4); color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .03em; white-space: nowrap; }
+.rf td { padding: 5px 12px; border-top: 1px solid var(--line); vertical-align: middle; max-width: 520px; line-height: 1.4; }
+.rf tbody tr:hover td { background: var(--soft); }
+.rf .bs-chips { margin: 0; flex-wrap: wrap; }
+.rf th .bs-chip { font-weight: 400; letter-spacing: 0; }
+.rf-up { color: var(--up); font-weight: 700; }
+.rf-down { color: var(--down); }
+.rf-br { display: block; color: var(--down); font-size: 10.5px; white-space: nowrap; }
+.rf-fold { margin: 0 0 8px; }
+.rf-fold > summary { cursor: pointer; padding: 7px 12px; border: 1px solid var(--line); border-radius: 8px; background: rgba(0, 0, 0, .3); font-family: var(--f-display); color: var(--gold); font-size: 14px; }
+.rf-fold > summary:hover { border-color: var(--line-2); }
+.rf-fold[open] > summary { margin-bottom: 6px; }
+.rf td .bs-chip { white-space: nowrap; }
+
+/* ---------- phones, second pass: every screen reachable, nothing cut or hidden from 320 px up ---------- */
+/* pieces that exist only for the phone layout */
+.ed-switch, .bs-tolist { display: none; }
+.bs-nav { display: contents; }
+@media (max-width: 760px) {
+  /* top bar: two rows instead of three */
+  .top { gap: 4px; padding: 6px; }
+  .top .btn { padding: 6px; }
+  .lang { padding: 1px; }
+  .lang button { padding: 6px 5px; font-size: 11px; }
+  /* calculator tabs: all four fit, no sideways scrolling */
+  .tabs { padding: 8px 4px 0; gap: 0; }
+  .tab { flex: 1 1 auto; padding: 8px 4px; font-size: 12px; text-align: center; }
+  .tab .ic { display: none; }
+  .tab .n { margin-left: 4px; padding: 0 5px; }
+  /* the result's head and the talents' foot wrap instead of pushing a button off the screen */
+  .res-head { flex-wrap: wrap; }
+  .tal-foot { flex-wrap: wrap; gap: 8px 12px; }
+  .tal-foot .btn { margin-left: auto; }
+  /* talents: a whole branch fits the screen */
+  .tal { --t: 35px; }
+  .tal-cols { gap: 5px; }
+  /* class picker: two columns that fit, scrolls when the screen is short */
+  .pop.cp { max-height: calc(100vh - 16px); overflow: auto; padding: 8px; }
+  .cp-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+  .cp-col { padding: 5px; gap: 3px; }
+  .cp-item { gap: 7px; padding: 5px; }
+  .cp-item img { width: 32px; height: 32px; }
+  .cp-item.sub img { width: 28px; height: 28px; }
+  .cp-subs { margin-left: 8px; padding-left: 6px; }
+  .cp-name { font-size: 13.5px; }
+  .cp-item.sub .cp-name { font-size: 12.5px; }
+  /* dialog buttons wrap instead of running off the screen */
+  .dialog-foot { flex-wrap: wrap; padding: 8px 10px; }
+  .dialog-foot .btn { flex: 1 1 auto; margin: 0 !important; }
+  .dialog-foot .spacer { display: none; }
+  /* the item editor: the list of items and the picked item's settings are two panes with a switch on top */
+  .ed-switch { display: flex; margin: 8px 10px 0; }
+  .ed-switch button { flex: 1; padding: 8px 6px; }
+  .dialog.ed .dialog-body { display: flex; flex-direction: column; overflow: hidden; }
+  .dialog.ed .picker { flex: 1; min-height: 0; border-right: 0; }
+  .dialog.ed .detail { flex: 1; min-height: 0; padding: 12px; }
+  .dialog.ed:not(.ed-detail) .detail, .dialog.ed.ed-detail .picker { display: none; }
+  /* settings: a wide control goes under its label */
+  .set-row:has(.seg) .set-l, .set-row:has(.set-themes) .set-l { flex: 1 1 100%; }
+  .set-row:has(.seg) .set-c, .set-row:has(.set-themes) .set-c { justify-content: flex-start; }
+  /* the Base: the list and the opened page are separate screens */
+  .bs-wrap { grid-template-columns: minmax(0, 1fr); }
+  .bs-side, .bs-detail { min-width: 0; }
+  .bs-wrap:not(.sn-wrap):not(.view) > .bs-detail { display: none; }
+  .bs-wrap:not(.sn-wrap).view > .bs-side { display: none; }
+  .bs-wrap:not(.sn-wrap) .bs-list { max-height: none; overflow: visible; padding-right: 0; }
+  .bs-nav { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .bs-nav .bs-back { margin: 0; }
+  .bs-tolist { display: inline-flex; }
+  .bs-detail { padding: 12px 12px 14px; max-height: none; }
+  .bs-cat { padding: 6px 11px; }
+  .bs-subs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+  .bs-subs::-webkit-scrollbar { display: none; }
+  .bs-sub { flex: none; padding: 5px 10px; }
+  .bs-mark { width: 26px; height: 26px; margin: -13px 0 0 -13px; }
+  /* reference tables: numbers stay a table, rows with chips or long text become cards */
+  .rf-wrap { display: block; }
+  .rf { width: 100%; }
+  .rf th, .rf td { padding: 5px 8px; }
+  .rf-chance .rf-stone { display: none; }
+  .rf-chance th .bs-chip { padding: 3px; }
+  .rf-chance th, .rf-chance td { padding: 5px 4px; text-align: center; }
+  .rf-chance th:first-child, .rf-chance td:first-child { text-align: left; padding-left: 8px; }
+  .rf-pct th:first-child, .rf-pct td:first-child { position: sticky; left: 0; z-index: 1; background: #15110c; }
+  .rf-pct th:first-child { white-space: normal; min-width: 92px; }
+  .rf-fold > summary { padding: 9px 12px; }
+  /* things to tap are big enough for a finger */
+  .seg button { padding: 6px; }
+  .btn.small { padding: 5px 10px; }
+  .bt-star { padding: 6px; margin: -6px -2px -6px -6px; font-size: 17px; }
+  .ct-tog { width: 24px; height: 24px; }
+  .bs-wiki { display: inline-block; padding: 6px 0; }
+  /* mastery + / −: side by side and finger-sized instead of two 13 px slivers */
+  .mst-btns { flex-direction: row-reverse; gap: 4px; }
+  .mst-btns button, .mst-minus { width: 26px; height: 24px !important; font-size: 15px !important; line-height: 20px !important; }
+  .sheet-reset { padding: 5px 10px; }
+  .bg-pick { opacity: 1; gap: 8px; }
+  .bg-pick button { width: 24px; height: 24px; }
+  /* the sticker goes to the end of the page, where it covers nothing */
+  .sticker, body:not(.tool-timer) .sticker { position: relative; right: auto; bottom: auto; display: block; margin: 10px auto 78px; }
+  .sticker-tip { right: 50%; transform: translateX(50%); }
+  .sticker:hover .sticker-tip, .sticker:focus .sticker-tip { transform: translateX(50%); }
+  .sticker-tip::after { right: calc(50% - 6px); }
+}
+/* small phones (360 px) */
+@media (max-width: 380px) {
+  .tal { --t: 32px; }
+  .tal-cols { gap: 4px; }
+  .rf-chance th, .rf-chance td { padding: 5px 2px; font-size: 12px; }
+  .rf-chance .rf-br { font-size: 10px; }
+  .top .btn { padding: 5px; }
+  .brand { font-size: 16px; }
+}
+/* the narrowest phones (320 px) */
+@media (max-width: 340px) {
+  .tab { padding: 8px 2px; font-size: 11.5px; }
+  .tab .n { display: none; }
+  .tal { --t: 29px; }
+  .lang button { padding: 6px 3px; }
+}
+
+/* phones and tablets: a reference table with chips or long text turns into cards — one row is one card, each cell under its column name */
+@media (max-width: 1099px) {
+  .rf-stack thead { display: none; }
+  .rf-stack tr { display: block; padding: 8px 10px; border-top: 1px solid var(--line); }
+  .rf-stack tbody tr:first-child { border-top: 0; }
+  .rf-stack td { display: flex; align-items: baseline; gap: 8px; padding: 2px 0; border: 0; max-width: none; }
+  .rf-stack td::before { content: attr(data-l); flex: 0 0 84px; color: var(--dim); font-size: 11px; }
+  .rf-stack td:first-child { font-weight: 700; color: var(--gold-hi); }
+  .rf-stack td:first-child::before, .rf-stack td.rf-none { display: none; }
+  /* a bare number in the first cell gets its column name: «День 1» */
+  .rf-stack td.rf-lead::before { display: inline; flex: none; color: inherit; font-size: inherit; }
+  .rf-stack td.rf-lead { gap: 5px; }
+  .rf-stack td .bs-chip { white-space: normal; text-align: left; }
+}
+
+/* ---------- tablets: the calculator's three columns need 1086 px, narrower screens get their own layouts ---------- */
+@media (min-width: 761px) and (max-width: 1099px) {
+  /* a talent branch fits the middle column: its name goes above the icons, the icons are a little smaller */
+  .tal-branch, .gt-branch { grid-template-columns: 1fr; }
+  .tal { --t: 42px; }
+  .tal-cols { gap: 6px; }
+  .talwin { padding: 12px; }
+  .tab .ic { display: none; }
+  .sheet-foot { flex-wrap: wrap; }
+}
+/* portrait tablets (761–1023 px): the character and the result share the left column, gear / talents / effects take the right one */
+@media (min-width: 761px) and (max-width: 1023px) {
+  .layout:not(.wide) { grid-template-columns: 318px minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  .layout:not(.wide) > .left { grid-column: 1; grid-row: 1; overflow: visible; border-bottom: 1px solid var(--line-2); }
+  .layout:not(.wide) > .right { grid-column: 1; grid-row: 2; border-left: 0; border-right: 1px solid var(--line); box-shadow: inset -12px 0 18px -14px rgba(0, 0, 0, .8); }
+  .layout:not(.wide) > .center { grid-column: 2; grid-row: 1 / 3; }
+  .tabs { padding: 10px 8px 0; }
+  .tab { padding-left: 10px; padding-right: 10px; }
+  /* the bell sits on the left of the wrapped top bar here: its list hangs from the right edge of the screen, not of the button */
+  .news-menu { position: fixed; right: 10px; left: auto; top: 96px; width: min(440px, calc(100vw - 20px)); }
+}
+@media (min-width: 761px) and (max-width: 900px) {
+  .cp-grid { grid-template-columns: repeat(2, 200px); }
+}
+/* landscape tablets (1024–1099 px): the same three columns, the side ones slimmer */
+@media (min-width: 1024px) and (max-width: 1099px) {
+  .layout:not(.wide) { grid-template-columns: 288px minmax(0, 1fr) 318px; }
+  .tabs { padding: 12px 6px 0; }
+  .tab { font-size: 14px; padding-left: 7px; padding-right: 7px; }
+  .tal { --t: 38px; }
+  /* a narrower label column, so the class button and the switches keep their width */
+  .left { padding-left: 10px; padding-right: 10px; }
+  .left .field { grid-template-columns: 84px minmax(0, 1fr); gap: 6px; }
+}

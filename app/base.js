@@ -16,7 +16,7 @@ const MI_IMG = id => `../data/market-img/${id}.png`;
 const BASE_T = {
   uk: {
     title: 'База', sub: 'Монстри, локації з картами, НПС, завдання, рецепти, ресурси, предмети — і де що взяти',
-    cats: { monster: 'Монстри', loc: 'Локації', npc: 'НПС', quest: 'Завдання', event: 'Івенти', recipe: 'Рецепти', res: 'Збір і рибалка', item: 'Спорядження', card: 'Карти', stamp: 'Печатки', good: 'Предмети', loot: 'Видобуток', thing: 'Предмет' },
+    toList: 'До списку', cats: { monster: 'Монстри', loc: 'Локації', npc: 'НПС', quest: 'Завдання', event: 'Івенти', recipe: 'Рецепти', res: 'Збір і рибалка', item: 'Спорядження', card: 'Карти', stamp: 'Печатки', good: 'Предмети', loot: 'Видобуток', thing: 'Предмет', ref: 'Довідник' },
     goods: { all: 'Усі', fx: 'Ефект', box: 'Вміст', more: 'Додатково', gift: 'У подарунку', where: 'Де', gets: 'Виходить', needs: 'Потрібно', mons: 'Монстри', given: 'Видає', feat: 'Особливості', make: 'Створення' },
     search: 'Пошук по всій базі…', empty: 'Нічого не знайдено', pick: 'Оберіть щось у списку ліворуч', back: 'Назад', more: 'Показано {n} з {all} — уточніть пошук',
     lvl: 'рів.', level: 'Рівень', hp: 'Життя', race: 'Раса', element: 'Стихія', defense: 'Захист', exp: 'Досвід', mode: 'Атака',
@@ -48,7 +48,7 @@ const BASE_T = {
   },
   ru: {
     title: 'База', sub: 'Монстры, локации с картами, НПС, задания, рецепты, ресурсы, предметы — и где что взять',
-    cats: { monster: 'Монстры', loc: 'Локации', npc: 'НПС', quest: 'Задания', event: 'Ивенты', recipe: 'Рецепты', res: 'Сбор и рыбалка', item: 'Снаряжение', card: 'Карты', stamp: 'Печати', good: 'Предметы', loot: 'Добыча', thing: 'Предмет' },
+    toList: 'К списку', cats: { monster: 'Монстры', loc: 'Локации', npc: 'НПС', quest: 'Задания', event: 'Ивенты', recipe: 'Рецепты', res: 'Сбор и рыбалка', item: 'Снаряжение', card: 'Карты', stamp: 'Печати', good: 'Предметы', loot: 'Добыча', thing: 'Предмет', ref: 'Справочник' },
     goods: { all: 'Все', fx: 'Эффект', box: 'Содержимое', more: 'Дополнительно', gift: 'В подарке', where: 'Где', gets: 'Получается', needs: 'Требуется', mons: 'Монстры', given: 'Выдаёт', feat: 'Особенности', make: 'Создание' },
     search: 'Поиск по всей базе…', empty: 'Ничего не найдено', pick: 'Выберите что-нибудь в списке слева', back: 'Назад', more: 'Показано {n} из {all} — уточните поиск',
     lvl: 'ур.', level: 'Уровень', hp: 'Жизни', race: 'Раса', element: 'Стихия', defense: 'Защита', exp: 'Опыт', mode: 'Атака',
@@ -80,7 +80,7 @@ const BASE_T = {
   },
   en: {
     title: 'Database', sub: 'Monsters, locations with maps, NPCs, quests, recipes, resources, items — and where to get what',
-    cats: { monster: 'Monsters', loc: 'Locations', npc: 'NPCs', quest: 'Quests', event: 'Events', recipe: 'Recipes', res: 'Gathering & fishing', item: 'Gear', card: 'Cards', stamp: 'Stamps', good: 'Items', loot: 'Loot', thing: 'Item' },
+    toList: 'To the list', cats: { monster: 'Monsters', loc: 'Locations', npc: 'NPCs', quest: 'Quests', event: 'Events', recipe: 'Recipes', res: 'Gathering & fishing', item: 'Gear', card: 'Cards', stamp: 'Stamps', good: 'Items', loot: 'Loot', thing: 'Item', ref: 'Reference' },
     goods: { all: 'All', fx: 'Effect', box: 'Contents', more: 'Also', gift: 'In the gift', where: 'Where', gets: 'Gives', needs: 'Needs', mons: 'Monsters', given: 'Given by', feat: 'Features', make: 'Crafting' },
     search: 'Search the whole database…', empty: 'Nothing found', pick: 'Pick something in the list on the left', back: 'Back', more: 'Showing {n} of {all} — narrow the search',
     lvl: 'lvl', level: 'Level', hp: 'Health', race: 'Race', element: 'Element', defense: 'Defence', exp: 'Experience', mode: 'Attack',
@@ -113,8 +113,8 @@ const BASE_T = {
 };
 const BTX = () => BASE_T[lang] || BASE_T.ru;
 const bget2 = (k, def) => { try { const v = localStorage.getItem('rqc.' + k); return v == null ? def : JSON.parse(v); } catch { return def; } };
-const BS = { cat: bget2('baseCat', 'monster'), q: '', sel: bget2('baseSel', null), back: [] };
-const BCATS = ['monster', 'loc', 'npc', 'quest', 'event', 'recipe', 'res', 'item', 'good', 'card', 'stamp'];
+const BS = { cat: bget2('baseCat', 'monster'), q: '', sel: bget2('baseSel', null), back: [], pane: 'list', listY: 0 };
+const BCATS = ['monster', 'loc', 'npc', 'quest', 'event', 'recipe', 'res', 'item', 'good', 'card', 'stamp', 'ref'];
 BS.sub = bget2('baseSub', '');
 
 // ---------- the index (built on first use) ----------
@@ -138,6 +138,7 @@ function baseIndex() {
     quests: W.quests.slice().sort((a, b) => (!!a.event || (a.level ?? 0) <= 1) - (!!b.event || (b.level ?? 0) <= 1) || (a.level ?? 0) - (b.level ?? 0) || a.name.localeCompare(b.name, 'ru')), nodes: W.nodes,
     itemBy: byName(items), cardBy: byName(cards), lootBy: byName(window.RQ_MARKET_ITEMS || []), monBy: byName(monsters),
     events: window.RQ_BASE_EVENTS || [], eventBy: byName(window.RQ_BASE_EVENTS || []),
+    refs: window.RQ_BASE_REF || [], refBy: new Map((window.RQ_BASE_REF || []).map(x => [x.id, x])),
     npcBy: byName(W.npcs), questBy: byName(W.quests), recipeBy: byName(W.recipes), nodeBy: byName(W.nodes) };
 
   // locations: the wiki's (map, markers) together with the ones the monsters name
@@ -248,6 +249,8 @@ function usesOf(name) {
 const hideImg = e => { e.target.style.visibility = 'hidden'; };
 // ---------- entries: { kind, key, name, icon, round, meta } ----------
 const ph = kind => ({ loc: 'globe', npc: 'group', quest: 'book', recipe: 'calc', res: 'globe', event: 'calendar' }[kind] || 'book');
+// a text of ours in the data: { ru, uk, en } → the current language; the wiki's own strings pass through
+const rtr = v => (v && typeof v === 'object' && !Array.isArray(v) && 'ru' in v ? v[lang] || v.ru : v);
 function iconOfName(name) {
   const X = baseIndex(), k = bnorm(bstrip(name));
   const it = X.itemBy.get(k); if (it) return IMG(it.imageId);
@@ -274,6 +277,7 @@ function entryOf(kind, x) {
     case 'res': return { kind, key: x.name, name: x.name, icon: (x.drops || []).map(d => iconOfName(d.n)).find(Boolean) || null, meta: [t.nodeKind[x.kind], (x.locs || []).length ? `${t.locsOf.toLowerCase()}: ${x.locs.length}` : ''].filter(Boolean).join(' · ') };
     case 'good': return { kind, key: x.name, name: x.name, icon: iconOfName(x.name), meta: [(x.f || {})['Тип'] || x.cat, (x.f || {})['МинУровень'] ? `${t.lvl} ${x.f['МинУровень']}+` : '', (x.f || {})['Ивент']].filter(Boolean).join(' · ') };
     case 'thing': return { kind, key: x, name: x, icon: iconOfName(x), meta: '' };
+    case 'ref': return { kind, key: x.id, name: rtr(x.name), icon: null, meta: rtr(x.group) };
     case 'event': return { kind, key: x.name, name: x.name, icon: x.img ? `../data/events/${x.img}` : null, cover: true,
       meta: [x.running ? evMonths(x) : t.ev.past, x.dates[0] ? x.dates[0].to.slice(0, 4) : ''].filter(Boolean).join(' · ') };
   }
@@ -284,7 +288,7 @@ function entriesOf(kind) {
   const ck = kind + ':' + lang;
   if (entryCache.has(ck)) return entryCache.get(ck);
   const X = baseIndex();
-  const src = { event: X.events, monster: X.monsters, item: X.items, card: X.cards, stamp: X.stamps, loc: X.locs, loot: X.loot, good: X.goods, npc: X.npcs, quest: X.quests, recipe: X.recipes, res: X.nodes }[kind] || [];
+  const src = { event: X.events, monster: X.monsters, item: X.items, card: X.cards, stamp: X.stamps, loc: X.locs, loot: X.loot, good: X.goods, npc: X.npcs, quest: X.quests, recipe: X.recipes, res: X.nodes, ref: X.refs }[kind] || [];
   const list = src.map(x => entryOf(kind, x));
   if (kind === 'good') list.push(...X.lootOnly.map(x => entryOf('loot', x)));
   entryCache.set(ck, list);
@@ -307,6 +311,7 @@ function findEntry(kind, key) {
     case 'res': return pick(X.nodeBy.get(bnorm(key)));
     case 'thing': return { e: entryOf('thing', key), x: key };
     case 'event': return pick(X.eventBy.get(bnorm(key)));
+    case 'ref': return pick(X.refBy.get(key));
   }
   return null;
 }
@@ -333,9 +338,20 @@ function openBase(kind, key, { push = true } = {}) {
   if (push && BS.sel && !(BS.sel.kind === kind && BS.sel.key === key)) BS.back.push(BS.sel);
   BS.sel = { kind, key };
   store.set('baseSel', BS.sel);
+  basePane('view');
   if (tab !== 'base') { switchTool('base'); return; }
   markBaseList();
   drawBaseDetail();
+}
+// a phone shows either the list or the opened page (CSS: .bs-wrap.view); a wide screen shows both side by side
+const basePhone = () => matchMedia('(max-width: 760px)').matches;
+function basePane(p) {
+  const was = BS.pane;
+  BS.pane = p;
+  const w = document.querySelector('.bs-wrap:not(.sn-wrap)');
+  if (w) w.classList.toggle('view', p === 'view');
+  if (!basePhone() || was === p) return;
+  if (p === 'view') { if (w) BS.listY = scrollY; scrollTo(0, 0); } else scrollTo(0, BS.listY);
 }
 // only move the highlight in the list: rebuilding its 300 rows makes every icon load again and the page blink
 function markBaseList() {
@@ -348,9 +364,9 @@ function renderBase(el) {
   const t = BTX();
   const search = h('input', { class: 'inp', placeholder: t.search, value: BS.q, spellcheck: false });
   search.addEventListener('input', () => { BS.q = search.value; drawBaseList(); });
-  el.append(h('div', { class: 'bs-wrap' },
+  el.append(h('div', { class: 'bs-wrap' + (BS.pane === 'view' && BS.sel ? ' view' : '') },
     h('div', { class: 'bs-side' },
-      h('div', { class: 'bs-cats' }, BCATS.map(c => h('button', { class: 'bs-cat' + (BS.cat === c && !BS.q.trim() ? ' on' : ''), onclick: () => { BS.cat = c; BS.q = ''; store.set('baseCat', c); renderCenter(); } }, t.cats[c]))),
+      h('div', { class: 'bs-cats' }, BCATS.map(c => h('button', { class: 'bs-cat' + (BS.cat === c && !BS.q.trim() ? ' on' : ''), onclick: () => { BS.cat = c; BS.q = ''; BS.pane = 'list'; store.set('baseCat', c); renderCenter(); } }, t.cats[c]))),
       BS.cat === 'good' && !BS.q.trim() ? goodsFilter() : null,
       search,
       h('div', { class: 'bs-list', id: 'baseList' })),
@@ -703,6 +719,62 @@ function drawEventPage(el, x) {
   el.append(h('div', { class: 'bs-foot' }, wikiLink(x.name)));
 }
 
+// ---------- «Справочник»: a mechanic = our short points + the wiki's tables (data/base-ref.js) ----------
+const REF_T = {
+  uk: { how: 'Коротко', breaks: 'злам', quest: 'Завдання', gold: 'Золото', exp: 'Досвід', event: 'Подія', rows: 'рядків: {n}' },
+  ru: { how: 'Коротко', breaks: 'слом', quest: 'Задание', gold: 'Золото', exp: 'Опыт', event: 'Событие', rows: 'строк: {n}' },
+  en: { how: 'In short', breaks: 'breaks', quest: 'Quest', gold: 'Gold', exp: 'Exp', event: 'Event', rows: 'rows: {n}' },
+};
+const RTX = () => REF_T[lang] || REF_T.ru;
+// one cell of a table: text, things of the base (chips with links), a value with a small note
+function refCell(c, tb) {
+  if (c == null || c === '') return '';
+  if (typeof c !== 'object') {
+    const p = tb.pct && /^(\d+)%$/.exec(c);
+    return p && +p[1] !== 100 ? h('span', { class: +p[1] > 100 ? 'rf-up' : 'rf-down' }, c) : String(c);
+  }
+  if ('ru' in c) return rtr(c);
+  if (c.q) { const q = baseIndex().questBy.get(bnorm(c.q)); return q ? qchip(q) : c.q; }
+  if (c.l) return h('div', { class: 'bs-chips' }, c.l.map(o => bchip(o.n, undefined, { count: o.c })));
+  if (c.i) return h('div', { class: 'bs-chips' }, c.i.map(n => bchip(n)), c.t ? h('span', null, c.t) : null);
+  if ('v' in c) return h('span', { class: c.hl ? 'rf-up' : null }, rtr(c.v), c.s ? h('small', { class: 'rf-br' }, `${RTX().breaks} ${c.s}`) : null);
+  return '';
+}
+function refTable(tb) {
+  // the stones over the chance columns: the picture and the first word, so five of them fit («Осколок», «Чёрный»…)
+  const stone = n => {
+    const link = linkOfName(n), f = link && findEntry(link.kind, link.key);
+    return h(link ? 'button' : 'span', { class: 'bs-chip' + (link ? ' link' : ''), title: n, onclick: link ? () => openBase(link.kind, link.key) : null },
+      f && f.e.icon ? h('img', { src: f.e.icon, decoding: 'sync', draggable: 'false', onerror: hideImg }) : null, h('span', { class: 'rf-stone' }, n.split(' ')[0]));
+  };
+  // a phone turns a table with chips or long text into cards: one row = one card, every cell under its column's name
+  const chipsIn = c => (c && typeof c === 'object' ? (c.l || c.i || (c.q ? [1] : [])).length : 0);
+  const long = c => (typeof c === 'string' && c.length > 40) || (c && typeof c === 'object' && 'ru' in c && String(rtr(c)).length > 40);
+  const stack = !tb.chance && !tb.pct && tb.rows.some(r => r.some(long) || r.some(c => chipsIn(c) > 2) || (r.length > 2 && r.some(chipsIn)));
+  const label = c => (c && typeof c === 'object' && c.i ? c.i[0] : String(rtr(c) ?? ''));
+  const none = c => c == null || c === '' || (typeof c === 'object' && c.l && !c.l.length);
+  return h('div', { class: 'rf-wrap' + (stack ? ' rf-stack' : '') + (tb.chance ? ' rf-chance' : '') + (tb.pct ? ' rf-pct' : '') }, h('table', { class: 'rf' },
+    h('thead', null, h('tr', null, tb.head.map(c => h('th', null, tb.chance && c && c.i ? stone(c.i[0]) : refCell(c, tb))))),
+    h('tbody', null, tb.rows.map(r => h('tr', null, r.map((c, i) => h('td', { 'data-l': label(tb.head[i]), class: none(c) ? 'rf-none' : !i && typeof c === 'string' && c.length < 4 ? 'rf-lead' : null }, refCell(c, tb))))))));
+}
+// the daily quests: straight from the quests of the base, the ones of game events last
+function dailyQuestsTable() {
+  const r = RTX(), list = baseIndex().quests.filter(q => q.type === 'Ежедневное').sort((a, b) => !!a.event - !!b.event || (a.level ?? 0) - (b.level ?? 0));
+  return { head: [r.quest, r.gold, r.exp, r.event], rows: list.map(q => [{ q: q.name }, q.gold ? fmtNum(q.gold) : '', q.exp ? fmtNum(q.exp) : '', q.event ? { i: [q.event] } : '']) };
+}
+function drawRefPage(el, x) {
+  const notes = x.notes && (x.notes[lang] || x.notes.ru);
+  if (notes && notes.length) el.append(bsec(RTX().how, h('ul', { class: 'bs-how' }, notes.map(n => h('li', null, n)))));
+  const tables = x.dyn === 'dailyQuests' ? [dailyQuestsTable()] : x.tables || [];
+  for (const tb of tables) {
+    const title = rtr(tb.title) || '';
+    // long lists in groups (achievements by category) open on demand
+    if (tb.fold) el.append(h('details', { class: 'rf-fold' }, h('summary', null, title), refTable(tb)));
+    else el.append(title ? bsec(title, refTable(tb)) : refTable(tb));
+  }
+  el.append(h('div', { class: 'bs-foot' }, wikiLink(x.wiki)));
+}
+
 // ---------- the page ----------
 function drawBaseDetail() {
   const el = document.getElementById('baseDetail');
@@ -712,7 +784,9 @@ function drawBaseDetail() {
   const f = BS.sel && findEntry(BS.sel.kind, BS.sel.key);
   if (!f) { el.append(h('div', { class: 'bs-empty big' }, t.pick)); return; }
   const { e, x } = f;
-  if (BS.back.length) el.append(h('button', { class: 'btn small ghost bs-back', onclick: () => { const p = BS.back.pop(); if (p) openBase(p.kind, p.key, { push: false }); } }, '← ' + t.back));
+  el.append(h('div', { class: 'bs-nav' },
+    h('button', { class: 'btn small ghost bs-tolist', onclick: () => basePane('list') }, '☰ ' + t.toList),
+    BS.back.length ? h('button', { class: 'btn small ghost bs-back', onclick: () => { const p = BS.back.pop(); if (p) openBase(p.kind, p.key, { push: false }); } }, '← ' + t.back) : null));
   el.append(h('div', { class: 'bs-head' },
     e.kind === 'event' ? null : e.icon ? h('img', { class: 'bs-big' + (e.round ? ' round' : '') + (e.cover ? ' cover' : ''), src: e.icon, draggable: 'false', onerror: hideImg }) : h('span', { class: 'bs-big ph' }, iconEl(ph(e.kind))),
     h('div', { class: 'bs-title' }, h('h2', null, e.name), h('div', { class: 'bs-meta' }, t.cats[e.kind] + (e.meta ? ' · ' + e.meta : '')))));
@@ -731,6 +805,8 @@ function drawBaseDetail() {
     el.append(h('div', { class: 'bs-foot' }, wikiLink('Монстр ' + x.name)));
   } else if (e.kind === 'event') {
     drawEventPage(el, x);
+  } else if (e.kind === 'ref') {
+    drawRefPage(el, x);
   } else if (e.kind === 'loc' && x.name === 'Все локации') {
     // not a place: the wiki writes it for monsters that can turn up on any location (event and wandering ones)
     el.append(h('div', { class: 'note bs-everywhere' }, t.everywhere));

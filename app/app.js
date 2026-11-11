@@ -900,6 +900,15 @@ function fitCharWindow() {
   const cs = getComputedStyle(win);
   const H = win.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
   const W = win.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+  // a phone: the page scrolls, so only the width matters — slots shrink until three of them and the model fit the screen
+  if (matchMedia('(max-width: 760px)').matches) {
+    const s = clamp(Math.floor(W / 7), 34, 64), gx = 4;
+    win.style.setProperty('--s', s + 'px');
+    win.style.setProperty('--gy', '4px');
+    win.style.setProperty('--gx', gx + 'px');
+    win.style.setProperty('--mw', Math.max(s * 2.6, W - 3 * s - 3 * gx) + 'px');
+    return;
+  }
   // moderate slots; the gaps and the model area take the rest, so the window fills the tab
   const s = clamp(Math.floor(Math.min(H / 8.4, W / 7)), 56, 72);
   const gy = clamp(Math.floor((H - 7 * s) / 6), 6, 24);
@@ -1007,11 +1016,23 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('modal'
 
 function openEditor(key) {
   const slot = ctx.slots.get(+key.split(':')[0]);
-  editor = { key, search: '' };
+  // a phone shows one pane at a time: the list of items, or the picked item's upgrade, stamp and cards
+  editor = { key, search: '', pane: ch.equipment[key] ? 'detail' : 'list' };
+  const pane = p => {
+    editor.pane = p;
+    const d = document.querySelector('.dialog.ed');
+    if (!d) return;
+    d.classList.toggle('ed-detail', p === 'detail');
+    d.querySelectorAll('.ed-switch button').forEach((b, i) => b.classList.toggle('on', (i === 1) === (p === 'detail')));
+  };
+  editor.setPane = pane;
   const search = h('input', { class: 'inp', placeholder: T.search, spellcheck: false });
   search.addEventListener('input', () => { editor.search = search.value; renderEditorList(); });
-  openModal(h('div', { class: 'dialog' },
+  openModal(h('div', { class: 'dialog ed' + (editor.pane === 'detail' ? ' ed-detail' : '') },
     h('div', { class: 'dialog-head' }, h('h3', null, slot.name), h('button', { class: 'btn small ghost', onclick: closeModal }, '✕')),
+    h('div', { class: 'seg ed-switch' },
+      h('button', { class: editor.pane === 'list' ? 'on' : '', onclick: () => pane('list') }, T.edItems),
+      h('button', { class: editor.pane === 'detail' ? 'on' : '', onclick: () => pane('detail') }, T.edSetup)),
     h('div', { class: 'dialog-body' },
       h('div', { class: 'picker' }, search, h('div', { class: 'list', id: 'edList' })),
       h('div', { class: 'detail', id: 'edDetail' })),
@@ -1020,7 +1041,8 @@ function openEditor(key) {
       h('button', { class: 'btn danger', onclick: () => changed(c => { delete c.equipment[key]; }, { center: false, after: () => { renderEditorList(); renderEditorDetail(); } }) }, T.remove),
       h('button', { class: 'btn primary', onclick: closeModal }, T.done))));
   renderEditorList(); renderEditorDetail();
-  setTimeout(() => { search.focus(); document.querySelector('#edList .li.on')?.scrollIntoView({ block: 'center' }); }, 0);
+  // no keyboard popping up on a touch screen
+  setTimeout(() => { if (!matchMedia('(hover: none)').matches) search.focus(); document.querySelector('#edList .li.on')?.scrollIntoView({ block: 'center' }); }, 0);
 }
 function renderEditorList() {
   const list = $('edList'); if (!list) return;
@@ -1050,7 +1072,7 @@ function pickItem(item) {
     c.equipment[editor.key] = e;
     // a two-handed weapon frees the left hand
     if (slotLockedByTwoHander(c, ctx.reverseKey(editor.key) || '')) delete c.equipment[ctx.reverseKey(editor.key)];
-  }, { center: false, after: () => { renderEditorList(); renderEditorDetail(); } });
+  }, { center: false, after: () => { renderEditorList(); renderEditorDetail(); if (editor && editor.setPane) editor.setPane('detail'); } });
 }
 // ---------- picker with descriptions (stamps, cards) ----------
 // card groups in the order players expect: boss cards first

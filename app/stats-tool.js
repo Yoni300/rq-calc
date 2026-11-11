@@ -167,7 +167,7 @@ function drawStatsTool() {
         h('section', { class: 'st-card' }, h('h3', null, t.shows), h('ul', { class: 'st-list' }, t.showsList.map(s => h('li', null, s)))),
         h('section', { class: 'st-card' }, h('h3', null, t.keys),
           h('div', { class: 'st-keys' }, t.keyRows.map(([k, s]) => h('div', null, h('kbd', null, k), h('span', null, s))))))),
-    IS_APP && window.rqcApp.stats ? statsSavedList() : null,
+    IS_APP && window.rqcApp.stats ? statsSavedList() : '',
     h('div', { class: 'sn-note st-note' }, t.note));
 }
 
