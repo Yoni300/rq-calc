@@ -377,12 +377,13 @@
       const cls = classes.get(classId);
       return !filter.length || filter.every(id => classAllowsStat(cls, id));
     }
-    // Deliberate deviation from Anon's calculator (user's call, 2026-11-08, after a player's report): items up to
-    // level 60 inclusive take a stamp of any class (only the item type matters); above 60 only the class's own stamps.
-    const ANY_CLASS_STAMP_MAX_LEVEL = 60;
+    // Deliberate deviation from Anon's calculator (user's call, 2026-11-12, as in the game): the item decides, not the
+    // character and not the level. An item any class can wear (rings, amulets, common armor…) takes a stamp of any
+    // class; a class item (e.g. a Разбойник armor) takes only stamps that fit one of the classes it is made for.
     function stampAllowed(stamp, item, classId) {
       if (stamp.hasEquipRows && !stamp.equipTypeIds.includes(item.typeId)) return false;
-      return item.level <= ANY_CLASS_STAMP_MAX_LEVEL || stampForClass(stamp, classId);
+      const itemClasses = itemClassConditions(item);
+      return !itemClasses.length || itemClasses.some(id => stampForClass(stamp, id));
     }
 
     // --- talents, auras, buffs, elixirs, consumables, collections ---

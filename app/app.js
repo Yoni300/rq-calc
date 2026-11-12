@@ -1208,7 +1208,7 @@ function renderEditorDetail() {
   if (stamps.length) {
     const curV = e.stampVariantId ? ctx.stampVariants.get(e.stampVariantId) : null;
     const variantFor = s => (curV && s.variants.find(v => v.colorId === curV.colorId)) || s.variants[s.variants.length - 1];
-    // the class's own stamps first; then other classes' stamps (items up to level 60 take any); stamps the wiki
+    // the class's own stamps first; then other classes' stamps (items every class can wear take any); stamps the wiki
     // no longer lists go last, under their own heading (values from Anon's older database)
     const own = s => ctx.stampForClass(s, ch.classId);
     const options = [...stamps.filter(s => !s.isLegacy && own(s)), ...stamps.filter(s => !s.isLegacy && !own(s)), ...stamps.filter(s => s.isLegacy)].map(s => {
