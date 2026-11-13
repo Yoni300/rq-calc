@@ -1,0 +1,47 @@
+TradeCounterRQ Non-Commercial License
+Version 1.0, 2026
+
+Copyright (c) 2026 w-stus
+
+1. Definitions
+
+"Software" means the TradeCounterRQ application and its source code, including
+the files in this repository, excluding third-party components and materials
+that are identified as being provided under separate terms.
+
+"Non-commercial purpose" means a purpose not primarily intended for or directed
+toward commercial advantage or monetary compensation. Use in connection with a
+commercial activity, including use by or for a business, is commercial even if
+no fee is charged for the Software itself.
+
+2. Permission
+
+Permission is granted to any person obtaining a copy of the Software to use,
+copy, modify, and create forks of the Software solely for non-commercial
+purposes. You may share the Software and modified versions for non-commercial
+purposes provided that you include this license and retain the copyright and
+permission notices.
+
+3. Restrictions
+
+You may not use, copy, modify, distribute, sublicense, or make the Software or
+any modified version available for a commercial purpose without prior written
+permission from the copyright holder.
+
+4. No trademark rights
+
+This license does not grant permission to use any trade names, trademarks,
+service marks, or product names of the copyright holder.
+
+5. Disclaimer
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY ARISING
+FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+IN THE SOFTWARE.
+
+Third-party components included with or used by the Software remain subject to
+their own licenses. See assets/licenses/, assets/tessdata/LICENSE, and
+docs/DEPENDENCIES.md.

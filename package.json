@@ -1,6 +1,6 @@
 {
   "name": "rq-calc",
-  "version": "1.0.24",
+  "version": "1.0.25",
   "description": "Royal Quest character stat calculator",
   "main": "main.js",
   "private": true,
@@ -29,12 +29,19 @@
       "card-match.js",
       "card-scan.js",
       "stats/**",
+      "trade/**",
       "build/icon.png",
       "app/**",
       "src/**",
       "data/**",
       "package.json",
-      "server/**"
+      "server/**",
+      "!node_modules/tesseract.js-core/tesseract-core-lstm.{js,wasm,wasm.js}",
+      "!node_modules/tesseract.js-core/tesseract-core-simd-lstm.{js,wasm,wasm.js}",
+      "!node_modules/tesseract.js-core/tesseract-core-relaxedsimd-lstm.{js,wasm,wasm.js}",
+      "!node_modules/tesseract.js/dist/**",
+      "!node_modules/@techstark/opencv-js/dist/src/**",
+      "!test/**"
     ],
     "directories": {
       "output": "dist"
@@ -69,11 +76,26 @@
     ],
     "asarUnpack": [
       "ocr/**",
-      "stats/ocr/**"
+      "stats/ocr/**",
+      "trade/assets/**",
+      "node_modules/tesseract.js/**",
+      "node_modules/tesseract.js-core/**",
+      "node_modules/bmp-js/**",
+      "node_modules/idb-keyval/**",
+      "node_modules/is-url/**",
+      "node_modules/node-fetch/**",
+      "node_modules/whatwg-url/**",
+      "node_modules/tr46/**",
+      "node_modules/webidl-conversions/**",
+      "node_modules/regenerator-runtime/**",
+      "node_modules/wasm-feature-detect/**",
+      "node_modules/zlibjs/**"
     ]
   },
   "dependencies": {
-    "electron-updater": "^6.8.11"
+    "@techstark/opencv-js": "4.12.0-release.1",
+    "electron-updater": "^6.8.11",
+    "tesseract.js": "7.0.0"
   },
   "repository": {
     "type": "git",

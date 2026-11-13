@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const cardScan = require('./card-scan');
 const stats = require('./stats'); // RQ Stats: the DPS / loot overlay over the game
+const trade = require('./trade'); // «Обмен»: values the game's trade window
 
 // The installed app keeps its data in %APPDATA%\rq-calc. Running from the source code is the TEST client:
 // it has its own profile (%APPDATA%\rq-calc-test, first filled with a copy of the main one) and reloads itself
@@ -180,7 +181,20 @@ ipcMain.on('rqc-stats', (_e, cmd) => {
   else if (cmd.action === 'import') stats.importChat(win).then(r => statsState({ ...stats.state(), imported: r }), err => { console.error('[stats] import', err); statsState({ ...stats.state(), imported: { error: true } }); });
   else if (cmd.action === 'state') statsState(stats.state());
 });
-app.on('will-quit', () => { stats.stop(); globalShortcut.unregisterAll(); cardScan.stop(); });
+// ---------- «Обмен» (trade/): values the game's trade window, based on TradeCounterRQ by w-stus ----------
+// { on: true | false, lang, signs: { buySign, sellSign }, price: { name, category, buy, sell, signs, remove }, link: { read, name }, action: 'show' | 'state' }
+// → 'rqc-trade-state' { on, ready, game, reading, issue, error, buySign, sellSign, hotkey, hotkeyOk, prices }
+const tradeState = st => { if (win && !win.isDestroyed()) win.webContents.send('rqc-trade-state', st); };
+ipcMain.on('rqc-trade', (_e, cmd) => {
+  if (cmd.lang) trade.setLang(cmd.lang);
+  if (cmd.on === true) tradeState(trade.start({ lang: cmd.lang, onChange: tradeState }));
+  else if (cmd.on === false) { trade.stop(); tradeState(trade.state()); }
+  else tradeState(trade.api(cmd));
+});
+ipcMain.handle('rqc-trade-known', (_e, q) => trade.searchKnown(q));
+ipcMain.handle('rqc-trade-history', (_e, f) => trade.history(f));
+ipcMain.handle('rqc-trade-delete', (_e, id) => { trade.deleteTrade(id); return true; });
+app.on('will-quit', () => { stats.stop(); trade.stop(); globalShortcut.unregisterAll(); cardScan.stop(); });
 
 // TEST client: reload the page when the app, engine or data change (main.js/preload.js need a restart)
 function watchForChanges() {

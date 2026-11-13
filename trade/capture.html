@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; media-src * blob: mediastream:">
+<title>RQ Tools trade capture</title>
+</head>
+<body>
+<video id="v" muted playsinline></video>
+<canvas id="c"></canvas>
+<script>
+// «Обмен» tool, hidden page: captures the game window (the way screen sharing does — the game is not touched)
+// and hands a frame to the reader each time it asks for one (at most 4 a second).
+'use strict';
+const { ipcRenderer } = require('electron');
+const video = document.getElementById('v'), canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d', { willReadFrequently: true });
+const MIN_GAP = 250;
+let stream = null, port = null, wanted = false, lastSent = 0, timer = null;
+
+function stop() {
+  if (stream) for (const t of stream.getTracks()) t.stop();
+  stream = null; wanted = false;
+  if (port) { port.close(); port = null; }
+}
+function send() {
+  timer = null;
+  if (!wanted || !port || !stream || video.readyState < 2 || !video.videoWidth) { if (wanted) timer = setTimeout(send, 200); return; }
+  const wait = lastSent + MIN_GAP - Date.now();
+  if (wait > 0) { timer = setTimeout(send, wait); return; }
+  const w = video.videoWidth, h = video.videoHeight;
+  if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
+  ctx.drawImage(video, 0, 0, w, h);
+  const img = ctx.getImageData(0, 0, w, h);
+  wanted = false; lastSent = Date.now();
+  port.postMessage({ type: 'frame', frame: { width: w, height: h, data: img.data, at: lastSent } });
+}
+ipcRenderer.on('trade:start', async (e, { sourceId }) => {
+  stop();
+  port = e.ports[0];
+  port.onmessage = ev => { if (ev.data && ev.data.type === 'next') { wanted = true; if (!timer) send(); } };
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: { mandatory: { chromeMediaSource: 'desktop', chromeMediaSourceId: sourceId, maxWidth: 3840, maxHeight: 2160, maxFrameRate: 5 } } });
+    video.srcObject = stream;
+    await video.play();
+    for (const t of stream.getVideoTracks()) t.onended = () => ipcRenderer.send('trade:capture-ended');
+    if (wanted && !timer) send();
+  } catch (err) {
+    ipcRenderer.send('trade:capture-error', String(err && err.message || err));
+  }
+});
+ipcRenderer.on('trade:stop', stop);
+</script>
+</body>
+</html>

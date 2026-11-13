@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'">
+<title>Обмен</title>
+<style>
+/* RQ Tools look (same as the stats overlay): warm blacks, bronze frame, gold accents */
+:root {
+  --bg1: 34 28 20; --bg2: 17 14 10;
+  --line: rgba(214, 168, 79, .16); --line-2: rgba(214, 168, 79, .32); --line-3: rgba(214, 168, 79, .55);
+  --soft: rgba(240, 210, 150, .06);
+  --fg: #eee4cf; --muted: #a89a80; --dim: #6f6553;
+  --accent: #e6b85c; --gold-2: #c9963f; --gold-hi: #ffe2a0; --on-gold: #1d1407;
+  --p1: #f2c771; --p3: #a87a2f; --p-border: #f5d48c;
+  --good: #86d46d; --bad: #ff6a5f; --warn: #e6b85c; --card: #c3a0ff; --coin: #f4c430;
+  --f-display: "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
+  --f-body: "Segoe UI", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: transparent; color: var(--fg); font-family: var(--f-body); font-size: 13px; overflow: hidden; user-select: none; }
+[hidden] { display: none !important; }
+.ov { position: absolute; inset: 6px; display: flex; flex-direction: column; overflow: hidden; border-radius: 10px;
+  background: linear-gradient(180deg, rgb(var(--bg1) / .93), rgb(var(--bg2) / .93) 70%);
+  border: 1px solid rgba(230, 184, 92, .45); box-shadow: inset 0 1px 0 rgba(255, 220, 150, .08), inset 0 0 0 1px rgba(0, 0, 0, .45);
+  font-variant-numeric: tabular-nums; }
+.head { position: relative; display: flex; align-items: center; gap: 8px; padding: 6px 6px 6px 11px; cursor: move; flex: none;
+  background: linear-gradient(180deg, rgba(48, 38, 26, .7), rgba(20, 16, 11, .35)); border-bottom: 1px solid var(--line-2); }
+.brand { font-family: var(--f-display); font-weight: 700; font-size: 15px; color: var(--accent); text-shadow: 0 1px 0 #000; white-space: nowrap; }
+.grip { color: var(--dim); font-size: 13px; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--dim); flex: none; }
+.dot.on { background: var(--good); box-shadow: 0 0 8px rgba(134, 212, 109, .7); }
+.dot.warn { background: var(--warn); }
+.dot.err { background: var(--bad); }
+.stat { margin-left: auto; color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.ib { height: 24px; min-width: 24px; display: inline-grid; place-items: center; padding: 0; background: transparent; border: 1px solid transparent; border-radius: 6px; color: var(--muted); cursor: pointer; font: inherit; font-size: 14px; flex: none; }
+.ib:hover { background: var(--soft); color: var(--gold-hi); border-color: var(--line-2); }
+.body { flex: 1; overflow-y: auto; padding: 4px 0 6px; }
+.body::-webkit-scrollbar { width: 6px; } .body::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 3px; }
+.msg { padding: 22px 16px; text-align: center; color: var(--muted); line-height: 1.45; }
+.msg b { display: block; color: var(--fg); font-size: 14px; margin-bottom: 4px; font-weight: 600; }
+.side { padding: 4px 10px 6px; }
+.side + .side { border-top: 1px solid var(--line); }
+.sh { display: flex; align-items: baseline; gap: 6px; margin: 4px 0 3px; }
+.sh h3 { margin: 0; font-family: var(--f-display); font-size: 13.5px; color: var(--accent); font-weight: 700; }
+.sh small { color: var(--dim); font-size: 11px; }
+.sh .sum { margin-left: auto; font-weight: 700; font-size: 14px; color: var(--gold-hi); }
+.row { display: grid; grid-template-columns: 1fr auto; gap: 1px 8px; padding: 4px 6px; border-radius: 6px; cursor: pointer; border: 1px solid transparent; }
+.row:hover { background: var(--soft); border-color: var(--line); }
+.row.open { background: rgba(230, 184, 92, .08); border-color: var(--line-2); }
+.nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nm .q { color: var(--muted); }
+.nm .tag { display: inline-block; font-size: 10px; padding: 0 4px; margin-right: 4px; border-radius: 3px; vertical-align: 1px; border: 1px solid var(--line-2); color: var(--muted); }
+.nm .tag.card { color: var(--card); border-color: rgba(195, 160, 255, .45); }
+.nm .tag.unique { color: var(--gold-hi); border-color: var(--line-3); }
+.val { text-align: right; font-weight: 600; white-space: nowrap; }
+.sub { grid-column: 1 / -1; font-size: 11.5px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row.bad .val, .row.bad .sub { color: var(--bad); }
+.row.bad .sub { white-space: normal; }
+.row.warn .sub { color: var(--warn); }
+.gold { display: flex; justify-content: space-between; padding: 3px 6px; color: var(--muted); }
+.gold span:last-child { color: var(--coin); font-weight: 600; }
+.foot { flex: none; border-top: 1px solid var(--line-2); padding: 8px 12px 9px; display: flex; align-items: baseline; gap: 8px; background: rgba(0, 0, 0, .22); }
+.foot .lbl { color: var(--muted); }
+.foot .diff { margin-left: auto; font-size: 20px; font-weight: 700; font-family: var(--f-display); }
+.diff.pos { color: var(--good); } .diff.neg { color: var(--bad); } .diff.na { color: var(--dim); font-size: 14px; font-family: var(--f-body); font-weight: 400; }
+.foot .note { display: block; font-size: 11px; color: var(--dim); }
+/* editor under a row */
+.ed { margin: 2px 0 6px; padding: 8px; border: 1px solid var(--line-2); border-radius: 8px; background: rgba(0, 0, 0, .3); display: grid; gap: 6px; }
+.ed .read { font-size: 11.5px; color: var(--muted); }
+.ed label { display: grid; grid-template-columns: 92px 1fr; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; }
+.ed input, .ed select { width: 100%; min-width: 0; font: inherit; font-size: 12.5px; padding: 4px 7px; border-radius: 6px; border: 1px solid var(--line-2); background: rgba(0, 0, 0, .45); color: var(--fg); outline: none; }
+.ed input:focus, .ed select:focus { border-color: var(--line-3); }
+.ed .btns { display: flex; gap: 6px; justify-content: flex-end; }
+.btn { font: inherit; font-size: 12px; font-weight: 700; padding: 4px 11px; border-radius: 6px; cursor: pointer; border: 1px solid var(--p-border); color: var(--on-gold); background: linear-gradient(180deg, var(--p1), var(--gold-2) 55%, var(--p3)); }
+.btn.no { background: transparent; color: var(--muted); border-color: var(--line-2); font-weight: 400; }
+.hits { display: grid; gap: 2px; max-height: 150px; overflow-y: auto; }
+.hits button { text-align: left; font: inherit; font-size: 12px; padding: 3px 6px; border-radius: 5px; border: 1px solid transparent; background: transparent; color: var(--fg); cursor: pointer; }
+.hits button:hover { background: var(--soft); border-color: var(--line-2); }
+.hits button small { color: var(--dim); margin-left: 4px; }
+.signs { padding: 8px 12px; border-bottom: 1px solid var(--line); background: rgba(230, 184, 92, .06); display: grid; gap: 6px; }
+.signs p { margin: 0; color: var(--muted); font-size: 12px; }
+.signs .two { display: grid; grid-template-columns: 1fr 1fr auto; gap: 6px; }
+.out { margin: 6px 10px 2px; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--line-2); background: rgba(0, 0, 0, .3); font-size: 12.5px; line-height: 1.4; }
+.out b { font-size: 14px; }
+.out.buy b { color: var(--bad); } .out.sell b { color: var(--good); }
+.out.no { color: var(--warn); border-color: rgba(230, 184, 92, .35); }
+.out small { display: block; color: var(--muted); font-size: 11.5px; }
+.bag { display: flex; justify-content: space-between; gap: 8px; margin: 2px 10px 0; padding: 4px 6px; font-size: 12px; color: var(--muted); }
+.bag span:last-child { color: var(--coin); font-weight: 600; }
+.bag.miss { color: var(--warn); }
+.signs input { min-width: 0; font: inherit; font-size: 12.5px; padding: 4px 7px; border-radius: 6px; border: 1px solid var(--line-2); background: rgba(0, 0, 0, .45); color: var(--fg); outline: none; }
+</style>
+</head>
+<body>
+<div class="ov">
+  <div class="head" id="head"><span class="grip">⠿</span><span class="brand" id="title">Обмен</span><i class="dot" id="dot"></i><span class="stat" id="stat"></span>
+    <button class="ib" id="bHide" title="">✕</button></div>
+  <div class="signs" id="signs" hidden></div>
+  <div class="body" id="body"></div>
+  <div class="foot" id="foot" hidden></div>
+</div>
+<script>
+'use strict';
+const L = {
+  ru: { title: 'Обмен', hide: 'Скрыть (горячая клавиша {key})', noGame: 'Игра не найдена', noGameHint: 'Запустите Royal Quest в оконном режиме или «окно без рамки».', starting: 'Запускаю распознавание…',
+    waiting: 'Ожидание обмена', waitingHint: 'Откройте обмен в игре — панель покажет обе стороны и разницу.', reading: 'читаю…', ok: 'готово', partial: 'не всё распознано', suspended: 'окно читается не полностью',
+    cut: 'Окно обмена видно не полностью', geometry: 'Окно обмена закрыто другим окном?',
+    recv: 'Получаю', recvNote: 'цены скупки', give: 'Отдаю', giveNote: 'цены продажи', gold: 'Золото', diff: 'Разница', diffNote: 'получаю − отдаю по вашим ценам', diffNa: 'нужны все цены',
+    signsAsk: 'Укажите цену знака — карты считаются по знакам.', buySign: 'Скупка знака', sellSign: 'Продажа знака', save: 'Сохранить', cancel: 'Отмена',
+    cat: { regular: 'обычный', card: 'карта', unique: 'уник.' }, catLong: { regular: 'Обычный лут (кол-во × цена)', card: 'Карта (знаки × цена знака)', unique: 'Уникальный (цена за штуку)' },
+    category: 'Тип', buy: 'Цена скупки', sell: 'Цена продажи', signsN: 'Знаков', read: 'Прочитано: «{t}»', fuzzy: 'Прочитано «{t}», похоже на это',
+    link: 'Это предмет…', linkHint: 'Начните вводить название', addNew: 'Добавить как новый: «{t}»', none: 'Ничего не найдено',
+    issue: { uncertain: 'Не удалось понять, что в ячейке', noName: 'Название не прочитано', notInCatalog: 'Нет в списке — нажмите, чтобы выбрать предмет', noQuantity: 'Количество не прочитано',
+      noSigns: 'Не указано число знаков', noBuySign: 'Нет цены скупки знака', noSellSign: 'Нет цены продажи знака', noBuy: 'Нет цены скупки — нажмите, чтобы указать', noSell: 'Нет цены продажи — нажмите, чтобы указать', overflow: 'Слишком большое число' },
+    bag: 'Золото в рюкзаке', bagMiss: 'Откройте рюкзак: без его золота обмен не попадёт в историю',
+    counted: { purchase: 'Обмен учтён: покупка', sale: 'Обмен учтён: продажа' }, mismatch: 'Золото в окне обмена не совпало с изменением рюкзака — записано по рюкзаку.',
+    notCounted: 'Обмен не попал в историю', why: { captureBreak: 'прервалось наблюдение за игрой', readError: 'ошибка чтения', newTradeTooSoon: 'новый обмен до проверки баланса', closeOrBalance: 'не подтверждено закрытие окна или баланс', noInitial: 'не прочитано золото рюкзака до обмена', noFinal: 'не прочитано золото рюкзака после обмена', unchanged: 'золото в рюкзаке не изменилось' },
+    row: 'Строка {n}', signsWord: 'зн.' },
+  uk: { title: 'Обмін', hide: 'Сховати (гаряча клавіша {key})', noGame: 'Гру не знайдено', noGameHint: 'Запустіть Royal Quest у віконному режимі або «вікно без рамки».', starting: 'Запускаю розпізнавання…',
+    waiting: 'Очікування обміну', waitingHint: 'Відкрийте обмін у грі — панель покаже обидві сторони й різницю.', reading: 'читаю…', ok: 'готово', partial: 'не все розпізнано', suspended: 'вікно читається не повністю',
+    cut: 'Вікно обміну видно не повністю', geometry: 'Вікно обміну закрите іншим вікном?',
+    recv: 'Отримую', recvNote: 'ціни скупки', give: 'Віддаю', giveNote: 'ціни продажу', gold: 'Золото', diff: 'Різниця', diffNote: 'отримую − віддаю за вашими цінами', diffNa: 'потрібні всі ціни',
+    signsAsk: 'Вкажіть ціну знака — карти рахуються за знаками.', buySign: 'Скупка знака', sellSign: 'Продаж знака', save: 'Зберегти', cancel: 'Скасувати',
+    cat: { regular: 'звичайний', card: 'карта', unique: 'унік.' }, catLong: { regular: 'Звичайний лут (к-сть × ціна)', card: 'Карта (знаки × ціна знака)', unique: 'Унікальний (ціна за штуку)' },
+    category: 'Тип', buy: 'Ціна скупки', sell: 'Ціна продажу', signsN: 'Знаків', read: 'Прочитано: «{t}»', fuzzy: 'Прочитано «{t}», схоже на це',
+    link: 'Це предмет…', linkHint: 'Почніть вводити назву', addNew: 'Додати як новий: «{t}»', none: 'Нічого не знайдено',
+    issue: { uncertain: 'Не вдалося зрозуміти, що в комірці', noName: 'Назву не прочитано', notInCatalog: 'Немає в списку — натисніть, щоб вибрати предмет', noQuantity: 'Кількість не прочитано',
+      noSigns: 'Не вказано число знаків', noBuySign: 'Немає ціни скупки знака', noSellSign: 'Немає ціни продажу знака', noBuy: 'Немає ціни скупки — натисніть, щоб вказати', noSell: 'Немає ціни продажу — натисніть, щоб вказати', overflow: 'Завелике число' },
+    bag: 'Золото в рюкзаку', bagMiss: 'Відкрийте рюкзак: без його золота обмін не потрапить в історію',
+    counted: { purchase: 'Обмін враховано: покупка', sale: 'Обмін враховано: продаж' }, mismatch: 'Золото у вікні обміну не збіглося зі зміною рюкзака — записано за рюкзаком.',
+    notCounted: 'Обмін не потрапив в історію', why: { captureBreak: 'перервалося спостереження за грою', readError: 'помилка читання', newTradeTooSoon: 'новий обмін до перевірки балансу', closeOrBalance: 'не підтверджено закриття вікна або баланс', noInitial: 'не прочитано золото рюкзака до обміну', noFinal: 'не прочитано золото рюкзака після обміну', unchanged: 'золото в рюкзаку не змінилося' },
+    row: 'Рядок {n}', signsWord: 'зн.' },
+  en: { title: 'Trade', hide: 'Hide (hotkey {key})', noGame: 'Game not found', noGameHint: 'Run Royal Quest in a window or a borderless window.', starting: 'Starting the reader…',
+    waiting: 'Waiting for a trade', waitingHint: 'Open a trade in the game — the panel shows both sides and the difference.', reading: 'reading…', ok: 'done', partial: 'not all read', suspended: 'window not fully readable',
+    cut: 'The trade window is not fully visible', geometry: 'Is another window covering the trade window?',
+    recv: 'I get', recvNote: 'buy prices', give: 'I give', giveNote: 'sell prices', gold: 'Gold', diff: 'Difference', diffNote: 'get − give at your prices', diffNa: 'every price is needed',
+    signsAsk: 'Set the sign price — cards are valued by their signs.', buySign: 'Sign buy price', sellSign: 'Sign sell price', save: 'Save', cancel: 'Cancel',
+    cat: { regular: 'regular', card: 'card', unique: 'unique' }, catLong: { regular: 'Regular loot (count × price)', card: 'Card (signs × sign price)', unique: 'Unique (price per piece)' },
+    category: 'Kind', buy: 'Buy price', sell: 'Sell price', signsN: 'Signs', read: 'Read: «{t}»', fuzzy: 'Read «{t}», looks like this',
+    link: 'This item is…', linkHint: 'Start typing the name', addNew: 'Add as new: «{t}»', none: 'Nothing found',
+    issue: { uncertain: 'Could not tell what is in the slot', noName: 'Name not read', notInCatalog: 'Not in the list — click to pick the item', noQuantity: 'Count not read',
+      noSigns: 'Number of signs not set', noBuySign: 'No sign buy price', noSellSign: 'No sign sell price', noBuy: 'No buy price — click to set it', noSell: 'No sell price — click to set it', overflow: 'Number too big' },
+    bag: 'Backpack gold', bagMiss: 'Open the backpack: without its gold the trade will not get into the history',
+    counted: { purchase: 'Trade counted: purchase', sale: 'Trade counted: sale' }, mismatch: 'The trade window gold did not match the backpack change — saved by the backpack.',
+    notCounted: 'The trade is not in the history', why: { captureBreak: 'lost sight of the game', readError: 'reading error', newTradeTooSoon: 'a new trade before the balance was checked', closeOrBalance: 'the window closing or the balance was not confirmed', noInitial: 'backpack gold before the trade was not read', noFinal: 'backpack gold after the trade was not read', unchanged: 'the backpack gold did not change' },
+    row: 'Row {n}', signsWord: 'signs' },
+};
+let S = null, T = L.ru, open = null; // open: 'L2' / 'R0' — the row whose editor is shown
+const $ = id => document.getElementById(id);
+const fmt = n => n == null ? '—' : Number(n).toLocaleString('ru-RU');
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const fill = (s, o) => s.replace(/\{(\w+)\}/g, (_, k) => o[k] ?? '');
+function el(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) { if (v == null) continue; if (k.startsWith('on')) e.addEventListener(k.slice(2), v); else if (k === 'html') e.innerHTML = v; else e.setAttribute(k, v); }
+  for (const k of kids.flat()) if (k != null) e.append(k.nodeType ? k : String(k));
+  return e;
+}
+
+// drag by the title bar
+$('head').addEventListener('mousedown', e => {
+  if (e.button !== 0 || e.target.closest('button')) return;
+  const sx = e.screenX, sy = e.screenY; window.trade.dragStart();
+  const mv = ev => window.trade.drag(ev.screenX - sx, ev.screenY - sy);
+  const up = () => { removeEventListener('mousemove', mv); removeEventListener('mouseup', up); window.trade.dragEnd(); };
+  addEventListener('mousemove', mv); addEventListener('mouseup', up);
+});
+$('bHide').onclick = () => window.trade.hide();
+
+window.trade.onPanel(s => { S = s; T = L[s.lang] || L.ru; draw(); });
+
+function editing() { const a = document.activeElement; return a && (a.tagName === 'INPUT' || a.tagName === 'SELECT') && a.closest('.ed, .signs'); }
+function draw() {
+  if (!S) return;
+  // keep what the player is typing: a new frame redraws only when no field has the focus
+  if (editing()) { drawHead(); return; }
+  drawHead(); drawSigns();
+  const body = $('body'), foot = $('foot');
+  body.innerHTML = ''; foot.hidden = true;
+  const last = S.last;
+  if (!S.ready && !S.error) { body.append(el('div', { class: 'msg' }, el('b', null, T.starting))); return; }
+  if (S.error && !S.ready) { body.append(el('div', { class: 'msg' }, el('b', null, 'Ошибка'), S.error)); return; }
+  if (!S.game) { body.append(el('div', { class: 'msg' }, el('b', null, T.noGame), T.noGameHint)); return; }
+  const ob = outcomeBox();
+  if (!last || !last.observation || !last.value) {
+    if (ob) { body.append(ob); return; }
+    body.append(el('div', { class: 'msg' }, el('b', null, S.issue ? T[S.issue] || S.issue : T.waiting), S.issue ? '' : T.waitingHint));
+    return;
+  }
+  const v = last.value;
+  if (ob) body.append(ob);
+  const bg = S.backpackGold;
+  body.append(el('div', { class: 'bag' + (bg == null ? ' miss' : '') }, bg == null ? el('span', null, T.bagMiss) : [el('span', null, T.bag), el('span', null, fmt(bg))]));
+  body.append(side('L', T.recv, T.recvNote, v.received), side('R', T.give, T.giveNote, v.given));
+  foot.hidden = false; foot.innerHTML = '';
+  const d = v.difference;
+  foot.append(el('span', { class: 'lbl' }, T.diff, el('span', { class: 'note' }, d == null ? T.diffNa : T.diffNote)),
+    el('span', { class: 'diff ' + (d == null ? 'na' : d >= 0 ? 'pos' : 'neg') }, d == null ? '—' : (d > 0 ? '+' : '') + fmt(d)));
+}
+// what the history did with the last trade, for 20 seconds
+function outcomeBox() {
+  const o = S.outcome;
+  if (!o || Date.now() - o.at > 20000) return null;
+  if (o.code === 'purchase' || o.code === 'sale')
+    return el('div', { class: 'out ' + (o.code === 'purchase' ? 'buy' : 'sell') }, T.counted[o.code] + ' ', el('b', null, (o.code === 'purchase' ? '−' : '+') + fmt(o.amount)),
+      o.reconciliation === 'mismatch' ? el('small', null, T.mismatch) : null);
+  const why = String(o.code).split(':')[1];
+  return el('div', { class: 'out no' }, T.notCounted, el('small', null, T.why[why] || why));
+}
+function drawHead() {
+  $('title').textContent = T.title; document.title = T.title;
+  $('bHide').title = fill(T.hide, { key: S.hotkey || 'Alt+Shift+T' });
+  const st = S.last && S.last.observation ? S.last.state : null;
+  const dot = $('dot');
+  dot.className = 'dot ' + (S.error && !S.ready ? 'err' : !S.game ? '' : st === 'complete' ? 'on' : st ? 'warn' : 'on');
+  $('stat').textContent = !S.game ? '' : st === 'complete' ? T.ok : st === 'partial' ? T.partial : st === 'suspended' ? T.suspended : st ? T.reading : '';
+}
+function drawSigns() {
+  const box = $('signs');
+  if (S.signs.buySign && S.signs.sellSign) { box.hidden = true; return; }
+  if (editing()) return;
+  box.hidden = false; box.innerHTML = '';
+  const b = el('input', { type: 'number', min: 1, placeholder: T.buySign, value: S.signs.buySign ?? '' }), s = el('input', { type: 'number', min: 1, placeholder: T.sellSign, value: S.signs.sellSign ?? '' });
+  for (const i of [b, s]) i.addEventListener('mousedown', () => window.trade.focus());
+  box.append(el('p', null, T.signsAsk), el('div', { class: 'two' }, b, s, el('button', { class: 'btn', onclick: () => window.trade.signs({ buySign: b.value, sellSign: s.value }) }, T.save)));
+}
+function side(key, title, note, sv) {
+  const box = el('div', { class: 'side' }, el('div', { class: 'sh' }, el('h3', null, title), el('small', null, note), el('span', { class: 'sum' }, sv.complete ? fmt(sv.subtotal) : fmt(sv.subtotal) + '+')));
+  for (const r of sv.rows) {
+    const id = key + r.index, bad = !!r.issue;
+    const tag = r.category ? el('span', { class: 'tag ' + r.category }, T.cat[r.category]) : null;
+    const name = r.name || fill(T.row, { n: r.index + 1 });
+    const q = r.category === 'regular' && r.quantity > 1 ? el('span', { class: 'q' }, ' ×' + fmt(r.quantity)) : null;
+    const sub = bad ? T.issue[r.issue] || r.issue : r.formula + (r.fuzzy ? ' · ≈' : '');
+    const row = el('div', { class: 'row' + (bad ? (r.issue === 'notInCatalog' || /^no(Buy|Sell)$/.test(r.issue) ? ' warn' : ' bad') : '') + (open === id ? ' open' : ''), onclick: () => { open = open === id ? null : id; draw(); } },
+      el('div', { class: 'nm', title: r.read || '' }, tag, name, q), el('div', { class: 'val' }, bad ? '—' : fmt(r.value)), el('div', { class: 'sub' }, sub));
+    box.append(row);
+    if (open === id) box.append(editor(r, key === 'L'));
+  }
+  box.append(el('div', { class: 'gold' }, el('span', null, T.gold), el('span', null, sv.gold == null ? '—' : fmt(sv.gold))));
+  return box;
+}
+function editor(r, receiving) {
+  const box = el('div', { class: 'ed', onmousedown: () => window.trade.focus() });
+  if (r.read) box.append(el('div', { class: 'read' }, fill(r.fuzzy ? T.fuzzy : T.read, { t: r.read })));
+  if (r.itemId) {
+    // a known item: its kind and prices
+    const cat = el('select', null, ['regular', 'card', 'unique'].map(c => { const o = el('option', { value: c }, T.catLong[c]); if (c === r.category) o.selected = true; return o; }));
+    const buy = el('input', { type: 'number', min: 1, value: r.category !== 'card' && receiving ? r.price ?? '' : '' });
+    const sell = el('input', { type: 'number', min: 1, value: r.category !== 'card' && !receiving ? r.price ?? '' : '' });
+    const signs = el('input', { type: 'number', min: 1, value: r.signs ?? '' });
+    const lb = el('label', null, T.buy, buy), ls = el('label', null, T.sell, sell), lg = el('label', null, T.signsN, signs);
+    const sync = () => { const card = cat.value === 'card'; lb.hidden = ls.hidden = card; lg.hidden = !card; };
+    cat.onchange = sync; sync();
+    // the price on the other side is not in the row: ask the main side for it so it is not wiped
+    window.trade.known(r.name).then(list => { const k = list.find(x => x.name === r.name); if (k && k.price) { if (k.price.buy != null) buy.value = k.price.buy; if (k.price.sell != null) sell.value = k.price.sell; } });
+    box.append(el('label', null, T.category, cat), lb, ls, lg, el('div', { class: 'btns' },
+      el('button', { class: 'btn no', onclick: () => { open = null; draw(); } }, T.cancel),
+      el('button', { class: 'btn', onclick: () => { window.trade.price({ name: r.name, category: cat.value, buy: buy.value, sell: sell.value, signs: signs.value }); open = null; document.activeElement.blur(); draw(); } }, T.save)));
+    setTimeout(() => (cat.value === 'card' ? signs : receiving ? buy : sell).focus(), 0);
+  }
+  // not resolved (or to correct it): tie the reading to the right item
+  if (r.read) {
+    const q = el('input', { type: 'text', placeholder: T.linkHint, value: r.itemId ? '' : r.read });
+    const hits = el('div', { class: 'hits' });
+    const search = async () => {
+      const list = await window.trade.known(q.value);
+      hits.innerHTML = '';
+      for (const k of list) hits.append(el('button', { onclick: () => { window.trade.link(r.read, k.name); open = null; document.activeElement.blur(); draw(); } }, k.name, el('small', null, T.cat[k.category] + (k.signs ? ` · ${k.signs} ${T.signsWord}` : ''))));
+      if (!list.length) hits.append(el('div', { class: 'read' }, T.none));
+      if (!r.itemId && q.value.trim()) hits.append(el('button', { onclick: () => { window.trade.price({ name: q.value.trim(), category: 'regular' }); if (q.value.trim() !== r.read) window.trade.link(r.read, q.value.trim()); open = null; document.activeElement.blur(); draw(); } }, fill(T.addNew, { t: q.value.trim() })));
+    };
+    let tm = null; q.oninput = () => { clearTimeout(tm); tm = setTimeout(search, 150); };
+    box.append(el('label', null, T.link, q), hits);
+    if (!r.itemId) { search(); setTimeout(() => q.focus(), 0); }
+  }
+  return box;
+}
+</script>
+</body>
+</html>

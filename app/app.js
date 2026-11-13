@@ -471,6 +471,7 @@ const TOP_ICONS = {
   news: '<path d="M4 5h13v13.5a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2z"/><path d="M17 9h3v9.5a2 2 0 0 1-4 0"/><path d="M7 8.5h7M7 12h7M7 15.5h4"/>',
   book: '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/><path d="M8 7.5h8M8 11h6"/>',
   chart: '<path d="M4 4v16h16"/><path d="M7.5 15l3.5-4 3 2.5 5-6.5"/>',
+  trade: '<path d="M4 8h14l-3.5-3.5"/><path d="M20 16H6l3.5 3.5"/>',
   skull: '<path d="M12 3a7.5 7.5 0 0 0-7.5 7.5c0 2.6 1.3 4.6 3 5.8V19a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1v-2.7c1.7-1.2 3-3.2 3-5.8A7.5 7.5 0 0 0 12 3z"/><circle cx="9.2" cy="11" r="1.6"/><circle cx="14.8" cy="11" r="1.6"/><path d="M10.5 20v-2.5M13.5 20v-2.5M11.2 14.8l.8-1.3.8 1.3"/>',
   group: '<circle cx="9" cy="8.5" r="3"/><path d="M3.5 19.5c.4-3.2 2.6-5 5.5-5s5.1 1.8 5.5 5"/><circle cx="16.5" cy="9" r="2.4"/><path d="M15.5 14.6c2.6-.3 4.6 1.3 5 4.4"/>',
   lock: '<rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/>',
@@ -520,7 +521,7 @@ function renderTop() {
   if (settingsLang !== lang) { settingsLang = lang; applySettings(); } // tray menu texts follow the language
   const ls = $('langSwitch'); ls.innerHTML = ''; ls.title = T.language;
   for (const [k, label] of [['uk', 'УКР'], ['ru', 'РУС'], ['en', 'ENG']]) {
-    ls.append(h('button', { class: k === lang ? 'on' : '', onclick: () => { lang = k; T = RQC_I18N[k]; store.set('lang', k); applyGameLang(); recalc(); renderAll(); statsLang(); } }, label));
+    ls.append(h('button', { class: k === lang ? 'on' : '', onclick: () => { lang = k; T = RQC_I18N[k]; store.set('lang', k); applyGameLang(); recalc(); renderAll(); statsLang(); tradeLang(); } }, label));
   }
 }
 $('buildName').addEventListener('input', e => { buildName = e.target.value; store.set('currentName', buildName); });
@@ -573,6 +574,7 @@ const TOOLS = [
   { id: 'steam', tab: 'steam', icon: 'news', name: () => STX().title, sub: () => STX().sub },
   { id: 'calendar', tab: 'cal', icon: 'calendar', name: () => CTX().title, sub: () => CTX().sub },
   { id: 'stats', tab: 'stats', icon: 'chart', name: () => STT().title, sub: () => STT().sub },
+  { id: 'trade', tab: 'trade', icon: 'trade', name: () => TRT().title, sub: () => TRT().sub },
 ];
 const toolOfTab = t => TOOLS.find(x => x.tab && x.tab === t);
 const curTool = () => toolOfTab(tab)?.id || 'calc';
@@ -836,6 +838,7 @@ function renderCenter() {
   else if (tab === 'steam') renderSteamNews(el);
   else if (tab === 'cal') renderCalendar(el);
   else if (tab === 'stats') renderStatsTool(el);
+  else if (tab === 'trade') renderTradeTool(el);
   else renderCollection(el);
   el.scrollTop = scroll;
 }

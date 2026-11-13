@@ -20,6 +20,12 @@ contextBridge.exposeInMainWorld('rqcApp', {
   copyText: text => ipcRenderer.send('rqc-copy-text', text),
   // RQ Stats overlay: { on, lang, action } → main.js; its state back ({ on, hasRegion, keys })
   stats: cmd => ipcRenderer.send('rqc-stats', cmd),
+  // «Обмен» (trade/): { on, lang, signs, price, link, action } → main.js; its state back
+  trade: cmd => ipcRenderer.send('rqc-trade', cmd),
+  onTrade: cb => ipcRenderer.on('rqc-trade-state', (_e, st) => cb(st)),
+  tradeKnown: q => ipcRenderer.invoke('rqc-trade-known', q),
+  tradeHistory: f => ipcRenderer.invoke('rqc-trade-history', f),
+  tradeDelete: id => ipcRenderer.invoke('rqc-trade-delete', id),
   onStats: cb => ipcRenderer.on('rqc-stats-state', (_e, st) => cb(st)), // the clipboard (works while the game has the focus)
 });
 
