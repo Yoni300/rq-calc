@@ -6,7 +6,7 @@
 // the frames go to a background process (trade/engine/worker.js) that finds and reads the trade window,
 // its result goes to the panel (trade/overlay). Prices live in <RQ Tools data>\trade.
 'use strict';
-const { app, BrowserWindow, ipcMain, globalShortcut, screen, desktopCapturer, utilityProcess, MessageChannelMain } = require('electron');
+const { app, BrowserWindow, ipcMain, globalShortcut, screen, desktopCapturer, utilityProcess, MessageChannelMain, clipboard } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
@@ -23,7 +23,7 @@ const writeJson = (n, v) => { try { fs.mkdirSync(dataDir(), { recursive: true })
 // settings: sign prices (buy = what you pay for a sign when you receive cards, sell = when you give them), hotkey, panel place
 let settings = null;
 // Alt+Shift+T, next to the stats overlay's Alt+Shift+S (F12 is often taken: Steam screenshots)
-const loadSettings = () => { settings = { buySign: null, sellSign: null, hotkey: 'Alt+Shift+T', panel: null, ...readJson('settings.json', {}) }; };
+const loadSettings = () => { settings = { buySign: null, sellSign: null, hotkey: 'Alt+Shift+T', autoCopy: true, panel: null, ...readJson('settings.json', {}) }; };
 // the price list: { items: { name: { category, buy, sell, signs } }, aliases: { NORMALIZED READ TEXT: name } }
 let prices = null;
 const loadPrices = () => { prices = readJson('prices.json', null) || { items: {}, aliases: {} }; prices.items ||= {}; prices.aliases ||= {}; };
@@ -72,7 +72,7 @@ let last = null; // the newest worker state (observation + value)
 let findTimer = null, captureSource = null, workerPort = null;
 const emit = () => { onChange(state()); };
 function state() {
-  return { ...st, buySign: settings?.buySign ?? null, sellSign: settings?.sellSign ?? null, hotkey: settings?.hotkey, prices: prices ? prices.items : {}, aliasCount: prices ? Object.keys(prices.aliases).length : 0, trade: last && last.observation ? { state: last.state } : null };
+  return { ...st, autoCopy: settings ? settings.autoCopy !== false : true, buySign: settings?.buySign ?? null, sellSign: settings?.sellSign ?? null, hotkey: settings?.hotkey, prices: prices ? prices.items : {}, aliasCount: prices ? Object.keys(prices.aliases).length : 0, trade: last && last.observation ? { state: last.state } : null };
 }
 
 function startWorker() {
@@ -89,6 +89,21 @@ function startWorker() {
   worker.postMessage({ type: 'init', assets: ASSETS, catalog: catalog(), pricing: pricing(), workerPath: unpacked(require.resolve('tesseract.js/src/worker-script/node/index.js')) });
 }
 
+// the value of everything you get (items only, not their gold) goes to the clipboard as plain digits, ready to paste
+// as your gold in the trade window. Only a stable reading where every item on that side has a value, and only
+// when the sum changes; a new trade copies again even if the sum is the same.
+let copied = null; // { sum, at }
+function autoCopy(m) {
+  if (m.justClosed || !m.observation) { copied = null; return; }
+  if (!settings.autoCopy || !m.value || !(m.state === 'complete' || m.state === 'partial')) return;
+  const rows = m.value.received.rows;
+  if (!rows.length || rows.some(r => r.issue || !(r.value > 0))) return;
+  const sum = rows.reduce((n, r) => n + r.value, 0);
+  if (copied && copied.sum === sum) return;
+  Promise.resolve(clipboard.writeText(String(sum))).catch(err => log('clipboard ' + err)); // async since Electron 45
+  copied = { sum, at: Date.now() };
+}
+
 let hideAfterOutcome = false, hideTimer = null;
 function onWorkerState(m) {
   last = m;
@@ -102,6 +117,7 @@ function onWorkerState(m) {
     hideAfterOutcome = false; clearTimeout(hideTimer);
     hideTimer = setTimeout(() => { if (panel && !panelPinned && !(last && last.observation)) panel.hide(); }, 5000);
   }
+  autoCopy(m);
   sendPanel();
   if (was !== st.reading || wasIssue !== st.issue || wasOutcome !== st.lastOutcome) emit();
 }
@@ -181,7 +197,7 @@ function createPanel() {
 function sendPanel() {
   if (!panel || panel.isDestroyed()) return;
   panel.webContents.send('trade:panel', { lang, game: st.game, ready: st.ready, error: st.error, issue: st.issue, pinned: panelPinned, hotkey: settings.hotkey,
-    signs: pricing(), outcome: st.lastOutcome, accounting: last ? last.accounting : null, backpackGold: last ? last.backpackGold : null,
+    signs: pricing(), copied, outcome: st.lastOutcome, accounting: last ? last.accounting : null, backpackGold: last ? last.backpackGold : null,
     last: last ? { state: last.state, observation: last.observation, value: last.value } : null });
 }
 function togglePanel() {
@@ -271,6 +287,7 @@ function setLang(l) { lang = l; sendPanel(); }
 function api(cmd) {
   if (!settings) { loadSettings(); loadPrices(); }
   if (cmd.signs) setSigns(cmd.signs);
+  if ('autoCopy' in cmd) { settings.autoCopy = !!cmd.autoCopy; writeJson('settings.json', settings); if (!settings.autoCopy) copied = null; sendPanel(); }
   if (cmd.price) setPrice(cmd.price);
   if (cmd.link) link(cmd.link.read, cmd.link.name);
   if (cmd.action === 'show' && panel) { panel.showInactive(); panelPinned = true; sendPanel(); }

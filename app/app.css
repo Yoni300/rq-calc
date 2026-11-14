@@ -1374,6 +1374,10 @@ body.tool-timer .calc-only { display: none !important; }
 .tr-row .inp { padding: 4px 7px; }
 .tr-del { padding: 2px 0; min-width: 0; }
 .tr-credit { margin: 12px 0 0; color: var(--dim); font-size: 12px; }
+.tr-copy { display: flex; gap: 10px; align-items: flex-start; margin-top: 14px; cursor: pointer; }
+.tr-copy input { margin-top: 3px; accent-color: var(--gold); }
+.tr-copy span { display: flex; flex-direction: column; gap: 2px; font-size: 13px; }
+.tr-copy small { color: var(--muted); font-size: 12px; line-height: 1.4; }
 .tr-credit a { color: var(--gold-2); }
 @media (max-width: 760px) { .tr-row { grid-template-columns: minmax(0, 1fr) 90px 30px; } .tr-row > :nth-child(3), .tr-row > :nth-child(4) { grid-column: auto; } .tr-th { display: none; } }
 

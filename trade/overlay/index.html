@@ -89,6 +89,7 @@ html, body { margin: 0; height: 100%; background: transparent; color: var(--fg);
 .bag { display: flex; justify-content: space-between; gap: 8px; margin: 2px 10px 0; padding: 4px 6px; font-size: 12px; color: var(--muted); }
 .bag span:last-child { color: var(--coin); font-weight: 600; }
 .bag.miss { color: var(--warn); }
+.copied { margin: -2px 0 4px; padding: 2px 6px; font-size: 11.5px; color: var(--good); }
 .signs input { min-width: 0; font: inherit; font-size: 12.5px; padding: 4px 7px; border-radius: 6px; border: 1px solid var(--line-2); background: rgba(0, 0, 0, .45); color: var(--fg); outline: none; }
 </style>
 </head>
@@ -116,6 +117,7 @@ const L = {
     bag: 'Золото в рюкзаке', bagMiss: 'Откройте рюкзак: без его золота обмен не попадёт в историю',
     counted: { purchase: 'Обмен учтён: покупка', sale: 'Обмен учтён: продажа' }, mismatch: 'Золото в окне обмена не совпало с изменением рюкзака — записано по рюкзаку.',
     notCounted: 'Обмен не попал в историю', why: { captureBreak: 'прервалось наблюдение за игрой', readError: 'ошибка чтения', newTradeTooSoon: 'новый обмен до проверки баланса', closeOrBalance: 'не подтверждено закрытие окна или баланс', noInitial: 'не прочитано золото рюкзака до обмена', noFinal: 'не прочитано золото рюкзака после обмена', unchanged: 'золото в рюкзаке не изменилось' },
+    copied: '✓ {n} скопировано — вставьте как золото (Ctrl+V)', copiedTip: 'Сумма предметов, которые вы получаете, без золота',
     row: 'Строка {n}', signsWord: 'зн.' },
   uk: { title: 'Обмін', hide: 'Сховати (гаряча клавіша {key})', noGame: 'Гру не знайдено', noGameHint: 'Запустіть Royal Quest у віконному режимі або «вікно без рамки».', starting: 'Запускаю розпізнавання…',
     waiting: 'Очікування обміну', waitingHint: 'Відкрийте обмін у грі — панель покаже обидві сторони й різницю.', reading: 'читаю…', ok: 'готово', partial: 'не все розпізнано', suspended: 'вікно читається не повністю',
@@ -130,6 +132,7 @@ const L = {
     bag: 'Золото в рюкзаку', bagMiss: 'Відкрийте рюкзак: без його золота обмін не потрапить в історію',
     counted: { purchase: 'Обмін враховано: покупка', sale: 'Обмін враховано: продаж' }, mismatch: 'Золото у вікні обміну не збіглося зі зміною рюкзака — записано за рюкзаком.',
     notCounted: 'Обмін не потрапив в історію', why: { captureBreak: 'перервалося спостереження за грою', readError: 'помилка читання', newTradeTooSoon: 'новий обмін до перевірки балансу', closeOrBalance: 'не підтверджено закриття вікна або баланс', noInitial: 'не прочитано золото рюкзака до обміну', noFinal: 'не прочитано золото рюкзака після обміну', unchanged: 'золото в рюкзаку не змінилося' },
+    copied: '✓ {n} скопійовано — вставте як золото (Ctrl+V)', copiedTip: 'Сума предметів, які ви отримуєте, без золота',
     row: 'Рядок {n}', signsWord: 'зн.' },
   en: { title: 'Trade', hide: 'Hide (hotkey {key})', noGame: 'Game not found', noGameHint: 'Run Royal Quest in a window or a borderless window.', starting: 'Starting the reader…',
     waiting: 'Waiting for a trade', waitingHint: 'Open a trade in the game — the panel shows both sides and the difference.', reading: 'reading…', ok: 'done', partial: 'not all read', suspended: 'window not fully readable',
@@ -144,6 +147,7 @@ const L = {
     bag: 'Backpack gold', bagMiss: 'Open the backpack: without its gold the trade will not get into the history',
     counted: { purchase: 'Trade counted: purchase', sale: 'Trade counted: sale' }, mismatch: 'The trade window gold did not match the backpack change — saved by the backpack.',
     notCounted: 'The trade is not in the history', why: { captureBreak: 'lost sight of the game', readError: 'reading error', newTradeTooSoon: 'a new trade before the balance was checked', closeOrBalance: 'the window closing or the balance was not confirmed', noInitial: 'backpack gold before the trade was not read', noFinal: 'backpack gold after the trade was not read', unchanged: 'the backpack gold did not change' },
+    copied: '✓ {n} copied — paste it as gold (Ctrl+V)', copiedTip: 'The value of the items you get, without gold',
     row: 'Row {n}', signsWord: 'signs' },
 };
 let S = null, T = L.ru, open = null; // open: 'L2' / 'R0' — the row whose editor is shown
@@ -227,6 +231,9 @@ function drawSigns() {
 }
 function side(key, title, note, sv) {
   const box = el('div', { class: 'side' }, el('div', { class: 'sh' }, el('h3', null, title), el('small', null, note), el('span', { class: 'sum' }, sv.complete ? fmt(sv.subtotal) : fmt(sv.subtotal) + '+')));
+  // the items' sum that went to the clipboard (trade/index.js autoCopy)
+  if (key === 'L' && S.copied && sv.rows.length && sv.rows.every(r => !r.issue) && sv.rows.reduce((n, r) => n + (r.value || 0), 0) === S.copied.sum)
+    box.append(el('div', { class: 'copied', title: T.copiedTip }, fill(T.copied, { n: fmt(S.copied.sum) })));
   for (const r of sv.rows) {
     const id = key + r.index, bad = !!r.issue;
     const tag = r.category ? el('span', { class: 'tag ' + r.category }, T.cat[r.category]) : null;

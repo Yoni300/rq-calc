@@ -35,6 +35,7 @@ const TRADE_T = {
     day: 'День', side: 'Сторона', qty: 'Кількість', unknownRows: 'Невідома к-сть', prev: '‹', next: '›',
     last: 'Останній результат: {r}', counted: { purchase: 'враховано покупку {a}', sale: 'враховано продаж {a}' }, notCounted: 'не враховано — {w}',
     why: { captureBreak: 'перервалося спостереження за грою', readError: 'помилка читання', newTradeTooSoon: 'новий обмін до перевірки балансу', closeOrBalance: 'не підтверджено закриття вікна або баланс', noInitial: 'не прочитано золото рюкзака до обміну', noFinal: 'не прочитано золото рюкзака після обміну', unchanged: 'золото в рюкзаку не змінилося' },
+    autoCopy: 'Копіювати суму в буфер обміну', autoCopyHint: 'Коли всі предмети, які ви отримуєте, мають ціну, їхня сума (без золота) сама копіюється — у грі вставте її як своє золото (Ctrl+V).',
     web: 'Обмін працює лише в програмі RQ Tools для Windows.', dl: 'Скачати програму',
   },
   ru: {
@@ -66,6 +67,7 @@ const TRADE_T = {
     day: 'День', side: 'Сторона', qty: 'Количество', unknownRows: 'Неизв. кол-во', prev: '‹', next: '›',
     last: 'Последний результат: {r}', counted: { purchase: 'учтена покупка {a}', sale: 'учтена продажа {a}' }, notCounted: 'не учтён — {w}',
     why: { captureBreak: 'прервалось наблюдение за игрой', readError: 'ошибка чтения', newTradeTooSoon: 'новый обмен до проверки баланса', closeOrBalance: 'не подтверждено закрытие окна или баланс', noInitial: 'не прочитано золото рюкзака до обмена', noFinal: 'не прочитано золото рюкзака после обмена', unchanged: 'золото в рюкзаке не изменилось' },
+    autoCopy: 'Копировать сумму в буфер обмена', autoCopyHint: 'Когда у всех предметов, которые вы получаете, есть цена, их сумма (без золота) сама копируется — в игре вставьте её как своё золото (Ctrl+V).',
     web: 'Обмен работает только в программе RQ Tools для Windows.', dl: 'Скачать программу',
   },
   en: {
@@ -97,6 +99,7 @@ const TRADE_T = {
     day: 'Day', side: 'Side', qty: 'Count', unknownRows: 'Unknown count', prev: '‹', next: '›',
     last: 'Last result: {r}', counted: { purchase: 'purchase {a} counted', sale: 'sale {a} counted' }, notCounted: 'not counted — {w}',
     why: { captureBreak: 'lost sight of the game', readError: 'reading error', newTradeTooSoon: 'a new trade before the balance was checked', closeOrBalance: 'the window closing or the balance was not confirmed', noInitial: 'backpack gold before the trade was not read', noFinal: 'backpack gold after the trade was not read', unchanged: 'the backpack gold did not change' },
+    autoCopy: 'Copy the sum to the clipboard', autoCopyHint: 'When every item you get has a price, their value (without gold) is copied by itself — paste it as your gold in the game (Ctrl+V).',
     web: 'Trade works only in the RQ Tools app for Windows.', dl: 'Download app',
   },
 };
@@ -167,7 +170,9 @@ function tradeSignsCard(t, s) {
   for (const i of [buy, sell]) i.addEventListener('keydown', e => { if (e.key === 'Enter') save(); });
   return h('section', { class: 'st-card' }, h('h3', null, t.signs), h('p', { class: 'tr-hint' }, t.signsHint),
     h('div', { class: 'tr-signs' }, h('label', null, h('span', null, t.buySign), buy), h('label', null, h('span', null, t.sellSign), sell),
-      h('button', { class: 'btn primary', onclick: save }, t.save)));
+      h('button', { class: 'btn primary', onclick: save }, t.save)),
+    h('label', { class: 'tr-copy' }, h('input', { type: 'checkbox', checked: s.autoCopy !== false ? '' : null, onchange: e => window.rqcApp.trade({ autoCopy: e.target.checked }) }),
+      h('span', null, h('b', null, t.autoCopy), h('small', null, t.autoCopyHint))));
 }
 function tradePricesCard(t, s) {
   const list = Object.entries(s.prices || {}).sort((a, b) => a[0].localeCompare(b[0], 'ru'));
