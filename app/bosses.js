@@ -5,7 +5,7 @@
 
 // one entry per boss and location: Дуан Безжалостный lives in four places, each with its own timer
 const BOSSES = (window.RQ_BOSSES || []).flatMap(b => b.spots.map(s => ({
-  key: b.name + ' | ' + s.loc, name: b.name, level: b.level, elite: b.type !== 'Босс', loc: s.loc, resp: s.resp, img: b.img,
+  key: b.name + ' | ' + s.loc, name: b.name, level: b.level, elite: b.type !== 'Босс', loc: s.loc, resp: s.resp, approx: !!s.approx, img: b.img,
 })));
 // this file loads before app.js (which may draw the boss tab right away), so it reads its settings itself
 const bget = (k, def) => { try { const v = localStorage.getItem('rqc.' + k); return v == null ? def : JSON.parse(v); } catch { return def; } };
@@ -332,9 +332,9 @@ function bossRow(b, st) {
           store.set('bossFav', [...BT.fav]); drawBossList();
         } }, fav ? '★' : '☆'),
         h('span', null, b.name)),
-      h('div', { class: 'bt-meta' }, `${T.lvl} ${b.level} · ${b.elite ? T.bossElite : T.bossBoss} · ${b.loc}`),
+      h('div', { class: 'bt-meta', title: b.loc }, `${T.lvl} ${b.level} · ${b.elite ? T.bossElite : T.bossBoss} · ${b.loc}`),
       h('button', { class: 'bt-resp' + (BT.resp[b.key] ? ' custom' : ''), title: fmtT(T.bossResp, { d: fmtResp(respOf(b)) }), onclick: () => editResp(b) },
-        '⟳ ', fmtResp(respOf(b)))),
+        '⟳ ', b.approx && !BT.resp[b.key] ? '≈ ' : '', fmtResp(respOf(b)))),
     h('div', { class: 'bt-state' }, big, sub),
     h('div', { class: 'bt-act' },
       h('button', { class: 'btn small primary bt-kill', title: T.bossKilledTip, onclick: () => { askNotify(); setKill(b, Date.now()); } }, '☠ ' + T.bossKilled),
