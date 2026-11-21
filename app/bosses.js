@@ -22,10 +22,15 @@ const BT = {
 const STALE = 24 * 3600e3;                  // a respawn this old says nothing any more
 
 const kills = () => (BT.room ? BT.remote : BT.local);
-const respOf = b => BT.resp[b.key] || b.resp;
+const respOf = b => BT.resp[b.key] || b.resp;   // minutes; a player's own time can have seconds (95.5 = 1:35:30)
+const respMs = b => Math.round(respOf(b) * 60) * 1000;
+const secShort = () => ({ en: 's' }[lang] || 'с');
 const locale = () => ({ uk: 'uk-UA', ru: 'ru-RU', en: 'en-GB' }[lang] || 'ru-RU');
-const clock = t => new Date(t).toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' });
-function fmtResp(min) { const hh = Math.floor(min / 60), mm = min % 60; return (hh ? `${hh} ${T.hShort} ` : '') + (mm || !hh ? `${mm} ${T.mShort}` : ''); }
+const clock = t => new Date(t).toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+function fmtResp(min) {
+  const all = Math.round(min * 60), hh = Math.floor(all / 3600), mm = Math.floor(all / 60) % 60, ss = all % 60;
+  return [hh ? `${hh} ${T.hShort}` : '', mm || (!hh && !ss) ? `${mm} ${T.mShort}` : '', ss ? `${ss} ${secShort()}` : ''].filter(Boolean).join(' ');
+}
 function fmtLeft(ms) {
   const s = Math.max(0, Math.ceil(ms / 1000)), hh = Math.floor(s / 3600), mm = Math.floor(s / 60) % 60, ss = s % 60;
   return (hh ? hh + ':' + String(mm).padStart(2, '0') : String(mm)) + ':' + String(ss).padStart(2, '0');
@@ -37,8 +42,8 @@ const fmtAgo = ms => (ms < 60e3 ? T.bossNow.toLowerCase() : fmtT(T.bossAgoD, { d
 function bossState(b, now = Date.now()) {
   const k = kills()[b.key];
   if (!k) return { s: 'none' };
-  const spawn = k.t + respOf(b) * 60e3;
-  if (now < spawn) return { s: 'wait', k, spawn, left: spawn - now, part: 1 - (spawn - now) / (respOf(b) * 60e3) };
+  const spawn = k.t + respMs(b);
+  if (now < spawn) return { s: 'wait', k, spawn, left: spawn - now, part: 1 - (spawn - now) / respMs(b) };
   if (now - spawn < STALE) return { s: 'up', k, spawn };
   return { s: 'none' };
 }
@@ -132,29 +137,33 @@ function joinRoom() {
 function editKill(b) {
   const k = kills()[b.key];
   const base = new Date(k ? k.t : Date.now());
-  const time = h('input', { type: 'time', class: 'inp', value: String(base.getHours()).padStart(2, '0') + ':' + String(base.getMinutes()).padStart(2, '0') });
+  const time = h('input', { type: 'time', step: 1, class: 'inp', value: [base.getHours(), base.getMinutes(), base.getSeconds()].map(x => String(x).padStart(2, '0')).join(':') });
   let close;
   const ago = m => { close(); setKill(b, Date.now() - m * 60e3); };
   close = bossDialog(fmtT(T.bossKillTitle, { n: b.name }), h('div', { class: 'bt-dlg-body' },
     h('div', { class: 'bt-quick' }, [0, 5, 10, 15, 30, 60, 90, 120].map(m =>
       h('button', { class: 'btn small', onclick: () => ago(m) }, m ? fmtT(T.bossAgo, { m }) : T.bossNow))),
     h('label', { class: 'bt-lbl' }, T.bossTimeLbl, time)), () => {
-    const [hh, mm] = time.value.split(':').map(Number);
+    const [hh, mm, ss = 0] = time.value.split(':').map(Number); // the browser drops «:00» seconds
     if (!isFinite(hh) || !isFinite(mm)) return false;
-    const d = new Date(); d.setHours(hh, mm, 0, 0);
+    const d = new Date(); d.setHours(hh, mm, ss, 0);
     if (d.getTime() > Date.now() + 60e3) d.setDate(d.getDate() - 1); // a time later than now was yesterday
     setKill(b, d.getTime());
   });
 }
 function editResp(b) {
-  const inp = h('input', { type: 'number', class: 'inp', min: 1, max: 2880, value: respOf(b) });
+  const total = Math.round(respOf(b) * 60);
+  const inp = h('input', { type: 'number', class: 'inp', min: 0, max: 2880, value: Math.floor(total / 60) });
+  const sec = h('input', { type: 'number', class: 'inp', min: 0, max: 59, value: total % 60 });
   let close;
   const save = v => { if (v && v !== b.resp) BT.resp[b.key] = v; else delete BT.resp[b.key]; store.set('bossResp', BT.resp); drawBossList(); };
   close = bossDialog(fmtT(T.bossRespTitle, { n: b.name }), h('div', { class: 'bt-dlg-body' },
-    h('div', { class: 'hint' }, fmtT(T.bossRespHint, { d: fmtResp(b.resp) })),
-    h('div', { class: 'bt-resp-row' }, inp, h('span', null, T.mShort),
+    h('div', { class: 'hint' }, fmtT(T.bossRespHint, { d: fmtResp(b.resp) }).replace(/^[^.]+\.\s*/, '')), // without «Minutes from…»: the fields are labelled
+    h('div', { class: 'bt-resp-row' }, inp, h('span', null, T.mShort), sec, h('span', null, secShort()),
       h('button', { class: 'btn small', onclick: () => { close(); save(null); } }, T.bossRespReset))), () => {
-    const v = Math.round(+inp.value);
+    const m = Math.floor(+inp.value), s = Math.floor(+sec.value);
+    if (!(m >= 0 && s >= 0 && s <= 59)) return false;
+    const v = m + s / 60;
     if (!(v >= 1 && v <= 2880)) return false;
     save(v);
   });

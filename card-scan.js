@@ -95,7 +95,7 @@ async function scan(skip) {
     if (!found || found.miss) found = (await read(RETRY_SCALE)) || found;
   } catch (e) { return { ok: false, reason: e.message }; }
   if (!found || found.miss) return { ok: false, reason: 'none', read: found && found.miss, ms: Date.now() - t0 };
-  return { ok: true, name: found.name, signs: found.signs, ms: Date.now() - t0 };
+  return { ok: true, name: found.name, signs: found.signs, x: dip.x, y: dip.y, ms: Date.now() - t0 }; // x, y: the mouse (a held key repeats the same card)
 }
 
 // The Windows component «Optical character recognition» for Russian (a keyboard layout alone does not bring it).

@@ -17,6 +17,8 @@ contextBridge.exposeInMainWorld('rqcApp', {
   onCardStatus: cb => ipcRenderer.on('rqc-card-status', (_e, st) => cb(st)),
   // installing the Russian text recognition: { state: 'start' | 'ok' | 'cancel' | 'fail', reason }
   onCardOcr: cb => ipcRenderer.on('rqc-card-ocr', (_e, st) => cb(st)),
+  // the buttons of the card scanner's total message: 'card-total-undo' | 'card-total-reset'
+  onCardAction: cb => ipcRenderer.on('rqc-card-action', (_e, id) => cb(id)),
   copyText: text => ipcRenderer.send('rqc-copy-text', text),
   // RQ Stats overlay: { on, lang, action } → main.js; its state back ({ on, hasRegion, keys })
   stats: cmd => ipcRenderer.send('rqc-stats', cmd),

@@ -17,12 +17,16 @@ function close(card) {
 
 window.rqcAlert.onAlert(a => {
   // a newer message about the same boss replaces the older one
-  for (const c of [...stack.children]) if (c.dataset.key === a.key) c.remove();
-  while (stack.children.length >= MAX) stack.firstElementChild.remove();
+  let replaced = false;
+  for (const c of [...stack.children]) if (c.dataset.key === a.key) { c.remove(); replaced = true; }
+  if (a.remove) { fit(); return; }
+  // a sticky message (the card scanner's total) stays until it is reset: older ordinary ones make room first
+  while (stack.children.length >= MAX) ([...stack.children].find(c => !c.dataset.sticky) || stack.firstElementChild).remove();
 
   const card = document.createElement('div');
-  card.className = 'card ' + a.kind;
+  card.className = 'card ' + a.kind + (a.sticky ? ' sticky' : '') + (a.sticky && replaced ? ' still' : '');
   card.dataset.key = a.key;
+  if (a.sticky) card.dataset.sticky = '1';
   const pic = document.createElement('div');
   pic.className = 'pic';
   if (a.img) { const im = document.createElement('img'); im.src = a.img; pic.append(im); }
@@ -34,12 +38,24 @@ window.rqcAlert.onAlert(a => {
   // card scanner: the big line with the result («190 знаков ≈ 10 450 000»)
   if (a.big) { const b = document.createElement('div'); b.className = 'big'; b.textContent = a.big; text.append(b); }
   text.append(s);
-  // an optional button («Установить»): does its thing in main.js and closes the message
-  if (a.action) {
-    const b = document.createElement('button');
-    b.className = 'act'; b.textContent = a.action.label;
-    b.addEventListener('click', e => { e.stopPropagation(); window.rqcAlert.action(a.action.id); close(card); });
-    text.append(b);
+  // optional buttons («Установить»): do their thing in main.js and close the message (a sticky one is redrawn instead)
+  const actions = a.actions || (a.action ? [a.action] : []);
+  if (actions.length) {
+    const row = document.createElement('div');
+    row.className = 'acts';
+    for (const act of actions) {
+      const b = document.createElement('button');
+      b.className = 'act'; b.textContent = act.label;
+      b.addEventListener('click', e => { e.stopPropagation(); window.rqcAlert.action(act.id); if (!a.sticky) close(card); });
+      row.append(b);
+    }
+    text.append(row);
+  }
+  if (a.sticky) {
+    card.append(pic, text);
+    stack.append(card);
+    fit();
+    return;
   }
   const x = document.createElement('button');
   x.className = 'x'; x.textContent = '✕';

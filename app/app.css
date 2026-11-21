@@ -796,9 +796,9 @@ input[type=range] { accent-color: var(--gold-2); }
 .bt-code-inp { text-align: center; font: 700 20px ui-monospace, Consolas, monospace; letter-spacing: .2em; text-transform: uppercase; }
 .bt-quick { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
 .bt-lbl { display: flex; align-items: center; justify-content: center; gap: 10px; color: var(--muted); font-size: 12.5px; }
-.bt-lbl .inp { width: 110px; font-size: 15px; }
+.bt-lbl .inp { width: 150px; font-size: 15px; }
 .bt-resp-row { display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--muted); }
-.bt-resp-row .inp { width: 100px; font-size: 15px; text-align: center; }
+.bt-resp-row .inp { width: 76px; font-size: 15px; text-align: center; }
 @media (max-width: 720px) {
   .bt-row { grid-template-columns: 44px minmax(0, 1fr) auto; }
   .bt-pic { width: 44px; height: 44px; }

@@ -150,6 +150,8 @@ ipcMain.on('rqc-copy-text', (_e, text) => clipboard.writeText(String(text)));
 // «Установить» in the «no Russian text recognition» alert
 let ocrInstalling = false;
 ipcMain.on('rqc-alert-action', async (_e, id) => {
+  // the buttons of the card scanner's total: the page keeps the count
+  if (id === 'card-total-undo' || id === 'card-total-reset') { if (win && !win.isDestroyed()) win.webContents.send('rqc-card-action', id); return; }
   if (id !== 'install-ru-ocr' || ocrInstalling) return;
   ocrInstalling = true;
   const send = st => { if (win && !win.isDestroyed()) win.webContents.send('rqc-card-ocr', st); };
