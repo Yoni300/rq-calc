@@ -1628,9 +1628,17 @@ function updBusy() {
 }
 function showUpdate(st) {
   let el = document.getElementById('updBanner');
-  if (!st || (st.status !== 'downloading' && st.status !== 'ready')) { if (el) el.remove(); return; }
+  if (!st || !['downloading', 'ready', 'portable'].includes(st.status) || (st.status === 'portable' && updPostponed === st.version)) { if (el) el.remove(); return; }
   if (!el) { el = h('div', { class: 'upd', id: 'updBanner' }); document.body.append(el); }
   el.innerHTML = '';
+  // the portable copy: a new version is out, download it by hand (the banner hides until the next app start)
+  if (st.status === 'portable') {
+    el.append(h('div', { class: 'upd-t' }, fmtT(T.updOut, { v: st.version || '' })), h('div', { class: 'upd-s' }, T.updPortable),
+      h('div', { class: 'upd-btns' },
+        h('button', { class: 'btn small', onclick: () => { updPostponed = st.version; showUpdate(st); } }, T.updPostpone),
+        h('button', { class: 'btn primary small', onclick: () => window.open('https://github.com/Yoni300/rq-calc/releases/latest') }, T.updDownload)));
+    return;
+  }
   if (st.status === 'downloading') {
     el.append(h('div', { class: 'upd-t' }, fmtT(T.updDownloading, { v: st.version || '' })),
       h('div', { class: 'upd-bar' }, h('i', { style: `width:${st.percent || 3}%` })));

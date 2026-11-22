@@ -4,6 +4,30 @@
 (() => {
   window.RQC_WEB = true;
 
+  // the first visit: the page in the visitor's language — Ukrainian for a Ukrainian browser, otherwise Russian (the game's
+  // language; search engines read the page in it too). The app's own default stays Ukrainian. A choice made later is kept.
+  try {
+    if (localStorage.getItem('rqc.lang') == null) {
+      const uk = (navigator.languages || [navigator.language]).some(l => /^uk\b/i.test(l || ''));
+      localStorage.setItem('rqc.lang', JSON.stringify(uk ? 'uk' : 'ru'));
+    }
+  } catch { /* storage blocked: the app's default */ }
+
+  // the tab title: the app sets a bare «RQ Tools»; on the site keep the full one search results show (tools/build-landing.mjs)
+  const TITLES = {
+    ru: 'RQ Tools — калькулятор, таймер боссов и база Royal Quest',
+    uk: 'RQ Tools — калькулятор, таймер босів і база Royal Quest',
+    en: 'RQ Tools — calculator, boss timer and database for Royal Quest',
+  };
+  const titleProp = Object.getOwnPropertyDescriptor(Document.prototype, 'title');
+  if (titleProp && titleProp.set) {
+    Object.defineProperty(document, 'title', {
+      configurable: true,
+      get: () => titleProp.get.call(document),
+      set: () => titleProp.set.call(document, TITLES[document.documentElement.lang] || TITLES.ru),
+    });
+  }
+
   // Visitors (GoatCounter, https://<GC>.goatcounter.com): no cookies, nothing personal; only on the website, never in the app.
   // A page view when the site opens; events: which tool is opened (tool-<id>) and «Скачать программу» (download-app).
   const GC = 'rqtools'; // the GoatCounter code (https://rqtools.goatcounter.com); empty = nothing is counted

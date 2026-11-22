@@ -1,6 +1,10 @@
 // "What's new" under the bell in the top bar (app/news.js). Newest first. Add an entry for every change players see.
 // at: ISO time in UTC (shown in each viewer's own time zone); text: ru / uk / en.
 window.RQ_CHANGELOG = [
+  { at: '2026-11-22T00:05Z',
+    ru: 'Появилась портативная версия: скачайте архив RQ-Calc-Portable со страницы релиза, распакуйте в любую папку и запустите RQ Calc.exe, установка не нужна. О новых версиях она сообщает сама, а скачать архив нужно вручную.',
+    uk: 'З’явилася портативна версія: скачайте архів RQ-Calc-Portable зі сторінки релізу, розпакуйте в будь-яку папку й запустіть RQ Calc.exe, встановлення не потрібне. Про нові версії вона повідомляє сама, а скачати архів треба вручну.',
+    en: 'There is now a portable version: download the RQ-Calc-Portable archive from the release page, unpack it into any folder and run RQ Calc.exe, no install needed. It tells you about new versions, and you download the archive by hand.' },
   { at: '2026-11-21T21:28Z',
     ru: 'Сканер карт умеет считать несколько карт вместе. Включите «Считать все карты вместе» в настройках сканера и нажимайте клавишу на каждой карте: в углу экрана будет общее число карт, знаков и золота, а в буфере обмена вся сумма. Последнюю карту можно убрать, счёт можно сбросить.',
     uk: 'Сканер карт уміє рахувати кілька карт разом. Увімкніть «Рахувати всі карти разом» у налаштуваннях сканера й натискайте клавішу на кожній карті: у кутку екрана буде загальна кількість карт, знаків і золота, а в буфері обміну вся сума. Останню карту можна прибрати, рахунок можна скинути.',

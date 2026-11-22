@@ -9,6 +9,9 @@ const trade = require('./trade'); // «Обмен»: values the game's trade win
 // it has its own profile (%APPDATA%\rq-calc-test, first filled with a copy of the main one) and reloads itself
 // when files change. RQC_USERDATA: separate profile for automated test runs.
 const IS_TEST = !app.isPackaged;
+// the portable copy (RQ-Calc-Portable-x.zip, unpacked anywhere) has no uninstaller next to its exe; it can't update
+// itself — the installer would put a second, installed copy — so it only says a new version is out
+const IS_PORTABLE = app.isPackaged && !fs.existsSync(path.join(path.dirname(process.execPath), `Uninstall ${app.getName()}.exe`));
 const mainProfile = path.join(app.getPath('appData'), 'rq-calc');
 const profile = process.env.RQC_USERDATA || (IS_TEST ? path.join(app.getPath('appData'), 'rq-calc-test') : mainProfile);
 if (IS_TEST && !process.env.RQC_USERDATA && !fs.existsSync(profile)) {
@@ -220,9 +223,9 @@ function setupUpdates() {
   if (!app.isPackaged || process.env.RQC_SCREENSHOT) return;
   let autoUpdater;
   try { ({ autoUpdater } = require('electron-updater')); } catch { return; }
-  autoUpdater.autoDownload = true;
-  autoUpdater.autoInstallOnAppQuit = true;
-  autoUpdater.on('update-available', info => sendUpdate({ status: 'downloading', version: info.version }));
+  autoUpdater.autoDownload = !IS_PORTABLE;
+  autoUpdater.autoInstallOnAppQuit = !IS_PORTABLE;
+  autoUpdater.on('update-available', info => sendUpdate({ status: IS_PORTABLE ? 'portable' : 'downloading', version: info.version }));
   autoUpdater.on('download-progress', p => sendUpdate({ status: 'downloading', version: updateState.version, percent: Math.round(p.percent) }));
   autoUpdater.on('update-downloaded', info => sendUpdate({ status: 'ready', version: info.version }));
   autoUpdater.on('error', err => {
@@ -233,7 +236,7 @@ function setupUpdates() {
   ipcMain.on('rqc-install-update', () => { quitting = true; autoUpdater.quitAndInstall(true, true); });
   let lastCheck = 0;
   const check = () => {
-    if (updateState.status === 'downloading' || updateState.status === 'ready') return;
+    if (updateState.status === 'downloading' || updateState.status === 'ready' || updateState.status === 'portable') return;
     lastCheck = Date.now();
     autoUpdater.checkForUpdates().catch(err => console.error('update check failed', err && err.message));
   };
