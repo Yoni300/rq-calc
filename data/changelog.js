@@ -1,6 +1,14 @@
 // "What's new" under the bell in the top bar (app/news.js). Newest first. Add an entry for every change players see.
 // at: ISO time in UTC (shown in each viewer's own time zone); text: ru / uk / en.
 window.RQ_CHANGELOG = [
+  { at: '2026-11-22T14:37Z',
+    ru: 'Таймер боссов сам переходит на следующий КД: когда время респа наступает, отсчёт начинается заново, а рядом видно номер круга: КД 2, КД 3, КД 4. Кнопка «Убили» начинает счёт с начала.',
+    uk: 'Таймер босів сам переходить на наступний КД: коли настає час респу, відлік починається знову, а поруч видно номер кола: КД 2, КД 3, КД 4. Кнопка «Вбили» починає рахунок спочатку.',
+    en: 'The boss timer now moves to the next cooldown by itself: when the respawn time comes, the countdown starts again and shows which round it is: CD 2, CD 3, CD 4. The «Killed» button starts the count over.' },
+  { at: '2026-11-22T00:53Z',
+    ru: 'В Базе у карт теперь написано, сколько знаков они дают при обмене: и в списке, и на странице карты.',
+    uk: 'У Базі в карт тепер написано, скільки знаків вони дають за обмін: і в списку, і на сторінці карти.',
+    en: 'Cards in the Base now show how many signs they give when exchanged, both in the list and on the card page.' },
   { at: '2026-11-22T00:05Z',
     ru: 'Появилась портативная версия: скачайте архив RQ-Calc-Portable со страницы релиза, распакуйте в любую папку и запустите RQ Calc.exe, установка не нужна. О новых версиях она сообщает сама, а скачать архив нужно вручную.',
     uk: 'З’явилася портативна версія: скачайте архів RQ-Calc-Portable зі сторінки релізу, розпакуйте в будь-яку папку й запустіть RQ Calc.exe, встановлення не потрібне. Про нові версії вона повідомляє сама, а скачати архів треба вручну.',

@@ -16,7 +16,7 @@ const MI_IMG = id => `../data/market-img/${id}.png`;
 const BASE_T = {
   uk: {
     title: 'База', sub: 'Монстри, локації з картами, НПС, завдання, рецепти, ресурси, предмети — і де що взяти',
-    toList: 'До списку', cats: { monster: 'Монстри', loc: 'Локації', npc: 'НПС', quest: 'Завдання', event: 'Івенти', recipe: 'Рецепти', res: 'Збір і рибалка', item: 'Спорядження', card: 'Карти', stamp: 'Печатки', good: 'Предмети', loot: 'Видобуток', thing: 'Предмет', ref: 'Довідник' },
+    cardSigns: 'Знаки за обмін', toList: 'До списку', cats: { monster: 'Монстри', loc: 'Локації', npc: 'НПС', quest: 'Завдання', event: 'Івенти', recipe: 'Рецепти', res: 'Збір і рибалка', item: 'Спорядження', card: 'Карти', stamp: 'Печатки', good: 'Предмети', loot: 'Видобуток', thing: 'Предмет', ref: 'Довідник' },
     goods: { all: 'Усі', fx: 'Ефект', box: 'Вміст', more: 'Додатково', gift: 'У подарунку', where: 'Де', gets: 'Виходить', needs: 'Потрібно', mons: 'Монстри', given: 'Видає', feat: 'Особливості', make: 'Створення' },
     search: 'Пошук по всій базі…', empty: 'Нічого не знайдено', pick: 'Оберіть щось у списку ліворуч', back: 'Назад', more: 'Показано {n} з {all} — уточніть пошук',
     lvl: 'рів.', level: 'Рівень', hp: 'Життя', race: 'Раса', element: 'Стихія', defense: 'Захист', exp: 'Досвід', mode: 'Атака',
@@ -48,7 +48,7 @@ const BASE_T = {
   },
   ru: {
     title: 'База', sub: 'Монстры, локации с картами, НПС, задания, рецепты, ресурсы, предметы — и где что взять',
-    toList: 'К списку', cats: { monster: 'Монстры', loc: 'Локации', npc: 'НПС', quest: 'Задания', event: 'Ивенты', recipe: 'Рецепты', res: 'Сбор и рыбалка', item: 'Снаряжение', card: 'Карты', stamp: 'Печати', good: 'Предметы', loot: 'Добыча', thing: 'Предмет', ref: 'Справочник' },
+    cardSigns: 'Знаки за обмен', toList: 'К списку', cats: { monster: 'Монстры', loc: 'Локации', npc: 'НПС', quest: 'Задания', event: 'Ивенты', recipe: 'Рецепты', res: 'Сбор и рыбалка', item: 'Снаряжение', card: 'Карты', stamp: 'Печати', good: 'Предметы', loot: 'Добыча', thing: 'Предмет', ref: 'Справочник' },
     goods: { all: 'Все', fx: 'Эффект', box: 'Содержимое', more: 'Дополнительно', gift: 'В подарке', where: 'Где', gets: 'Получается', needs: 'Требуется', mons: 'Монстры', given: 'Выдаёт', feat: 'Особенности', make: 'Создание' },
     search: 'Поиск по всей базе…', empty: 'Ничего не найдено', pick: 'Выберите что-нибудь в списке слева', back: 'Назад', more: 'Показано {n} из {all} — уточните поиск',
     lvl: 'ур.', level: 'Уровень', hp: 'Жизни', race: 'Раса', element: 'Стихия', defense: 'Защита', exp: 'Опыт', mode: 'Атака',
@@ -80,7 +80,7 @@ const BASE_T = {
   },
   en: {
     title: 'Database', sub: 'Monsters, locations with maps, NPCs, quests, recipes, resources, items — and where to get what',
-    toList: 'To the list', cats: { monster: 'Monsters', loc: 'Locations', npc: 'NPCs', quest: 'Quests', event: 'Events', recipe: 'Recipes', res: 'Gathering & fishing', item: 'Gear', card: 'Cards', stamp: 'Stamps', good: 'Items', loot: 'Loot', thing: 'Item', ref: 'Reference' },
+    cardSigns: 'Signs when exchanged', toList: 'To the list', cats: { monster: 'Monsters', loc: 'Locations', npc: 'NPCs', quest: 'Quests', event: 'Events', recipe: 'Recipes', res: 'Gathering & fishing', item: 'Gear', card: 'Cards', stamp: 'Stamps', good: 'Items', loot: 'Loot', thing: 'Item', ref: 'Reference' },
     goods: { all: 'All', fx: 'Effect', box: 'Contents', more: 'Also', gift: 'In the gift', where: 'Where', gets: 'Gives', needs: 'Needs', mons: 'Monsters', given: 'Given by', feat: 'Features', make: 'Crafting' },
     search: 'Search the whole database…', empty: 'Nothing found', pick: 'Pick something in the list on the left', back: 'Back', more: 'Showing {n} of {all} — narrow the search',
     lvl: 'lvl', level: 'Level', hp: 'Health', race: 'Race', element: 'Element', defense: 'Defence', exp: 'Experience', mode: 'Attack',
@@ -119,6 +119,16 @@ BS.sub = bget2('baseSub', '');
 
 // ---------- the index (built on first use) ----------
 const bnorm = s => String(s || '').toLowerCase().replace(/ё/g, 'е').replace(/\s+/g, ' ').trim();
+// the «Знаки» a card gives when exchanged (data/card-signs.js, the same list the card scanner reads)
+// the calculator and the wiki spell some cards differently: «Гоблина мародера» / «Гоблина-мародёра», «Феллура» / «Фелура»
+const signKey = s => bnorm(s).replace(/[-‐–—]/g, ' ').replace(/\s+/g, ' ');
+const SIGN_ALIAS = { 'карта воспитаницы соло': 'карта воспитанницы соло', 'карта воспитаника соло': 'карта воспитанника соло', 'карта феллура': 'карта фелура' };
+let cardSignMap = null;
+const cardSignsOf = name => {
+  cardSignMap ||= new Map(Object.entries(window.RQ_CARD_SIGNS || {}).map(([n, s]) => [signKey(n), s]));
+  const k = signKey(name);
+  return cardSignMap.get(SIGN_ALIAS[k] || k);
+};
 // "Ледяная коса к.вд2сл", "Брюки ловца 1 слот", "Перчатки лучника 1СЛ", "Кинжал новичка ЭОГ" → the item itself
 const bstrip = s => String(s || '').replace(/\s+\d+\s+слот(а|ов)?\s*$/i, '').replace(/\s*\d\s*сл\.?$/i, '').replace(/\s+к\.\s*\S+$/i, '').replace(/\s+Э[А-ЯЁ]{1,2}\d?$/, '').replace(/\s*\(Класс [A-ZА-Я]\)$/, '').trim();
 let BX = null;
@@ -266,7 +276,7 @@ function entryOf(kind, x) {
     case 'monster': return { kind, key: x.name, name: x.name, icon: x.img ? `../data/monsters/${x.img}` : null, round: true,
       meta: [x.level != null ? `${t.lvl} ${x.level}` : '', x.race, /босс/i.test(x.type || '') ? t.boss : /элит/i.test(x.type || '') ? t.elite : ''].filter(Boolean).join(' · ') };
     case 'item': return { kind, key: x.id, name: x.name, icon: IMG(x.imageId), meta: `${ctx.eqTypes.get(x.typeId)?.name || ''} · ${t.lvl} ${x.level}` };
-    case 'card': return { kind, key: x.id, name: x.name, icon: IMG(x.imageId), meta: cardTypeLabel(x) };
+    case 'card': { const s = cardSignsOf(x.name); return { kind, key: x.id, name: x.name, icon: IMG(x.imageId), meta: cardTypeLabel(x), tail: s == null ? '' : `${s} ${signsWord(s)}` }; }
     case 'stamp': return { kind, key: x.id, name: `${T.stampWord} ${x.name}`, icon: IMG(x.variants[x.variants.length - 1]?.color?.Image_Id), meta: `${x.variants.length} · ${t.variants.toLowerCase()}` };
     case 'loc': return { kind, key: x.name, name: x.name, icon: x.map ? `../data/maps/${x.map}` : null, cover: true, meta: [(x.type || [])[0], x.min != null ? `${t.lvl} ${x.min === x.max ? x.min : `${x.min}–${x.max}`}` : ''].filter(Boolean).join(' · ') };
     case 'loot': return { kind, key: x.id, name: x.name, icon: MI_IMG(x.id), meta: x.type || '' };
@@ -380,7 +390,7 @@ function baseRow(e, showCat, onclick) {
   const on = BS.sel && BS.sel.kind === e.kind && BS.sel.key === e.key;
   const row = h('div', { class: 'bs-row' + (on ? ' on' : ''), onclick: onclick || (() => openBase(e.kind, e.key, { push: false })) },
     e.icon ? h('img', { class: 'bs-ic' + (e.round ? ' round' : '') + (e.cover ? ' cover' : ''), src: e.icon, loading: 'lazy', decoding: 'sync', draggable: 'false', onerror: hideImg }) : h('span', { class: 'bs-ic ph' }, iconEl(ph(e.kind))),
-    h('div', { class: 'bs-name' }, e.name, h('small', null, (showCat ? BTX().cats[e.kind] + ' · ' : '') + (e.meta || ''))));
+    h('div', { class: 'bs-name' }, e.name, h('small', null, (showCat ? BTX().cats[e.kind] + ' · ' : '') + [e.meta, e.tail].filter(Boolean).join(' · '))));
   row._bs = e;
   return row;
 }
@@ -898,6 +908,7 @@ function drawBaseDetail() {
       : h('div', { class: 'hint' }, fmtT(t.cantEquip, { cls: ctx.classes.get(ch.classId)?.name || '' })));
     el.append(...whereBlocks(x.name));
   } else if (e.kind === 'card') {
+    if (cardSignsOf(x.name) != null) el.append(bfacts([[t.cardSigns, cardSignsOf(x.name)]]));
     el.append(h('div', { class: 'bs-bonuses' }, x.bonuses.map(cb => h('div', null, bonusText({ typeId: cb.typeId, vars: cardBonusVarsForDisplay(cb) })))));
     const where = [...(x.slotIds || []).map(id => ctx.slots.get(id)?.name), ...(x.typeIds || []).map(id => ctx.eqTypes.get(id)?.name)].filter(Boolean);
     if (where.length) el.append(bsec(t.slots, chips(where, w => h('span', { class: 'bs-chip' }, w))));

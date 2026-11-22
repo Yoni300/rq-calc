@@ -19,7 +19,8 @@ const BT = {
   warned: {},                               // key -> { t: kill time, kind: 'soon' | 'up' } already announced
   rows: new Map(),                          // key -> elements updated every second
 };
-const STALE = 24 * 3600e3;                  // a respawn this old says nothing any more
+const STALE = 24 * 3600e3;                  // a timer nobody renewed this long after its first respawn says nothing any more
+const UP_FRESH = 2 * 60e3;                  // a respawn older than this is not announced
 
 const kills = () => (BT.room ? BT.remote : BT.local);
 const respOf = b => BT.resp[b.key] || b.resp;   // minutes; a player's own time can have seconds (95.5 = 1:35:30)
@@ -38,14 +39,17 @@ function fmtLeft(ms) {
 // "12 хв тому", or "щойно" for the first minute (without "тому")
 const fmtAgo = ms => (ms < 60e3 ? T.bossNow.toLowerCase() : fmtT(T.bossAgoD, { d: fmtResp(Math.floor(ms / 60e3)) }));
 
-// state of one timer: none (unknown) / wait (counting down) / up (should be alive)
+// state of one timer: none (unknown) / wait (counting down). When the respawn time comes the countdown starts over by
+// itself: cd = which cooldown runs since the kill (1, then 2, 3, 4…). It comes from the kill time alone, so everyone
+// in a group sees the same number and the server stores nothing new.
 function bossState(b, now = Date.now()) {
   const k = kills()[b.key];
   if (!k) return { s: 'none' };
-  const spawn = k.t + respMs(b);
-  if (now < spawn) return { s: 'wait', k, spawn, left: spawn - now, part: 1 - (spawn - now) / respMs(b) };
-  if (now - spawn < STALE) return { s: 'up', k, spawn };
-  return { s: 'none' };
+  const resp = respMs(b), first = k.t + resp;
+  if (now - first >= STALE) return { s: 'none' };
+  const cd = now < first ? 1 : Math.floor((now - k.t) / resp) + 1;
+  const spawn = k.t + cd * resp;
+  return { s: 'wait', k, cd, spawn, last: cd > 1 ? spawn - resp : null, left: spawn - now, part: 1 - (spawn - now) / resp };
 }
 
 // ---------- server ----------
@@ -215,12 +219,13 @@ function claimAlert(id) {
   return true;
 }
 // one message per alert: the system notification, or (when it is not allowed) a message inside the page
-function alertBoss(b, kind, left, test = false) {
+function alertBoss(b, kind, left, test = false, cd = 1) {
   const title = kind === 'up' ? fmtT(T.bossUpN, { n: b.name }) : fmtT(T.bossSoonN, { n: b.name, m: Math.max(1, Math.ceil(left / 60e3)) });
+  const sub = [cd > 1 ? fmtT(T.bossCd, { n: cd }) : '', b.loc].filter(Boolean).join(' · '); // the number first: a long location gets cut
   beep(kind);
   // the app: its own message in the screen corner, above the game (main.js, app/alert.html)
   if (window.rqcApp && window.rqcApp.bossAlert && SETTINGS.popup) {
-    window.rqcApp.bossAlert({ key: test ? 'test' : b.key, kind, title, sub: b.loc || '', img: b.img ? `../data/bosses/${b.img}` : '',
+    window.rqcApp.bossAlert({ key: test ? 'test' : b.key, kind, title, sub, img: b.img ? `../data/bosses/${b.img}` : '',
       corner: SETTINGS.corner, ms: (POPUP_MS[SETTINGS.popupTime] || POPUP_MS.normal)[kind] });
     return;
   }
@@ -228,7 +233,7 @@ function alertBoss(b, kind, left, test = false) {
   try {
     if (window.Notification && Notification.permission === 'granted') {
       // the same tag replaces an older message about the same boss instead of adding another one
-      const n = new Notification(title, { body: b.loc || '', tag: test ? 'rqc-test' : `rqc-${b.key}`, renotify: true, silent: true,
+      const n = new Notification(title, { body: sub, tag: test ? 'rqc-test' : `rqc-${b.key}`, renotify: true, silent: true,
         icon: b.img ? `../data/bosses/${b.img}` : undefined });
       n.onclick = () => { window.focus(); if (tab !== 'bosses') openBosses(); n.close(); };
       shown = true;
@@ -259,13 +264,14 @@ function checkAlerts(now) {
     if (onlyFav && !BT.fav.has(b.name)) continue;
     const st = bossState(b, now);
     if (st.s === 'none') continue;
-    const w = BT.warned[b.key], done = w && w.t === st.k.t ? w.kind : null; // a new kill starts over
-    if (st.s === 'wait' && soon && st.left <= soon && !done) {
-      BT.warned[b.key] = { t: st.k.t, kind: 'soon' };
-      if (claimAlert(`${b.key}|${st.k.t}|soon`)) alertBoss(b, 'soon', st.left);
-    } else if (st.s === 'up' && now - st.spawn < 2 * 60e3 && done !== 'up') {
-      BT.warned[b.key] = { t: st.k.t, kind: 'up' };
-      if (SETTINGS.alertUp && claimAlert(`${b.key}|${st.k.t}|up`)) alertBoss(b, 'up');
+    let w = BT.warned[b.key];
+    if (!w || w.t !== st.k.t) w = BT.warned[b.key] = { t: st.k.t, soon: 0, up: 1 }; // a new kill starts over
+    if (st.cd > w.up) { // the countdown has just moved on: the cooldown before it ended with a respawn
+      w.up = st.cd;
+      if (now - st.last < UP_FRESH && SETTINGS.alertUp && claimAlert(`${b.key}|${st.k.t}|${st.cd - 1}|up`)) alertBoss(b, 'up', 0, false, st.cd - 1);
+    } else if (soon && st.left <= soon && w.soon < st.cd && (st.cd === 1 || soon < respMs(b))) { // a warning longer than the cooldown would ring all the time
+      w.soon = st.cd;
+      if (claimAlert(`${b.key}|${st.k.t}|${st.cd}|soon`)) alertBoss(b, 'soon', st.left, false, st.cd);
     }
   }
 }
@@ -274,7 +280,9 @@ function primeAlerts() {
   const now = Date.now();
   for (const b of BOSSES) {
     const st = bossState(b, now);
-    if (st.s === 'up' && now - st.spawn >= 2 * 60e3) BT.warned[b.key] = { t: st.k.t, kind: 'up' };
+    if (st.s !== 'wait' || st.cd === 1 || now - st.last < UP_FRESH) continue;
+    const w = BT.warned[b.key];
+    BT.warned[b.key] = { t: st.k.t, soon: w && w.t === st.k.t ? w.soon : 0, up: st.cd };
   }
 }
 
@@ -321,9 +329,9 @@ function drawBossList() {
   const items = BOSSES.filter(b => (BT.filter === 'all' || (BT.filter === 'fav' ? BT.fav.has(b.name) : (BT.filter === 'elite') === b.elite))
     && matches(BT.q, b.name, b.loc))
     .map(b => ({ b, st: bossState(b, now) }));
-  const rank = { wait: 0, up: 1, none: 2 };
+  const rank = { wait: 0, none: 1 };
   items.sort((x, y) => rank[x.st.s] - rank[y.st.s]
-    || (x.st.s === 'wait' ? x.st.spawn - y.st.spawn : x.st.s === 'up' ? y.st.spawn - x.st.spawn : 0)
+    || (x.st.s === 'wait' ? x.st.spawn - y.st.spawn : 0)
     || x.b.level - y.b.level || x.b.name.localeCompare(y.b.name));
   if (!items.length) { list.append(h('div', { class: 'hint pb-msg' }, BT.filter === 'fav' && !BT.fav.size ? T.bossNoFav : T.bossEmpty)); return; }
   for (const { b, st } of items) list.append(bossRow(b, st));
@@ -331,7 +339,8 @@ function drawBossList() {
 
 function bossRow(b, st) {
   const fav = BT.fav.has(b.name);
-  const big = h('div', { class: 'bt-big' }), sub = h('div', { class: 'bt-sub' }), bar = h('i');
+  const big = h('span'), sub = h('div', { class: 'bt-sub' }), bar = h('i');
+  const cdMark = st.cd > 1 ? h('span', { class: 'bt-cd', title: fmtT(T.bossCdTip, { t: clock(st.last) }) }, fmtT(T.bossCd, { n: st.cd })) : null;
   const row = h('div', { class: 'bt-row ' + st.s + (b.elite ? ' elite' : '') },
     h('div', { class: 'bt-pic' }, b.img ? h('img', { src: `../data/bosses/${b.img}`, alt: '', draggable: 'false' }) : null),
     h('div', { class: 'bt-info' },
@@ -344,13 +353,13 @@ function bossRow(b, st) {
       h('div', { class: 'bt-meta', title: b.loc }, `${T.lvl} ${b.level} · ${b.elite ? T.bossElite : T.bossBoss} · ${b.loc}`),
       h('button', { class: 'bt-resp' + (BT.resp[b.key] ? ' custom' : ''), title: fmtT(T.bossResp, { d: fmtResp(respOf(b)) }), onclick: () => editResp(b) },
         '⟳ ', b.approx && !BT.resp[b.key] ? '≈ ' : '', fmtResp(respOf(b)))),
-    h('div', { class: 'bt-state' }, big, sub),
+    h('div', { class: 'bt-state' }, h('div', { class: 'bt-big' }, cdMark, big), sub),
     h('div', { class: 'bt-act' },
       h('button', { class: 'btn small primary bt-kill', title: T.bossKilledTip, onclick: () => { askNotify(); setKill(b, Date.now()); } }, '☠ ' + T.bossKilled),
       h('button', { class: 'btn small', title: T.bossEdit, onclick: () => editKill(b) }, '✎'),
       st.k ? h('button', { class: 'btn small ghost', title: T.bossClear, onclick: () => setKill(b, null) }, '✕') : null),
     h('div', { class: 'bt-prog' }, bar));
-  BT.rows.set(b.key, { b, s: st.s, big, sub, bar });
+  BT.rows.set(b.key, { b, s: st.s, cd: st.cd, big, sub, bar });
   paintRow(BT.rows.get(b.key), st, Date.now());
   return row;
 }
@@ -361,10 +370,6 @@ function paintRow(r, st, now) {
     r.big.textContent = fmtLeft(st.left);
     r.sub.textContent = fmtT(T.bossAt, { t: clock(st.spawn) }) + by;
     r.bar.style.width = (st.part * 100).toFixed(2) + '%';
-  } else if (st.s === 'up') {
-    r.big.textContent = T.bossUp;
-    r.sub.textContent = fmtT(T.bossUpSince, { t: clock(st.spawn), a: fmtAgo(now - st.spawn) }) + by;
-    r.bar.style.width = '100%';
   } else {
     r.big.textContent = T.bossUnknown;
     r.sub.textContent = T.bossUnknownSub;
@@ -381,7 +386,7 @@ setInterval(() => {
     let moved = false;
     for (const r of BT.rows.values()) {
       const st = bossState(r.b, now);
-      if (st.s !== r.s) { moved = true; break; }
+      if (st.s !== r.s || st.cd !== r.cd) { moved = true; break; } // a new cooldown: its place in the list changes too
       paintRow(r, st, now);
     }
     if (moved) drawBossList();
