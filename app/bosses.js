@@ -5,7 +5,8 @@
 
 // one entry per boss and location: Дуан Безжалостный lives in four places, each with its own timer
 const BOSSES = (window.RQ_BOSSES || []).flatMap(b => b.spots.map(s => ({
-  key: b.name + ' | ' + s.loc, name: b.name, level: b.level, elite: b.type !== 'Босс', loc: s.loc, resp: s.resp, approx: !!s.approx, img: b.img,
+  key: b.name + ' | ' + s.loc, name: b.name, level: b.level, elite: b.type !== 'Босс' && b.type !== 'НПС', npc: b.type === 'НПС', after: b.after, hold: !!b.hold,
+  loc: s.loc, resp: s.resp, approx: !!s.approx, img: b.img,
 })));
 // this file loads before app.js (which may draw the boss tab right away), so it reads its settings itself
 const bget = (k, def) => { try { const v = localStorage.getItem('rqc.' + k); return v == null ? def : JSON.parse(v); } catch { return def; } };
@@ -47,6 +48,7 @@ function bossState(b, now = Date.now()) {
   if (!k) return { s: 'none' };
   const resp = respMs(b), first = k.t + resp;
   if (now - first >= STALE) return { s: 'none' };
+  if (b.hold && now >= first) return { s: 'up', k, cd: 2, spawn: first, last: first }; // Занка stays until the springs are collected: no new round
   const cd = now < first ? 1 : Math.floor((now - k.t) / resp) + 1;
   const spawn = k.t + cd * resp;
   return { s: 'wait', k, cd, spawn, last: cd > 1 ? spawn - resp : null, left: spawn - now, part: 1 - (spawn - now) / resp };
@@ -144,7 +146,7 @@ function editKill(b) {
   const time = h('input', { type: 'time', step: 1, class: 'inp', value: [base.getHours(), base.getMinutes(), base.getSeconds()].map(x => String(x).padStart(2, '0')).join(':') });
   let close;
   const ago = m => { close(); setKill(b, Date.now() - m * 60e3); };
-  close = bossDialog(fmtT(T.bossKillTitle, { n: b.name }), h('div', { class: 'bt-dlg-body' },
+  close = bossDialog(fmtT(T.bossKillTitle, { n: b.after || b.name }), h('div', { class: 'bt-dlg-body' },
     h('div', { class: 'bt-quick' }, [0, 5, 10, 15, 30, 60, 90, 120].map(m =>
       h('button', { class: 'btn small', onclick: () => ago(m) }, m ? fmtT(T.bossAgo, { m }) : T.bossNow))),
     h('label', { class: 'bt-lbl' }, T.bossTimeLbl, time)), () => {
@@ -280,7 +282,7 @@ function primeAlerts() {
   const now = Date.now();
   for (const b of BOSSES) {
     const st = bossState(b, now);
-    if (st.s !== 'wait' || st.cd === 1 || now - st.last < UP_FRESH) continue;
+    if (st.s === 'none' || st.cd === 1 || now - st.last < UP_FRESH) continue;
     const w = BT.warned[b.key];
     BT.warned[b.key] = { t: st.k.t, soon: w && w.t === st.k.t ? w.soon : 0, up: st.cd };
   }
@@ -329,9 +331,9 @@ function drawBossList() {
   const items = BOSSES.filter(b => (BT.filter === 'all' || (BT.filter === 'fav' ? BT.fav.has(b.name) : (BT.filter === 'elite') === b.elite))
     && matches(BT.q, b.name, b.loc))
     .map(b => ({ b, st: bossState(b, now) }));
-  const rank = { wait: 0, none: 1 };
+  const rank = { wait: 0, up: 1, none: 2 };
   items.sort((x, y) => rank[x.st.s] - rank[y.st.s]
-    || (x.st.s === 'wait' ? x.st.spawn - y.st.spawn : 0)
+    || (x.st.s === 'wait' ? x.st.spawn - y.st.spawn : x.st.s === 'up' ? y.st.spawn - x.st.spawn : 0)
     || x.b.level - y.b.level || x.b.name.localeCompare(y.b.name));
   if (!items.length) { list.append(h('div', { class: 'hint pb-msg' }, BT.filter === 'fav' && !BT.fav.size ? T.bossNoFav : T.bossEmpty)); return; }
   for (const { b, st } of items) list.append(bossRow(b, st));
@@ -340,7 +342,7 @@ function drawBossList() {
 function bossRow(b, st) {
   const fav = BT.fav.has(b.name);
   const big = h('span'), sub = h('div', { class: 'bt-sub' }), bar = h('i');
-  const cdMark = st.cd > 1 ? h('span', { class: 'bt-cd', title: fmtT(T.bossCdTip, { t: clock(st.last) }) }, fmtT(T.bossCd, { n: st.cd })) : null;
+  const cdMark = st.s === 'wait' && st.cd > 1 ? h('span', { class: 'bt-cd', title: fmtT(T.bossCdTip, { t: clock(st.last) }) }, fmtT(T.bossCd, { n: st.cd })) : null;
   const row = h('div', { class: 'bt-row ' + st.s + (b.elite ? ' elite' : '') },
     h('div', { class: 'bt-pic' }, b.img ? h('img', { src: `../data/bosses/${b.img}`, alt: '', draggable: 'false' }) : null),
     h('div', { class: 'bt-info' },
@@ -350,12 +352,13 @@ function bossRow(b, st) {
           store.set('bossFav', [...BT.fav]); drawBossList();
         } }, fav ? '★' : '☆'),
         h('span', null, b.name)),
-      h('div', { class: 'bt-meta', title: b.loc }, `${T.lvl} ${b.level} · ${b.elite ? T.bossElite : T.bossBoss} · ${b.loc}`),
+      h('div', { class: 'bt-meta', title: b.loc }, b.npc ? `${T.bossNpc} · ${b.loc}` : `${T.lvl} ${b.level} · ${b.elite ? T.bossElite : T.bossBoss} · ${b.loc}`),
       h('button', { class: 'bt-resp' + (BT.resp[b.key] ? ' custom' : ''), title: fmtT(T.bossResp, { d: fmtResp(respOf(b)) }), onclick: () => editResp(b) },
-        '⟳ ', b.approx && !BT.resp[b.key] ? '≈ ' : '', fmtResp(respOf(b)))),
+        '⟳ ', b.approx && !BT.resp[b.key] ? '≈ ' : '', fmtResp(respOf(b)), b.after ? ` · ${T.bossSpringMeta}` : '')),
     h('div', { class: 'bt-state' }, h('div', { class: 'bt-big' }, cdMark, big), sub),
     h('div', { class: 'bt-act' },
-      h('button', { class: 'btn small primary bt-kill', title: T.bossKilledTip, onclick: () => { askNotify(); setKill(b, Date.now()); } }, '☠ ' + T.bossKilled),
+      h('button', { class: 'btn small primary bt-kill', title: b.after ? fmtT(T.bossSpringTip, { d: fmtResp(respOf(b)) }) : T.bossKilledTip,
+        onclick: () => { askNotify(); setKill(b, Date.now()); } }, '☠ ' + (b.after || T.bossKilled)),
       h('button', { class: 'btn small', title: T.bossEdit, onclick: () => editKill(b) }, '✎'),
       st.k ? h('button', { class: 'btn small ghost', title: T.bossClear, onclick: () => setKill(b, null) }, '✕') : null),
     h('div', { class: 'bt-prog' }, bar));
@@ -370,6 +373,10 @@ function paintRow(r, st, now) {
     r.big.textContent = fmtLeft(st.left);
     r.sub.textContent = fmtT(T.bossAt, { t: clock(st.spawn) }) + by;
     r.bar.style.width = (st.part * 100).toFixed(2) + '%';
+  } else if (st.s === 'up') {
+    r.big.textContent = T.bossUp;
+    r.sub.textContent = fmtT(T.bossUpSince, { t: clock(st.spawn), a: fmtAgo(now - st.spawn) }) + by;
+    r.bar.style.width = '100%';
   } else {
     r.big.textContent = T.bossUnknown;
     r.sub.textContent = T.bossUnknownSub;

@@ -61,6 +61,9 @@ for (const p of pages) {
   if (!spots.length) continue;
   bosses.push({ name, level: parseInt(f['Уровень'], 10) || 0, type: f['Тип'], spots });
 }
+// not a monster, so not in the pages above. Занка (wiki: page «Занка», update 1.2.103) comes back 8 h 5 min after Пружинка is
+// killed and stays until the springs are collected: hold = the timer does not start over by itself
+bosses.push({ name: 'Занка', level: 0, type: 'НПС', after: 'Пружинка', hold: true, spots: [{ loc: 'Макдар', resp: 485 }] });
 bosses.sort((a, b) => a.level - b.level || a.name.localeCompare(b.name, 'ru'));
 
 // icons: the wiki's "Портрет <name>.png" (small portrait), otherwise "Монстр <name>.png" → data/bosses/<n>.png
