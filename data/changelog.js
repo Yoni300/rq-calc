@@ -1,6 +1,10 @@
 // "What's new" under the bell in the top bar (app/news.js). Newest first. Add an entry for every change players see.
 // at: ISO time in UTC (shown in each viewer's own time zone); text: ru / uk / en.
 window.RQ_CHANGELOG = [
+  { at: '2026-11-24T20:16Z',
+    ru: 'Статус игры в верхней панели: зелёная точка и число игроков в игре по Steam. Нажмите на неё, и откроется онлайн за сутки. Если игру закрыли на техработы или онлайн резко упал (похоже, сервер упал), под панелью появится полоска.',
+    uk: 'Статус гри у верхній панелі: зелена крапка й кількість гравців у грі за Steam. Натисніть на неї, і відкриється онлайн за добу. Якщо гру закрили на техроботи або онлайн різко впав (схоже, сервер упав), під панеллю з\'явиться смужка.',
+    en: 'Game status in the top bar: a green dot and the number of players in the game on Steam. Click it to see the last 24 hours. If the game is closed for maintenance or the number of players suddenly drops (looks like the server is down), a strip appears under the bar.' },
   { at: '2026-11-24T19:54Z',
     ru: 'Английская версия теперь показывает названия из игры по-английски: монстров, предметы, карты, задания, локации, НПС и боссов, как в английском клиенте Royal Quest. Поиск понимает оба языка, а русское название видно в подсказке. Описания с вики пока на русском.',
     uk: 'Англійська версія тепер показує назви з гри англійською: монстрів, предмети, карти, завдання, локації, НПС і босів, як в англійському клієнті Royal Quest. Пошук розуміє обидві мови, а російську назву видно в підказці. Описи з вікі поки російською.',

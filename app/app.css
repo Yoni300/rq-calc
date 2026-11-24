@@ -1077,6 +1077,52 @@ body.tool-timer .calc-only { display: none !important; }
 .maint-bar .mb-txt { flex: 1; min-width: 0; }
 .maint-bar .mb-x { background: none; border: 0; color: inherit; opacity: .7; cursor: pointer; font-size: 14px; padding: 2px 6px; }
 .maint-bar .mb-x:hover { opacity: 1; }
+
+/* game status (app/server-status.js): a dot + players online in the top bar, a strip for maintenance / a sudden drop */
+.server-btn { display: inline-flex; align-items: center; gap: 6px; font-variant-numeric: tabular-nums; }
+.server-btn .srv-w { color: var(--muted); font-weight: 400; }
+.srv-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; background: var(--dim); }
+.st-ok .srv-dot { background: var(--up); box-shadow: 0 0 6px rgba(134, 212, 109, .6); }
+.st-maint .srv-dot { background: #f0a040; box-shadow: 0 0 6px rgba(240, 160, 64, .7); }
+.st-drop .srv-dot { background: var(--bad); box-shadow: 0 0 6px rgba(236, 107, 94, .8); animation: srv-blink 1.2s ease-in-out infinite; }
+@keyframes srv-blink { 50% { opacity: .35; } }
+.server-btn.st-drop { border-color: rgba(236, 107, 94, .6); }
+.server-btn.st-maint { border-color: rgba(240, 160, 64, .55); }
+.server-bar.drop { background: linear-gradient(90deg, rgba(150, 30, 30, .6), rgba(90, 20, 20, .35)); border-bottom-color: rgba(236, 107, 94, .5); color: #ffd9d4; }
+.server-menu { width: min(380px, calc(100vw - 30px)); padding-bottom: 12px; }
+.srv-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 14px 4px; }
+.srv-state { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; }
+.srv-state.st-ok { color: var(--up); } .srv-state.st-maint { color: #f0a040; } .srv-state.st-drop { color: var(--bad); } .srv-state.st-unknown { color: var(--muted); }
+.srv-ago { color: var(--dim); font-size: 11.5px; }
+.srv-warn { margin: 6px 14px 0; padding: 6px 10px; border-radius: 6px; background: rgba(236, 107, 94, .12); color: #ffcfc8; font-size: 12.5px; }
+.srv-big { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 10px; padding: 8px 14px 2px; }
+.srv-big b { font-size: 26px; color: var(--gold); font-variant-numeric: tabular-nums; }
+.srv-big span { color: var(--muted); font-size: 12.5px; }
+.srv-cap { display: flex; justify-content: space-between; padding: 10px 14px 4px; color: var(--dim); font-size: 11.5px; text-transform: uppercase; letter-spacing: .04em; }
+.srv-mk { display: inline-flex; align-items: center; gap: 5px; text-transform: none; letter-spacing: 0; }
+.srv-mk::before { content: ''; width: 10px; height: 10px; border-radius: 2px; background: rgba(240, 160, 64, .35); }
+.srv-chart-box { padding: 0 10px; }
+.srv-empty { margin: 4px 14px 0; padding: 18px 12px; border: 1px dashed var(--line-2); border-radius: 6px; color: var(--dim); font-size: 12px; text-align: center; }
+.srv-chart { display: block; width: 100%; height: auto; }
+.srv-chart .srv-ln { fill: none; stroke: var(--gold); stroke-width: 1.6; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.srv-chart .srv-ax { stroke: var(--line-2); stroke-dasharray: 3 3; vector-effect: non-scaling-stroke; }
+.srv-chart .srv-m { fill: rgba(240, 160, 64, .3); }
+.srv-chart .srv-tx { fill: var(--dim); font-size: 10px; font-family: var(--f-body); }
+.srv-note { padding: 10px 14px 0; color: var(--dim); font-size: 11.5px; line-height: 1.45; }
+.server-btn { padding-left: 9px; padding-right: 9px; }
+/* the top bar has no room to spare: below 1700 px the forum / news buttons lose their words and the status its «online»,
+   below 1440 px the status is only the coloured dot (the number is in its tooltip and menu) */
+@media (max-width: 1699px) {
+  .server-btn .srv-w, .forum-btn span, .steam-btn span:not(.news-badge) { display: none; }
+  .steam-btn, .forum-btn { padding-left: 8px; padding-right: 8px; }
+}
+@media (max-width: 1439px) {
+  .server-btn .srv-n { display: none; }
+  .server-btn { padding-left: 8px; padding-right: 8px; }
+  .build-name { min-width: 80px; }
+  .top { gap: 6px; }
+  .lang button { padding-left: 5px; padding-right: 5px; }
+}
 .sn-pic { display: block; max-width: 100%; height: auto; border-radius: 6px; margin: 8px 0; }
 /* other currencies (Знаки крови, Алхимические руны…) — the wiki's icons after the number */
 .cur { width: 1.5em; height: 1.5em; margin-left: .25em; vertical-align: -.42em; }

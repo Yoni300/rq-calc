@@ -1,4 +1,4 @@
-const { app, BrowserWindow, shell, ipcMain, screen, Tray, Menu, globalShortcut, clipboard } = require('electron');
+const { app, BrowserWindow, shell, ipcMain, screen, Tray, Menu, globalShortcut, clipboard, net } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const cardScan = require('./card-scan');
@@ -200,6 +200,31 @@ ipcMain.handle('rqc-trade-known', (_e, q) => trade.searchKnown(q));
 ipcMain.handle('rqc-trade-history', (_e, f) => trade.history(f));
 ipcMain.handle('rqc-trade-delete', (_e, id) => { trade.deleteTrade(id); return true; });
 app.on('will-quit', () => { stats.stop(); trade.stop(); globalShortcut.unregisterAll(); cardScan.stop(); });
+
+// ---------- server status (app/server-status.js): players in the game from Steam + the game's maintenance switch ----------
+// A web page can't ask either of them (no CORS), the app can: every minute, while the page is open. The site gets the same
+// from server-status.json (tools/update-server-status.mjs, every 5 minutes). → 'rqc-server' { at, online, canRun, statuses }
+const STEAM_ONLINE_URL = 'https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?appid=2962300';
+const GAME_STATUS_URL = 'https://bffweb.baseplatform.online/api/servicecontrol/service-status/rq';
+let serverLast = null, serverTimer = null;
+async function askJson(url, headers) {
+  const r = await net.fetch(url + (url.includes('?') ? '&' : '?') + '_=' + Date.now(), { headers, cache: 'no-store', signal: AbortSignal.timeout(15000) });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  return r.json();
+}
+async function checkServer() {
+  const [steam, game] = await Promise.allSettled([askJson(STEAM_ONLINE_URL), askJson(GAME_STATUS_URL, { 'X-Application': 'SilentLauncher' })]);
+  const s = steam.status === 'fulfilled' && steam.value.response, g = game.status === 'fulfilled' && game.value.data;
+  const online = s && s.result === 1 && Number.isFinite(s.player_count) ? s.player_count : null;
+  const canRun = g && typeof g.canRun === 'boolean' ? g.canRun : null;
+  if (online == null && canRun == null) return; // no internet: the page keeps what it has and says how old it is
+  serverLast = { at: Math.floor(Date.now() / 1000), online, canRun, statuses: (g && Array.isArray(g.statuses) && g.statuses) || [] };
+  if (win && !win.isDestroyed()) win.webContents.send('rqc-server', serverLast);
+}
+ipcMain.handle('rqc-server', () => {
+  if (!serverTimer) { checkServer(); serverTimer = setInterval(checkServer, 60 * 1000); }
+  return serverLast;
+});
 
 // TEST client: reload the page when the app, engine or data change (main.js/preload.js need a restart)
 function watchForChanges() {

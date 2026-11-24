@@ -24,6 +24,11 @@
     <button id="btnCode" class="btn calc-only"></button>
     <button id="btnPublic" class="btn public calc-only"></button>
     <div class="spacer"></div>
+    <!-- game status: players online in Steam + maintenance (app/server-status.js) -->
+    <div class="dropdown">
+      <button id="btnServer" class="btn server-btn"></button>
+      <div id="serverMenu" class="menu news-menu server-menu" hidden></div>
+    </div>
     <button id="btnDownload" class="btn dl-btn" hidden></button>
     <div class="lang" id="langSwitch"></div>
     <a id="btnForum" class="btn forum-btn" href="https://royalquest.net/" target="_blank" rel="noopener"><img src="forum-icon.png" alt="" draggable="false"><span></span></a>
@@ -37,6 +42,8 @@
   </header>
   <!-- maintenance soon / running (app/steam-calendar.js) -->
   <div id="maintBar" class="maint-bar" hidden></div>
+  <!-- the game is closed for maintenance right now / players suddenly dropped (app/server-status.js) -->
+  <div id="serverBar" class="maint-bar server-bar" hidden></div>
 
   <main class="layout">
     <aside class="col left" id="left"></aside>
@@ -86,6 +93,7 @@
   <script src="base.js"></script>
   <script src="steam-news.js"></script>
   <script src="steam-calendar.js"></script>
+  <script src="server-status.js"></script>
   <script src="news.js"></script>
   <script src="build-card.js"></script>
   <script src="app.js"></script>

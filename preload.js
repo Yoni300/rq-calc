@@ -29,6 +29,9 @@ contextBridge.exposeInMainWorld('rqcApp', {
   tradeHistory: f => ipcRenderer.invoke('rqc-trade-history', f),
   tradeDelete: id => ipcRenderer.invoke('rqc-trade-delete', id),
   onStats: cb => ipcRenderer.on('rqc-stats-state', (_e, st) => cb(st)), // the clipboard (works while the game has the focus)
+  // server status: the first call starts asking Steam + the game every minute; each answer comes to onServer
+  server: () => ipcRenderer.invoke('rqc-server'),
+  onServer: cb => ipcRenderer.on('rqc-server', (_e, st) => cb(st)),
 });
 
 // used only by app/alert.html (the corner window)

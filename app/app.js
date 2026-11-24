@@ -512,6 +512,7 @@ function renderTop() {
   $('btnBug').innerHTML = svgIcon('bug'); $('btnBug').title = RT().btn;
   drawNewsBell();
   drawSteamButton();
+  drawServer();
   // the website: download the Windows app (the app itself does not need it)
   $('btnDownload').hidden = !window.RQC_WEB;
   if (window.RQC_WEB) { topButton('btnDownload', 'download', T.dlApp); $('btnDownload').title = T.dlTip; }
