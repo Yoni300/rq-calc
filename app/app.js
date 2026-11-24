@@ -94,7 +94,8 @@ const normSearch = s => String(s || '').toLowerCase().replace(/ё/g, 'е');
 function matches(query, ...fields) {
   const words = normSearch(query).split(/\s+/).filter(Boolean);
   if (!words.length) return true;
-  const hay = normSearch(fields.filter(Boolean).join(' '));
+  // the names as shown (English, Ukrainian) are found as well as the game's Russian ones
+  const hay = normSearch(fields.filter(Boolean).map(f => (typeof f === 'string' ? f + ' ' + gameName(f) : f)).join(' '));
   return words.every(w => hay.includes(w));
 }
 
@@ -488,6 +489,7 @@ function topButton(id, icon, label, menu = false) {
 
 function renderTop() {
   document.documentElement.lang = lang;
+  syncGameNames(); // app/game-names.js: game names on screen in this language
   $('appTitle').textContent = T.title;
   document.title = T.title + (IS_TEST ? ' — ТЕСТ' : '');
   if (IS_TEST && !$('testBadge')) $('appTitle').after(h('span', { id: 'testBadge', class: 'test-badge', title: T.testTip }, 'ТЕСТ'));

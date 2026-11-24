@@ -919,6 +919,7 @@ body.tool-timer .calc-only { display: none !important; }
 .bs-big.round { border-radius: 50%; border: 2px solid var(--gold-3); }
 .bs-title h2 { margin: 0; font-family: var(--f-display); color: var(--gold); font-size: 24px; }
 .bs-meta { color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+.bs-orig { color: var(--dim); font-size: 12px; font-style: italic; margin-top: 1px; }
 .bs-facts { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; margin: 4px 0 10px; }
 .bs-facts div { background: rgba(0, 0, 0, .3); border: 1px solid var(--line); border-radius: 6px; padding: 5px 9px; }
 .bs-facts span { display: block; font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 700; }

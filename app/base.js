@@ -799,7 +799,10 @@ function drawBaseDetail() {
     BS.back.length ? h('button', { class: 'btn small ghost bs-back', onclick: () => { const p = BS.back.pop(); if (p) openBase(p.kind, p.key, { push: false }); } }, '← ' + t.back) : null));
   el.append(h('div', { class: 'bs-head' },
     e.kind === 'event' ? null : e.icon ? h('img', { class: 'bs-big' + (e.round ? ' round' : '') + (e.cover ? ' cover' : ''), src: e.icon, draggable: 'false', onerror: hideImg }) : h('span', { class: 'bs-big ph' }, iconEl(ph(e.kind))),
-    h('div', { class: 'bs-title' }, h('h2', null, e.name), h('div', { class: 'bs-meta' }, t.cats[e.kind] + (e.meta ? ' · ' + e.meta : '')))));
+    h('div', { class: 'bs-title' }, h('h2', null, e.name),
+      // in English / Ukrainian: the name as the Russian game client shows it (app/game-names.js leaves .gn-raw alone)
+      gameName(e.name) !== e.name ? h('div', { class: 'bs-orig gn-raw' }, e.name) : null,
+      h('div', { class: 'bs-meta' }, t.cats[e.kind] + (e.meta ? ' · ' + e.meta : '')))));
 
   if (e.kind === 'monster') {
     el.append(bfacts([[t.level, x.level], [t.hp, x.hp != null ? fmtNum(x.hp) : null], [t.race, x.race], [t.element, x.element], [t.defense, x.defense],

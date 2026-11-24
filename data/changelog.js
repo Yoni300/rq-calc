@@ -1,6 +1,10 @@
 // "What's new" under the bell in the top bar (app/news.js). Newest first. Add an entry for every change players see.
 // at: ISO time in UTC (shown in each viewer's own time zone); text: ru / uk / en.
 window.RQ_CHANGELOG = [
+  { at: '2026-11-24T19:54Z',
+    ru: 'Английская версия теперь показывает названия из игры по-английски: монстров, предметы, карты, задания, локации, НПС и боссов, как в английском клиенте Royal Quest. Поиск понимает оба языка, а русское название видно в подсказке. Описания с вики пока на русском.',
+    uk: 'Англійська версія тепер показує назви з гри англійською: монстрів, предмети, карти, завдання, локації, НПС і босів, як в англійському клієнті Royal Quest. Пошук розуміє обидві мови, а російську назву видно в підказці. Описи з вікі поки російською.',
+    en: 'The English version now shows game names in English: monsters, items, cards, quests, locations, NPCs and bosses, as in the English Royal Quest client. Search understands both languages, and the Russian name shows in the tooltip. Wiki descriptions are still in Russian for now.' },
   { at: '2026-11-23T19:44Z',
     ru: 'В таймере боссов появился НПС Занка в Макдаре. Нажмите «Пружинка», когда её убили: через 8 часов 5 минут таймер покажет, что Занка вернулся. Сам по КД он не переписывается: Занка стоит, пока не соберёт пружинки.',
     uk: 'У таймері босів з’явився НПС Занка в Макдарі. Натисніть «Пружинка», коли її вбили: через 8 годин 5 хвилин таймер покаже, що Занка повернувся. Сам по КД він не переписується: Занка стоїть, поки не збере пружинки.',

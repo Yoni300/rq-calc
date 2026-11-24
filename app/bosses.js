@@ -24,6 +24,8 @@ const STALE = 24 * 3600e3;                  // a timer nobody renewed this long 
 const UP_FRESH = 2 * 60e3;                  // a respawn older than this is not announced
 
 const kills = () => (BT.room ? BT.remote : BT.local);
+// the monster that brings Занка back, as the chosen language calls it (app/game-names.js: «Пружинка» alone is the spring item)
+const afterName = b => { const m = 'Монстр ' + b.after, t = gameName(m); return t !== m ? t : b.after; };
 const respOf = b => BT.resp[b.key] || b.resp;   // minutes; a player's own time can have seconds (95.5 = 1:35:30)
 const respMs = b => Math.round(respOf(b) * 60) * 1000;
 const secShort = () => ({ en: 's' }[lang] || 'с');
@@ -146,7 +148,7 @@ function editKill(b) {
   const time = h('input', { type: 'time', step: 1, class: 'inp', value: [base.getHours(), base.getMinutes(), base.getSeconds()].map(x => String(x).padStart(2, '0')).join(':') });
   let close;
   const ago = m => { close(); setKill(b, Date.now() - m * 60e3); };
-  close = bossDialog(fmtT(T.bossKillTitle, { n: b.after || b.name }), h('div', { class: 'bt-dlg-body' },
+  close = bossDialog(fmtT(T.bossKillTitle, { n: b.after ? afterName(b) : b.name }), h('div', { class: 'bt-dlg-body' },
     h('div', { class: 'bt-quick' }, [0, 5, 10, 15, 30, 60, 90, 120].map(m =>
       h('button', { class: 'btn small', onclick: () => ago(m) }, m ? fmtT(T.bossAgo, { m }) : T.bossNow))),
     h('label', { class: 'bt-lbl' }, T.bossTimeLbl, time)), () => {
@@ -222,8 +224,10 @@ function claimAlert(id) {
 }
 // one message per alert: the system notification, or (when it is not allowed) a message inside the page
 function alertBoss(b, kind, left, test = false, cd = 1) {
-  const title = kind === 'up' ? fmtT(T.bossUpN, { n: b.name }) : fmtT(T.bossSoonN, { n: b.name, m: Math.max(1, Math.ceil(left / 60e3)) });
-  const sub = [cd > 1 ? fmtT(T.bossCd, { n: cd }) : '', b.loc].filter(Boolean).join(' · '); // the number first: a long location gets cut
+  // the corner message is another window: the names go there already in the chosen language (app/game-names.js)
+  const n = gameName(b.name);
+  const title = kind === 'up' ? fmtT(T.bossUpN, { n }) : fmtT(T.bossSoonN, { n, m: Math.max(1, Math.ceil(left / 60e3)) });
+  const sub = [cd > 1 ? fmtT(T.bossCd, { n: cd }) : '', gameName(b.loc || '')].filter(Boolean).join(' · '); // the number first: a long location gets cut
   beep(kind);
   // the app: its own message in the screen corner, above the game (main.js, app/alert.html)
   if (window.rqcApp && window.rqcApp.bossAlert && SETTINGS.popup) {
@@ -358,7 +362,7 @@ function bossRow(b, st) {
     h('div', { class: 'bt-state' }, h('div', { class: 'bt-big' }, cdMark, big), sub),
     h('div', { class: 'bt-act' },
       h('button', { class: 'btn small primary bt-kill', title: b.after ? fmtT(T.bossSpringTip, { d: fmtResp(respOf(b)) }) : T.bossKilledTip,
-        onclick: () => { askNotify(); setKill(b, Date.now()); } }, '☠ ' + (b.after || T.bossKilled)),
+        onclick: () => { askNotify(); setKill(b, Date.now()); } }, '☠ ' + (b.after ? afterName(b) : T.bossKilled)),
       h('button', { class: 'btn small', title: T.bossEdit, onclick: () => editKill(b) }, '✎'),
       st.k ? h('button', { class: 'btn small ghost', title: T.bossClear, onclick: () => setKill(b, null) }, '✕') : null),
     h('div', { class: 'bt-prog' }, bar));
@@ -412,7 +416,7 @@ function titleTimer(now) {
       if (st.s === 'wait' && (!next || st.spawn < next.st.spawn)) next = { b, st };
     }
   }
-  const title = next ? `${next.b.name} ${fmtLeft(next.st.left)} · ${base}` : base;
+  const title = next ? `${gameName(next.b.name)} ${fmtLeft(next.st.left)} · ${base}` : base;
   if (document.title !== title) document.title = title;
 }
 primeAlerts();
