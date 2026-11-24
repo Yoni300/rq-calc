@@ -1,7 +1,7 @@
 /* Is the game up? A top-bar button with a coloured dot and the number of players in the game (Steam); a click opens the
    last 24 hours as a chart. Two sources: players online from Steam (a crash shows as a sudden drop) and the game's own
    maintenance switch (the one the launcher checks). The app asks both every minute (main.js → window.rqcApp.server);
-   the site and the history come from server-status.json (tools/update-server-status.mjs, every 5 minutes).
+   the site and the history come from Supabase, which asks both every minute itself (server/008-server-status.sql).
    A strip under the top bar says when the game is closed for maintenance or the number of players has suddenly fallen.
    Uses globals from app.js at call time. */
 
@@ -14,7 +14,8 @@ const SRV_T = {
     maintBar: 'Гра закрита на технічні роботи — так зараз каже лаунчер гри.',
     dropBar: 'Онлайн різко впав: {a} → {b} за {t}. Схоже, сервер упав.', hide: 'Сховати',
     note: 'Онлайн — тільки гравці, які зараз у грі через Steam (обидва сервери разом). Тих, хто грає через лаунчер BASE, Steam не рахує, а BASE свого онлайну не показує, тож усього гравців більше. Для статусу цього досить: коли сервер падає, вилітають усі, і онлайн у Steam різко падає теж, зазвичай за кілька хвилин. Техроботи — перемикач BASE, за яким лаунчер не пускає в гру.',
-    stale: 'Дані давні — перевірте інтернет.',
+    stale: 'Свіжих даних немає. Нижче — останнє відоме число.',
+    noSteam: 'Steam зараз не віддає онлайн (так буває під час техробіт самого Steam, зазвичай у вівторок увечері). Статус гри від BASE працює.',
   },
   ru: {
     btn: 'онлайн', tip: 'Статус игры: игроков в Steam сейчас', title: 'Статус игры', ok: 'Работает', maint: 'Технические работы', drop: 'Онлайн резко упал',
@@ -24,7 +25,8 @@ const SRV_T = {
     maintBar: 'Игра закрыта на технические работы — так сейчас говорит лаунчер игры.',
     dropBar: 'Онлайн резко упал: {a} → {b} за {t}. Похоже, сервер упал.', hide: 'Скрыть',
     note: 'Онлайн — только игроки, которые сейчас в игре через Steam (оба сервера вместе). Тех, кто играет через лаунчер BASE, Steam не считает, а BASE свой онлайн не показывает, так что всего игроков больше. Для статуса этого хватает: когда сервер падает, вылетают все, и онлайн в Steam резко падает тоже, обычно за несколько минут. Техработы — переключатель BASE, по которому лаунчер не пускает в игру.',
-    stale: 'Данные старые — проверьте интернет.',
+    stale: 'Свежих данных нет. Ниже — последнее известное число.',
+    noSteam: 'Steam сейчас не отдаёт онлайн (так бывает во время техработ самого Steam, обычно во вторник вечером). Статус игры от BASE работает.',
   },
   en: {
     btn: 'online', tip: 'Game status: players in Steam now', title: 'Game status', ok: 'Up', maint: 'Maintenance', drop: 'Players suddenly dropped',
@@ -34,15 +36,17 @@ const SRV_T = {
     maintBar: 'The game is closed for maintenance — that is what the game launcher says right now.',
     dropBar: 'Players suddenly dropped: {a} → {b} in {t}. Looks like the server is down.', hide: 'Hide',
     note: 'Online = only the players in the game through Steam right now (both servers together). Steam does not count those who play through the BASE launcher, and BASE does not show its own number, so there are more players in total. That is enough for the status: when the server goes down everyone is kicked, and the Steam number drops sharply too, usually within a few minutes. Maintenance = the BASE switch the launcher uses to keep players out.',
-    stale: 'The data is old — check your connection.',
+    stale: 'No fresh data. Below is the last known number.',
+    noSteam: 'Steam is not giving the player count right now (this happens during Steam\'s own maintenance, usually on Tuesday evening). The game status from BASE works.',
   },
 };
 const SVT = () => SRV_T[lang] || SRV_T.ru;
-const SERVER_URL = 'https://raw.githubusercontent.com/Yoni300/rq-calc/refs/heads/server-status/server-status.json';
 const SRV_KEEP = 48 * 3600;
-// hist: [time, players | null, 1 = can play / 0 = maintenance / null]; last: the newest answer { at, online, canRun }
+// points: [time, players | null, 1 = can play / 0 = maintenance / null]; hist from Supabase, live = the app's own answers
 // (live is read from the storage when the page is ready: app.js, which has `store`, loads after this file)
-const SRV = { hist: [], live: [], last: null, loading: false };
+const SRV = { hist: [], live: [], loading: false };
+// Steam answers 0 players for every game while Steam itself is under maintenance: that is "unknown", not an empty game
+const srvN = n => (Number.isFinite(n) && n > 0 ? n : null);
 
 const srvNow = () => Math.floor(Date.now() / 1000);
 function srvSpan(sec) {
@@ -57,45 +61,52 @@ function srvPoints() {
   for (const p of all) if (!res.length || p[0] - res[res.length - 1][0] >= 30) res.push(p); else if (p[1] != null) res[res.length - 1] = p;
   return res;
 }
-function srvAdd(st) {
-  if (!st || !st.at) return;
-  if (!SRV.last || st.at >= SRV.last.at) SRV.last = st;
+// the newest state: when the newest answer came, whether the game can be started, and the players
+// (the newest number of the last 10 minutes: Steam and BASE answer separately and sometimes one of them misses a minute)
+function srvLast() {
+  const pts = srvPoints();
+  if (!pts.length) return null;
+  const at = pts[pts.length - 1][0];
+  const run = [...pts].reverse().find(p => p[2] != null);
+  const on = [...pts].reverse().find(p => p[1] != null && at - p[0] <= 10 * 60);
+  return { at, canRun: run ? run[2] === 1 : null, online: on ? on[1] : null };
 }
 
-async function loadServerFile() {
-  if (SRV.loading) return;
+// the last 24 hours, collected every minute by Supabase itself (server/008-server-status.sql)
+async function loadServerHist() {
+  if (SRV.loading || !sbConfigured()) return;
   SRV.loading = true;
   try {
-    const r = await fetch(SERVER_URL + '?t=' + Math.floor(Date.now() / 120000), { cache: 'no-store' });
-    if (r.ok) {
-      const j = await r.json();
-      SRV.hist = Array.isArray(j.hist) ? j.hist : [];
-      srvAdd({ at: j.at, online: j.online, canRun: j.canRun, statuses: j.statuses || [] });
-    }
+    const rows = await sb('rpc/server_status_hist', { method: 'POST', body: '{}' });
+    if (Array.isArray(rows)) SRV.hist = rows.map(r => [Math.floor(Date.parse(r.at) / 1000), srvN(r.online), r.can_run == null ? null : r.can_run ? 1 : 0]);
   } catch { /* offline: the app still has its own answers */ }
   SRV.loading = false;
   drawServer();
 }
 // an answer from main.js (the app only)
 function onServerAnswer(st) {
-  if (!st) return;
-  srvAdd(st);
-  SRV.live = SRV.live.filter(p => p[0] > srvNow() - SRV_KEEP);
-  SRV.live.push([st.at, st.online, st.canRun == null ? null : st.canRun ? 1 : 0]);
+  if (!st || !st.at) return;
+  SRV.live = SRV.live.filter(p => p[0] > srvNow() - SRV_KEEP && p[0] !== st.at);
+  SRV.live.push([st.at, srvN(st.online), st.canRun == null ? null : st.canRun ? 1 : 0]);
   store.set('srvLive', SRV.live);
   drawServer();
 }
 
 // 'ok' | 'maint' | 'drop' | 'unknown', with the numbers of a drop
 function serverState() {
-  const l = SRV.last, now = srvNow();
-  if (!l || now - l.at > (window.RQC_WEB ? 25 : 15) * 60) return { k: 'unknown', stale: !!l };
+  const l = srvLast(), now = srvNow();
+  if (!l || now - l.at > 10 * 60) return { k: 'unknown', stale: !!l };
   if (l.canRun === false) return { k: 'maint' };
-  if (l.online != null) {
-    // the most players during the 25 minutes before the newest answer
-    const before = srvPoints().filter(p => p[1] != null && p[0] < l.at - 20 && p[0] >= l.at - 25 * 60);
-    const top = before.reduce((m, p) => (p[1] > m[1] ? p : m), [0, 0]);
-    if (top[1] >= 80 && l.online <= top[1] * 0.7) return { k: 'drop', a: top[1], b: l.online, t: l.at - top[0] };
+  // a drop: the last two numbers of players (not one: a single odd answer must not raise the alarm) are both at most 70 %
+  // of the most players during the 25 minutes before them
+  const on = srvPoints().filter(p => p[1] != null && l.at - p[0] <= 10 * 60);
+  if (on.length >= 2) {
+    const [p1, p2] = on.slice(-2);
+    const top = srvPoints().filter(p => p[1] != null && p[0] < p1[0] - 20 && p[0] >= p1[0] - 25 * 60).reduce((m, p) => (p[1] >= m[1] ? p : m), [0, 0]); // the latest of equal tops: the shortest time of the fall
+    // after Steam's own maintenance (answers of 0 = unknown) Steam counts players again from a low number:
+    // a fall across such a gap is Steam, not the game
+    const steamGap = srvPoints().some(p => p[0] > top[0] && p[0] < p2[0] && p[1] == null);
+    if (top[1] >= 80 && !steamGap && p1[1] <= top[1] * 0.7 && p2[1] <= top[1] * 0.7) return { k: 'drop', a: top[1], b: p2[1], t: p2[0] - top[0] };
   }
   return { k: 'ok' };
 }
@@ -103,7 +114,7 @@ function serverState() {
 function drawServer() {
   const btn = $('btnServer');
   if (!btn) return;
-  const t = SVT(), s = serverState(), l = SRV.last;
+  const t = SVT(), s = serverState(), l = srvLast();
   btn.className = 'btn server-btn st-' + s.k;
   btn.innerHTML = '';
   btn.append(h('span', { class: 'srv-dot' }), h('span', { class: 'srv-n' }, l && l.online != null && s.k !== 'unknown' ? fmtNum(l.online) : '—'), h('span', { class: 'srv-w' }, t.btn));
@@ -168,7 +179,7 @@ function serverChart() {
 }
 
 function drawServerMenu() {
-  const menu = $('serverMenu'), t = SVT(), s = serverState(), l = SRV.last;
+  const menu = $('serverMenu'), t = SVT(), s = serverState(), l = srvLast();
   menu.innerHTML = '';
   menu.append(h('div', { class: 'news-head' }, t.title));
   const hourAgo = l && srvPoints().filter(p => p[1] != null && Math.abs(p[0] - (l.at - 3600)) <= 10 * 60).sort((a, b) => Math.abs(a[0] - (l.at - 3600)) - Math.abs(b[0] - (l.at - 3600)))[0];
@@ -180,7 +191,7 @@ function drawServerMenu() {
   if (l && l.online != null) {
     menu.append(h('div', { class: 'srv-big' }, h('b', null, fmtNum(l.online)), h('span', null, t.online),
       hourAgo ? h('span', { class: 'srv-ago' }, fmtT(t.hourAgo, { n: fmtNum(hourAgo[1]) })) : null));
-  }
+  } else if (l && s.k !== 'unknown') menu.append(h('div', { class: 'srv-warn soft' }, t.noSteam));
   menu.append(h('div', { class: 'srv-cap' }, t.chart, h('span', { class: 'srv-mk' }, t.maintChart)), serverChart());
   menu.append(h('div', { class: 'srv-note' }, t.note));
 }
@@ -197,17 +208,17 @@ document.addEventListener('click', e => {
   if (m && !m.hidden && !m.contains(e.target) && !$('btnServer').contains(e.target) && !$('serverBar').contains(e.target)) m.hidden = true;
 });
 document.addEventListener('DOMContentLoaded', () => {
-  SRV.live = store.get('srvLive', []);
-  // the newest of the app's own answers is shown at once, until a fresh one comes
-  for (const p of SRV.live) srvAdd({ at: p[0], online: p[1], canRun: p[2] == null ? null : !!p[2], statuses: [] });
+  // the app's own earlier answers: shown at once, until fresh ones come (zeros saved by 1.0.33 are "unknown")
+  SRV.live = store.get('srvLive', []).filter(Array.isArray).map(p => [p[0], srvN(p[1]), p[2]]);
   $('btnServer').addEventListener('click', openServerMenu);
   const appBridge = window.rqcApp && window.rqcApp.server;
   if (appBridge) {
     window.rqcApp.onServer(onServerAnswer);
     window.rqcApp.server().then(onServerAnswer, () => {});
   }
-  loadServerFile();
-  setInterval(loadServerFile, 5 * 60 * 1000);
+  loadServerHist();
+  // the site has only this source: ask every minute; the app asks Steam and the game itself and only needs the history
+  setInterval(loadServerHist, (appBridge ? 5 : 1) * 60 * 1000);
   // "updated N minutes ago" and the old-data check move on by themselves
   setInterval(drawServer, 30 * 1000);
   drawServer();

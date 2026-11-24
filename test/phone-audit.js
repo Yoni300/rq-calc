@@ -51,7 +51,7 @@ const VIEWS = {
   'dlg-settings': { js: calc('gear') + 'openSettings();', shots: 2 },
   'dlg-report': { js: calc('gear') + 'openReport();', shots: 1 },
   'dlg-news': { js: calc('gear') + "document.getElementById('btnNews').click();", shots: 1 },
-  'dlg-server': { js: calc('gear') + "SRV.last = { at: Math.floor(Date.now() / 1000), online: 612, canRun: true, statuses: [] }; document.getElementById('btnServer').click();", shots: 1 },
+  'dlg-server': { js: calc('gear') + "SRV.live.push([Math.floor(Date.now() / 1000), 612, 1]); document.getElementById('btnServer').click();", shots: 1 },
   'timer': { js: "switchTool('timer');", shots: 2 },
   'timer-kill': { js: "switchTool('timer'); document.querySelector('.bt-act button:not(.bt-kill)')?.click();", shots: 1 },
   'timer-resp': { js: "switchTool('timer'); document.querySelector('.bt-resp')?.click();", shots: 1 },
