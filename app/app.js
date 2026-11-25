@@ -434,7 +434,24 @@ for (const r of [...(RQDATA.TalentBuffDescription || [])].sort((a, b) => a.Order
   });
 }
 const RIFLE_FX = 213, RIFLE_TYPE = 34; // «Ружейное мастерство»: skill damage while a rifle is worn
+// the tooltip as the game shows it now (data/talents-game.js, from the game's own files): its colors, numbers and icons
+const GAME_TIP_CLS = { fx: 'fx', pr: 'fx', bf: 'fx', db: 'fx', ct: 'fx', sk: 'sk', m: 'm', w: 'w', pas: 'tk' };
+function gameTalentLines(t) {
+  // the game has Russian and English texts; the Ukrainian interface shows the Russian ones, like the game names
+  const all = window.RQ_TALENTS_GAME || {};
+  const g = (all[lang === 'en' ? 'en' : 'ru'] || {})[t.id];
+  if (!g) return null;
+  const lines = g[ch.classId] || g[0] || Object.values(g)[0];
+  return lines.map(l => l.map(s => {
+    if (typeof s === 'string') return esc(s);
+    if (s[0] === 'img') return `<img class="tip-ic" src="../data/talents/${esc(s[1])}.png" alt="">`;
+    const c = GAME_TIP_CLS[s[0]];
+    return c ? `<span class="${c}">${esc(s[1])}</span>` : esc(s[1]);
+  }).join('')).join('\n');
+}
 function talentText(t) {
+  const game = gameTalentLines(t);
+  if (game) return `<b>${esc(t.name)}</b>\n<span class="tk">${esc(t.active ? T.talActive : T.talPassive)}</span>\n${game}`;
   const vars = talentVars.get(t.id) || [];
   const sub = s => String(s || '').replace(/\{(\d+)\}/g, (_, n) => vars[+n] ?? '?').replace(/◊/g, '• ');
   const fx = talentFx.get(t.id) || [];
@@ -1218,7 +1235,7 @@ function renderEditorDetail() {
   if (stamps.length) {
     const curV = e.stampVariantId ? ctx.stampVariants.get(e.stampVariantId) : null;
     const variantFor = s => (curV && s.variants.find(v => v.colorId === curV.colorId)) || s.variants[s.variants.length - 1];
-    // the class's own stamps first; then other classes' stamps (items every class can wear take any); stamps the wiki
+    // the class's own stamps first; then other classes' stamps (any item takes them: engine stampAllowed); stamps the wiki
     // no longer lists go last, under their own heading (values from Anon's older database)
     const own = s => ctx.stampForClass(s, ch.classId);
     const options = [...stamps.filter(s => !s.isLegacy && own(s)), ...stamps.filter(s => !s.isLegacy && !own(s)), ...stamps.filter(s => s.isLegacy)].map(s => {

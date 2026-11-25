@@ -377,13 +377,13 @@
       const cls = classes.get(classId);
       return !filter.length || filter.every(id => classAllowsStat(cls, id));
     }
-    // Deliberate deviation from Anon's calculator (user's call, 2026-11-12, as in the game): the item decides, not the
-    // character and not the level. An item any class can wear (rings, amulets, common armor…) takes a stamp of any
-    // class; a class item (e.g. a Разбойник armor) takes only stamps that fit one of the classes it is made for.
+    // Deliberate deviation from Anon's calculator (as in the game): neither the character's class nor the level limit the
+    // stamp — the one who stamps the item decides it, and an item can be handed to another class for that (a player's
+    // report, 2026-11-25: a Мечник's «Экспериментальный шлем» given to a Маг gets «Мечты Кардинала»). So any stamp that
+    // fits the item's type goes, class item or not (before 2026-11-25 a class item took only its classes' stamps).
+    // The picker still lists the character's own stamps first (app.js).
     function stampAllowed(stamp, item, classId) {
-      if (stamp.hasEquipRows && !stamp.equipTypeIds.includes(item.typeId)) return false;
-      const itemClasses = itemClassConditions(item);
-      return !itemClasses.length || itemClasses.some(id => stampForClass(stamp, id));
+      return !stamp.hasEquipRows || stamp.equipTypeIds.includes(item.typeId);
     }
 
     // --- talents, auras, buffs, elixirs, consumables, collections ---

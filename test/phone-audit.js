@@ -35,6 +35,8 @@ const q = s => JSON.stringify(s);
 const VIEWS = {
   'calc-gear': { js: calc('gear'), shots: 4 },
   'calc-talents': { js: calc('talents'), shots: 3 },
+  // a talent tooltip from the game's own texts (data/talents-game.js): Crusader, «Охотник на ведьм»
+  'tip-talent': { js: calc('talents') + "setClass(2); recalc(); renderAll(); { const el = [...document.querySelectorAll('#center *')].find(x => x._tip && String(typeof x._tip === 'function' ? x._tip() : x._tip).includes('Охотник на ведьм')); el.dispatchEvent(new MouseEvent('mouseover', { bubbles: true, clientX: 120, clientY: 160 })); }", shots: 1 },
   'calc-effects': { js: calc('effects'), shots: 3 },
   'calc-collection': { js: calc('collection'), shots: 2 },
   'calc-builds': { js: calc('builds'), shots: 2, wait: 2500 },

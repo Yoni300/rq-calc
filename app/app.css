@@ -384,6 +384,10 @@ input[type=range] { accent-color: var(--gold-2); }
 /* talent tooltips like in the game: the skill kind in green, effect names in turquoise */
 .tip .tk { color: #7fdc5a; }
 .tip .fx, .tal-mastery .fx { color: #4fd8b0; }
+/* talent tooltips from the game's own texts (data/talents-game.js): skill names yellow, the game's small icons inline */
+.tip .sk { color: #f2ef6b; }
+.tip .w { color: #fff; font-weight: 600; }
+.tip .tip-ic { width: 15px; height: 15px; vertical-align: -3px; margin-right: 2px; }
 
 .code-area { width: 100%; height: 110px; resize: vertical; padding: 9px; background: rgba(0, 0, 0, .35); border: 1px solid var(--line); border-radius: 6px; font-family: Consolas, monospace; font-size: 11.5px; color: var(--fg); outline: none; word-break: break-all; }
 .toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); background: linear-gradient(180deg, var(--p1), var(--gold-2)); color: var(--on-gold); padding: 8px 18px; border-radius: 7px; font-weight: 700; z-index: 120; box-shadow: 0 8px 24px rgba(0, 0, 0, .6); border: 1px solid #fff0c4; }

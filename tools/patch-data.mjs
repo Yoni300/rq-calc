@@ -86,6 +86,19 @@ for (const name of ['Снежный кристалин', 'Аура чистых 
   if (b) { b.Type_Id = 240; patched.push(`${name}: % к урону, а не к атаке`); }
 }
 
+// 5e. Talents changed in the game since Anon's database (the game's own data, 24.11.2026; a player's report):
+//  «Отвага» (Мечник): +7% attack, not +5%
+const courage = D.Buff.find(b => b.Name === 'Отвага' && b.TalentCondition_Id != null);
+const courageAtk = courage && D.BuffBonus.find(x => x.Buff_Id === courage.Id && x.Type_Id === 6);
+if (courageAtk && courageAtk.Value !== 7) { courageAtk.Value = 7; patched.push('Отвага: +7% атаки'); }
+//  «Рвение» (Крестоносец): «Стойкость» for 5 s when Ярость is full; the +25 resistance to control is for the other classes only
+const zeal = D.Talent.find(t => t.Name === 'Рвение' && D.TalentBranch.find(b => b.Id === t.Branch_Id)?.Class_Id === CLASS.CRUSADER);
+if (zeal) {
+  const before = D.TalentBonus.length;
+  D.TalentBonus = D.TalentBonus.filter(b => !(b.Talent_Id === zeal.Id && b.Type_Id === 221));
+  if (D.TalentBonus.length < before) patched.push('Рвение (Крестоносец): без +25 стійкості до контролю');
+}
+
 // 6. Collection trophies have no pictures in the database: give each a fitting icon of a pet, mount,
 //    book, potion or item that is already in data/img (picked by the trophy's theme).
 const TROPHY_ICONS = {
