@@ -250,6 +250,41 @@ function ftToggle(tag) {
     ftSet(nv, s - ol, e - ol);
   }
 }
+// two opening tags mean the same: <color=255,0,0> = <color=#FF0000>, <outline> = <outline=#000000FF>, <font=title,100> = <font=title>
+function ftSameTag(a, b) {
+  const parse = x => { const m = x.match(/^<([a-z]+)(?:=([^<>]*))?>$/i); return m ? [m[1].toLowerCase(), m[2]] : [x, null]; };
+  const [ta, va] = parse(a), [tb, vb] = parse(b);
+  if (ta !== tb) return false;
+  if (ta === 'color' || ta === 'outline') {
+    const black = { r: 0, g: 0, b: 0, a: 255 };
+    const ca = va == null && ta === 'outline' ? black : ftParseColor(va), cb = vb == null && tb === 'outline' ? black : ftParseColor(vb);
+    return !!ca && !!cb && ca.r === cb.r && ca.g === cb.g && ca.b === cb.b && ca.a === cb.a;
+  }
+  const norm = v => String(v ?? '').replace(/\s/g, '').toLowerCase().replace(/,100(\/100)?$/, '');
+  return norm(va) === norm(vb);
+}
+// color / outline / font switch like B: the same one again takes it off, another one takes the old one's place
+function ftToggleValue(tag, open) {
+  const { v, s, e, part } = ftSel();
+  const close = `</${tag}>`, re = ftTagRe(tag, true);
+  const opens = [...part.matchAll(re)].filter(m => !m[1]).map(m => m[0]);
+  if (opens.length) {
+    const bare = part.replace(re, '');
+    const out = opens.every(o => ftSameTag(o, open)) ? bare : open + bare + close;
+    return ftSet(v.slice(0, s) + out + v.slice(e), s, s + out.length);
+  }
+  const a = ftAround(tag, v, s, e);
+  if (!a) return ftWrap(open, close);
+  const [o, ol, c, cl] = a;
+  if (ftSameTag(v.slice(o, o + ol), open)) {
+    let nv = v;
+    if (c >= 0) nv = nv.slice(0, c) + nv.slice(c + cl);
+    nv = nv.slice(0, o) + nv.slice(o + ol);
+    return ftSet(nv, s - ol, e - ol);
+  }
+  const d = open.length - ol;
+  ftSet(v.slice(0, o) + open + v.slice(o + ol), s + d, e + d);
+}
 // the B / I / U / S buttons light up when the selection already has the tag
 function ftMarkTags() {
   for (const b of document.querySelectorAll('.ft-tools [data-tag]')) b.classList.toggle('on', ftTagOn(b.dataset.tag));
@@ -362,7 +397,7 @@ function renderFontTool(el) {
   const from = h('span', { class: 'ft-from', style: 'background:' + FT.color });
   const c1 = colorIn('color', () => { from.style.background = FT.color; }), c2 = colorIn('color2'), oc = colorIn('ocolor');
   const swatches = h('div', { class: 'ft-swatches' }, FT_SWATCHES.map(c => h('button', { class: 'ft-sw', style: `background:${c}`, title: c, onmousedown: e => e.preventDefault(),
-    onclick: () => { FT.color = c; c1.value = c.toLowerCase(); from.style.background = c; ftWrap(`<color=${ftColorCode(c, FT.alpha)}>`, '</color>'); } })));
+    onclick: () => { FT.color = c; c1.value = c.toLowerCase(); from.style.background = c; ftToggleValue('color', `<color=${ftColorCode(c, FT.alpha)}>`); } })));
 
   const ta = h('textarea', { id: 'ftCode', class: 'inp ft-code', spellcheck: false, placeholder: t.ph, rows: 4 });
   ta.value = FT.code;
@@ -381,10 +416,10 @@ function renderFontTool(el) {
       h('span', { class: 'ft-lab' }, t.font), fsel,
       num(40, 200, 'size', t.size),
       h('label', { class: 'ft-chk' }, wideChk, t.width), widthRow,
-      tbtn(t.apply, t.font, () => ftWrap(fontTag(), '</font>'), 'primary')),
+      tbtn(t.apply, t.font, () => ftToggleValue('font', fontTag()), 'primary')),
     h('div', { class: 'ft-row' },
       h('span', { class: 'ft-lab' }, t.color), c1, alphaIn('alpha'),
-      tbtn(t.apply, t.color, () => ftWrap(`<color=${ftColorCode(FT.color, FT.alpha)}>`, '</color>'), 'primary'),
+      tbtn(t.apply, t.color, () => ftToggleValue('color', `<color=${ftColorCode(FT.color, FT.alpha)}>`), 'primary'),
       swatches),
     h('div', { class: 'ft-row' },
       h('span', { class: 'ft-lab' }, t.gradient), from, h('span', { class: 'ft-grad' }, '→'), c2,
@@ -397,7 +432,7 @@ function renderFontTool(el) {
       h('span', { class: 'ft-lab ft-gap' }, t.outline), oc, alphaIn('oalpha'),
       tbtn(t.apply, t.outline, () => {
         const plain = FT.ocolor.toUpperCase() === '#000000' && FT.oalpha === 255;
-        ftWrap(plain ? '<outline>' : `<outline=${ftColorCode(FT.ocolor, 255)}${ftHex2(FT.oalpha)}>`, '</outline>');
+        ftToggleValue('outline', plain ? '<outline>' : `<outline=${ftColorCode(FT.ocolor, 255)}${ftHex2(FT.oalpha)}>`);
       }, 'primary')),
     h('div', { class: 'hint' }, t.sel));
 

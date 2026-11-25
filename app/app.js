@@ -876,7 +876,7 @@ function renderCenter() {
 const DOLL_POS = {
   '1:0': [1, 1], '2:0': [1, 2], '3:0': [1, 3], '4:0': [1, 4], '5:0': [1, 5], '6:0': [1, 6], '21:0': [1, 7],
   '14:0': [3, 1], '13:0': [4, 1], '12:0': [4, 2], '11:0': [4, 3], '11:1': [4, 4], '10:0': [4, 5], '9:0': [4, 6],
-  '15:0': [2, 7], '7:0': [3, 7], '22:0': [4, 7],
+  '7:0': [2, 7], '15:0': [3, 7], '22:0': [4, 7],
 };
 const DECOR_KEYS = [];
 
@@ -995,7 +995,8 @@ function renderGear(el) {
     if (!keys.has(key)) continue;
     const s = slotIcon(key, sets);
     s.style.gridColumn = c; s.style.gridRow = r;
-    if (key === '15:0') s.style.justifySelf = 'start'; // mount sits right next to the weapon
+    if (key === '7:0') s.style.justifySelf = 'start'; // the left hand sits right next to the weapon
+    if (key === '15:0') s.style.justifySelf = 'end'; // the mount sits right next to the spear
     if (key === '14:0') s.style.zIndex = 3; // costume sits in the model's top corner, next to the decoration
     win.append(s);
   }
