@@ -1046,6 +1046,31 @@ body.tool-timer .calc-only { display: none !important; }
 .bs-how { margin: 0; padding-left: 20px; line-height: 1.5; max-width: 760px; }
 .bs-how li { margin-bottom: 5px; }
 /* calendar (app/steam-calendar.js) */
+/* «Гайды» (app/steam-guides.js): Steam guides as cards with their Steam picture */
+.gd-cats { margin: -4px 0 12px; }
+.gd-cats small { opacity: .65; font-weight: 600; }
+.gd-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(440px, 1fr)); gap: 8px; }
+.gd-list .pb-msg { grid-column: 1 / -1; }
+.gd-card { display: grid; grid-template-columns: 104px minmax(0, 1fr); gap: 12px; padding: 9px; border: 1px solid var(--line); border-radius: 10px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .03), rgba(0, 0, 0, .25)); color: var(--fg); text-decoration: none; }
+.gd-card:hover { border-color: var(--line-3); background: linear-gradient(180deg, rgba(230, 184, 92, .07), rgba(0, 0, 0, .25)); }
+.gd-pic { width: 104px; height: 104px; border-radius: 7px; object-fit: cover; background: #000; border: 1px solid var(--line); }
+.gd-pic.ph { display: grid; place-items: center; color: var(--muted); }
+.gd-pic.ph .ic { width: 34px; height: 34px; fill: none; stroke: currentColor; stroke-width: 1.5; }
+.gd-body { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.gd-title { font-family: var(--f-display); font-size: 15.5px; font-weight: 700; color: var(--gold); line-height: 1.25; overflow-wrap: anywhere; }
+.gd-meta { font-size: 11.5px; color: var(--muted); }
+.gd-stars { color: var(--gold-hi); letter-spacing: 1px; }
+.gd-lang { margin-left: 6px; padding: 0 5px; border: 1px solid var(--line-2); border-radius: 4px; font-size: 10.5px; font-weight: 700; color: var(--fg); }
+.gd-desc { font-size: 12.5px; color: var(--fg); opacity: .85; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; white-space: pre-line; }
+.gd-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
+.gd-tags span { font-size: 10.5px; padding: 1px 7px; border-radius: 9px; background: rgba(0, 0, 0, .35); border: 1px solid var(--line); color: var(--muted); }
+.gd-note { margin-top: 10px; text-align: left; }
+@media (max-width: 760px) {
+  .gd-list { grid-template-columns: minmax(0, 1fr); }
+  .gd-card { grid-template-columns: 72px minmax(0, 1fr); gap: 10px; }
+  .gd-pic { width: 72px; height: 72px; }
+}
 .sn-switch { display: flex; gap: 6px; margin-bottom: 10px; }
 .sn-switch .bs-cat { font-size: 13.5px; padding: 6px 14px; }
 .sn-wrap .bs-list { max-height: calc(100vh - 262px); }

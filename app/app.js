@@ -391,7 +391,8 @@ function cardBonusVarsForDisplay(cb) {
   // cards that change other cards (two П'атаг cards turn Рогоножка's minuses into pluses): same rule as the engine,
   // counted over everything the character wears
   const worn = id => Object.values(ch.equipment || {}).reduce((n, e) => n + ((e && e.cards) || []).filter(c => c === id).length, 0);
-  if (cb.multiplyEffectCardId != null) { const n = worn(cb.multiplyEffectCardId); return vars.map(v => v * n); }
+  // a card nobody wears yet (the Base, the card picker) shows its value as one card: «0 к …» said nothing (Карта Воко)
+  if (cb.multiplyEffectCardId != null) { const n = Math.max(1, worn(cb.multiplyEffectCardId)); return vars.map(v => v * n); }
   if (cb.negateCardId != null) { const n = worn(cb.negateCardId); return vars.map(v => v * (1 - n)); }
   return vars;
 }
@@ -471,6 +472,7 @@ const TOP_ICONS = {
   download: '<path d="M12 3.5v11.5M7.5 10.5 12 15l4.5-4.5"/><path d="M4.5 16.5v2a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-2"/>',
   news: '<path d="M4 5h13v13.5a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2z"/><path d="M17 9h3v9.5a2 2 0 0 1-4 0"/><path d="M7 8.5h7M7 12h7M7 15.5h4"/>',
   book: '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/><path d="M8 7.5h8M8 11h6"/>',
+  guide: '<path d="M2 5.5c3-1.4 6-1.4 10 1v14c-4-2.4-7-2.4-10-1z"/><path d="M22 5.5c-3-1.4-6-1.4-10 1v14c4-2.4 7-2.4 10-1z"/>',
   chart: '<path d="M4 4v16h16"/><path d="M7.5 15l3.5-4 3 2.5 5-6.5"/>',
   trade: '<path d="M4 8h14l-3.5-3.5"/><path d="M20 16H6l3.5 3.5"/>',
   skull: '<path d="M12 3a7.5 7.5 0 0 0-7.5 7.5c0 2.6 1.3 4.6 3 5.8V19a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1v-2.7c1.7-1.2 3-3.2 3-5.8A7.5 7.5 0 0 0 12 3z"/><circle cx="9.2" cy="11" r="1.6"/><circle cx="14.8" cy="11" r="1.6"/><path d="M10.5 20v-2.5M13.5 20v-2.5M11.2 14.8l.8-1.3.8 1.3"/>',
@@ -575,6 +577,7 @@ const TOOLS = [
   { id: 'timer', tab: 'bosses', icon: 'skull', name: () => T.toolTimer, sub: () => T.toolTimerSub },
   { id: 'base', tab: 'base', icon: 'book', name: () => BTX().title, sub: () => BTX().sub },
   { id: 'steam', tab: 'steam', icon: 'news', name: () => STX().title, sub: () => STX().sub },
+  { id: 'guides', tab: 'guides', icon: 'guide', name: () => GTX().title, sub: () => GTX().sub },
   { id: 'calendar', tab: 'cal', icon: 'calendar', name: () => CTX().title, sub: () => CTX().sub },
   { id: 'stats', tab: 'stats', icon: 'chart', name: () => STT().title, sub: () => STT().sub },
   { id: 'trade', tab: 'trade', icon: 'trade', name: () => TRT().title, sub: () => TRT().sub },
@@ -839,6 +842,7 @@ function renderCenter() {
   else if (tab === 'bosses') renderBosses(el);
   else if (tab === 'base') renderBase(el);
   else if (tab === 'steam') renderSteamNews(el);
+  else if (tab === 'guides') renderGuides(el);
   else if (tab === 'cal') renderCalendar(el);
   else if (tab === 'stats') renderStatsTool(el);
   else if (tab === 'trade') renderTradeTool(el);

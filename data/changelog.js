@@ -1,6 +1,14 @@
 // "What's new" under the bell in the top bar (app/news.js). Newest first. Add an entry for every change players see.
 // at: ISO time in UTC (shown in each viewer's own time zone); text: ru / uk / en.
 window.RQ_CHANGELOG = [
+  { at: '2026-11-25T00:23Z',
+    ru: 'Новый инструмент «Гайды»: 60 гайдов игроков из Steam с картинками, оценками, темами и поиском. Гайд открывается в Steam. В английской версии названия и описания переведены.',
+    uk: 'Новий інструмент «Гайди»: 60 гайдів гравців зі Steam з картинками, оцінками, темами й пошуком. Гайд відкривається в Steam. В англійській версії назви й описи перекладено.',
+    en: 'New tool «Guides»: 60 player guides from Steam with pictures, ratings, topics and search. A guide opens on Steam. Titles and descriptions are translated into English.' },
+  { at: '2026-11-25T00:23Z',
+    ru: 'В Базе появились 42 Древние и Старинные карты: их всё ещё меняют на знаки. У Карты Воко вместо «0 Устойчивости к PvP урону» теперь видно +9.',
+    uk: 'У Базі з’явилися 42 Древні й Старинні карти: їх досі міняють на знаки. На Карті Воко замість «0 Устойчивости к PvP урону» тепер видно +9.',
+    en: 'The Base now has 42 Ancient and Old cards: players still trade them for signs. Карта Воко now shows +9 PvP damage resistance instead of 0.' },
   { at: '2026-11-24T20:16Z',
     ru: 'Статус игры в верхней панели: зелёная точка и число игроков в игре по Steam. Нажмите на неё, и откроется онлайн за сутки. Если игру закрыли на техработы или онлайн резко упал (похоже, сервер упал), под панелью появится полоска.',
     uk: 'Статус гри у верхній панелі: зелена крапка й кількість гравців у грі за Steam. Натисніть на неї, і відкриється онлайн за добу. Якщо гру закрили на техроботи або онлайн різко впав (схоже, сервер упав), під панеллю з\'явиться смужка.',

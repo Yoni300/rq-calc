@@ -28,6 +28,24 @@
     });
   }
 
+  // the footer with the page's heading and the links to the search pages (tools/build-landing.mjs): in the page's language
+  const FOOT = {
+    ru: { h1: TITLES.ru, calculator: 'Калькулятор', 'boss-timer': 'Таймер боссов', base: 'База', calendar: 'Календарь', program: 'Программа' },
+    uk: { h1: TITLES.uk, calculator: 'Калькулятор', 'boss-timer': 'Таймер босів', base: 'База', calendar: 'Календар', program: 'Програма' },
+    en: { h1: TITLES.en, calculator: 'Calculator', 'boss-timer': 'Boss timer', base: 'Database', calendar: 'Calendar', program: 'Windows app' },
+  };
+  const drawFoot = () => {
+    const el = document.getElementById('siteFoot');
+    const t = FOOT[document.documentElement.lang] || FOOT.ru;
+    if (!el) return;
+    el.querySelector('h1').textContent = t.h1;
+    for (const a of el.querySelectorAll('a[data-page]')) a.textContent = t[a.dataset.page] || a.textContent;
+  };
+  document.addEventListener('DOMContentLoaded', () => {
+    drawFoot();
+    new MutationObserver(drawFoot).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+  });
+
   // Visitors (GoatCounter, https://<GC>.goatcounter.com): no cookies, nothing personal; only on the website, never in the app.
   // A page view when the site opens; events: which tool is opened (tool-<id>) and «Скачать программу» (download-app).
   const GC = 'rqtools'; // the GoatCounter code (https://rqtools.goatcounter.com); empty = nothing is counted

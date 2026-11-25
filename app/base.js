@@ -138,7 +138,9 @@ function baseIndex() {
   const special = m => !!m.event || /Ивент|Квест|Призыва/i.test(m.group || '') || !(m.locs || []).length;
   const monsters = (window.RQ_BASE_MONSTERS || []).slice().sort((a, b) => special(a) - special(b) || (a.level ?? 999) - (b.level ?? 999) || a.name.localeCompare(b.name, 'ru'));
   const items = [...ctx.equipment.values()].filter(i => i.inVersion !== false);
-  const cards = [...ctx.cards.values()].filter(c => c.inVersion !== false && !c.isLegacy);
+  // old cards («Древняя карта …», «Старинная карта …») are out of the calculator, but players still have them and trade
+  // them for signs: those with a sign value stay in the Base
+  const cards = [...ctx.cards.values()].filter(c => c.inVersion !== false && (!c.isLegacy || cardSignsOf(c.name) != null));
   const stamps = [...ctx.stamps.values()].filter(s => !s.isLegacy);
   const loot = (window.RQ_MARKET_ITEMS || []).filter(i => i.cat !== 'card');
   const goods = window.RQ_BASE_GOODS || [];

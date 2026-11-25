@@ -271,6 +271,20 @@ function patchMain() {
   // the texts above are Russian, and so is the page a first visit gets (web/web.js); the app changes it when the language is switched
   s = s.replace(/<html lang="[a-z]+">/, '<html lang="ru">');
   if (!s.includes('<html lang="ru">')) throw new Error('main page: <html lang> not found');
+  // a thin footer under the app, only on the site: the page's heading (H1) and links to the search pages, in the page's
+  // own HTML (the app draws everything else with JavaScript). Visible, not hidden text; web/web.js puts it in the
+  // chosen language. Paths are absolute: the page has <base href="app/">
+  const foot = `<footer class="site-foot" id="siteFoot">
+    <h1>RQ Tools — калькулятор, таймер боссов и база Royal Quest</h1>
+    <nav>${PAGES.map(p => `<a href="/${p.slug}/" data-page="${p.slug}">${esc(p.nav)}</a>`).join('')}</nav>
+  </footer>`;
+  s = s.replace('</main>', '</main>\n  ' + foot);
+  if (!s.includes('id="siteFoot"')) throw new Error('main page: </main> not found');
+  const css = '.site-foot{flex:none;display:flex;align-items:center;gap:6px 16px;flex-wrap:wrap;padding:4px 16px;border-top:1px solid var(--line);'
+    + 'background:rgba(0,0,0,.35);font-size:11.5px;color:var(--dim)}.site-foot h1{margin:0;font:inherit;font-weight:600;color:var(--muted)}'
+    + '.site-foot nav{display:flex;flex-wrap:wrap;gap:4px 14px}.site-foot a{color:var(--dim);text-decoration:none}.site-foot a:hover{color:var(--gold)}'
+    + '@media (max-width:760px){.site-foot{padding:10px 16px;font-size:12.5px}}';
+  s = s.replace('</head>', `  <style>${css}</style>\n</head>`);
   fs.writeFileSync(f, s);
 }
 
