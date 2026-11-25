@@ -1651,3 +1651,77 @@ body.tool-timer .calc-only { display: none !important; }
   .left { padding-left: 10px; padding-right: 10px; }
   .left .field { grid-template-columns: 84px minmax(0, 1fr); gap: 6px; }
 }
+/* «Шрифты» (app/font-tool.js): free look-alikes of the game's fonts (data/fonts, SIL OFL), loaded only when the tool draws text */
+@font-face { font-family: "RQ Philosopher"; src: url(../data/fonts/Philosopher-Regular.ttf); font-weight: 400; font-display: swap; }
+@font-face { font-family: "RQ Philosopher"; src: url(../data/fonts/Philosopher-Bold.ttf); font-weight: 700; font-display: swap; }
+@font-face { font-family: "RQ Alegreya"; src: url(../data/fonts/Alegreya-Italic.ttf); font-weight: 400 900; font-style: italic; font-display: swap; }
+@font-face { font-family: "RQ Alegreya SC"; src: url(../data/fonts/AlegreyaSC-Medium.ttf); font-weight: 500; font-display: swap; }
+.ft-wrap { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 18px; align-items: start; }
+.ft-main, .ft-side { min-width: 0; }
+.ft-stage-head, .ft-code-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+.ft-stage-head h3, .ft-code-head h3 { margin: 0; margin-right: auto; }
+.ft-stage { min-height: 150px; display: grid; place-items: center; padding: 26px 18px; border-radius: 10px; border: 1px solid var(--line-2); overflow: hidden; margin-bottom: 14px; }
+.ft-stage.bg-night { background: radial-gradient(ellipse at 50% 120%, #2c3b2a 0%, #141c17 45%, #090b0e 100%); }
+.ft-stage.bg-day { background: linear-gradient(180deg, #8fc3e8 0%, #c4e0f0 55%, #7da35a 56%, #5e8a40 100%); }
+.ft-stage.bg-stone { background: repeating-linear-gradient(90deg, rgba(0, 0, 0, .18) 0 2px, transparent 2px 64px), repeating-linear-gradient(0deg, rgba(0, 0, 0, .18) 0 2px, transparent 2px 32px), #6b645a; }
+.ft-line { text-align: center; line-height: 1.35; overflow-wrap: anywhere; white-space: pre-wrap; max-width: 100%; }
+.ft-stretch { display: inline-block; transform-origin: left center; }
+.ft-empty { color: rgba(255, 255, 255, .35); font-size: 28px; }
+.ft-count { font-size: 12px; color: var(--muted); }
+.ft-code { color: var(--fg); font-family: Consolas, "Cascadia Mono", monospace; font-size: 13.5px; line-height: 1.5; resize: vertical; min-height: 92px; }
+.ft-warn { color: var(--bad); font-size: 12px; margin-top: 6px; }
+.ft-warn:empty { display: none; }
+.ft-actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0 14px; }
+.ft-actions .btn .ic { width: 15px; height: 15px; vertical-align: -3px; fill: none; stroke: currentColor; stroke-width: 2; }
+.ft-tools { display: flex; flex-direction: column; gap: 9px; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: rgba(0, 0, 0, .22); }
+.ft-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ft-row .btn.small { min-width: 34px; }
+.ft-right { margin-left: auto; }
+.ft-lab { font-weight: 700; color: var(--gold); min-width: 70px; }
+.ft-gap { margin-left: 14px; min-width: 0; }
+.ft-sel { width: auto; min-width: 150px; }
+.ft-num { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); }
+.ft-num input { width: 110px; }
+.ft-num b { color: var(--fg); min-width: 38px; }
+.ft-chk { display: flex; align-items: center; gap: 4px; font-size: 12.5px; color: var(--muted); cursor: pointer; }
+.ft-color { width: 34px; height: 26px; padding: 0; border: 1px solid var(--line-2); border-radius: 5px; background: none; cursor: pointer; }
+.ft-alpha { width: 80px; }
+.ft-grad { color: var(--muted); }
+.ft-from { width: 18px; height: 18px; border-radius: 4px; border: 1px solid rgba(255, 255, 255, .35); }
+.ft-swatches { display: flex; gap: 4px; flex-wrap: wrap; }
+.ft-sw { width: 20px; height: 20px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .35); cursor: pointer; padding: 0; }
+.ft-sw:hover { transform: scale(1.15); }
+.ft-side h3 { margin-top: 0; }
+.ft-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.ft-item { display: flex; align-items: center; gap: 6px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; cursor: pointer;
+  background: radial-gradient(ellipse at 50% 140%, #24301f 0%, #111611 60%, #0a0c0d 100%); }
+.ft-item:hover { border-color: var(--line-3); }
+.ft-item-pic { flex: 1; min-width: 0; overflow: hidden; }
+.ft-item .ft-line { text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ft-help summary { cursor: pointer; color: var(--gold); font-weight: 700; margin-bottom: 6px; }
+.ft-help-row { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; margin-bottom: 8px; font-size: 12px; color: var(--muted); }
+.ft-help-row code { color: var(--fg); font-size: 12px; overflow-wrap: anywhere; }
+.ft-note { text-align: left; }
+@media (max-width: 1099px) { .ft-wrap { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 760px) {
+  .ft-stage { padding: 18px 10px; min-height: 110px; }
+  .ft-lab { min-width: 0; width: 100%; }
+  .ft-gap { margin-left: 0; }
+  .ft-num input { width: 90px; }
+  .ft-right { margin-left: 0; }
+}
+.ft-steps { min-width: 0; }
+.ft-type-box { margin-top: 10px; padding: 10px 12px; border: 1px solid rgba(var(--gold-rgb), .4); border-radius: 10px; background: rgba(var(--gold-rgb), .05); }
+.ft-type-head { color: var(--gold); margin-bottom: 6px; }
+.ft-type { font-family: Consolas, "Cascadia Mono", monospace; font-size: 19px; line-height: 1.6; overflow-wrap: anywhere; color: var(--fg); user-select: all; }
+.ft-type .tg { color: #8fc9ff; background: rgba(143, 201, 255, .1); border-radius: 3px; }
+.ft-type .tg.cl { color: #c3a0ff; background: rgba(195, 160, 255, .1); }
+.ft-type .sp { color: var(--gold-2); }
+@media (max-width: 760px) { .ft-type { font-size: 16px; } }
+.ft-type-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.ft-left { font-size: 12.5px; color: var(--up); margin-right: auto; }
+.ft-left.bad { color: var(--bad); font-weight: 700; }
+.ft-limit { width: 64px; padding: 2px 6px; }
+.ft-type .cut { color: var(--bad); text-decoration: line-through; opacity: .75; }
+.ft-type.over { }
+.ft-tools .btn.ft-tg.on { border-color: var(--gold); color: var(--gold-hi); background: linear-gradient(180deg, #4a3a22, #2e2416); box-shadow: 0 0 10px rgba(var(--gold-rgb), .3); }

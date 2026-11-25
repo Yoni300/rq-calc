@@ -94,7 +94,7 @@
   for (const [k, t] of Object.entries(texts)) if (window.RQC_I18N && RQC_I18N[k]) Object.assign(RQC_I18N[k], t);
 
   // a link to a tool (rqcalc.com/#timer, #base, #calendar, #calc — the buttons on the search pages): open it, then clean the address
-  const TOOL_LINKS = ['calc', 'timer', 'base', 'calendar', 'steam'];
+  const TOOL_LINKS = ['calc', 'timer', 'base', 'calendar', 'steam', 'guides', 'font'];
   const openToolLink = () => {
     const id = location.hash.slice(1);
     if (!TOOL_LINKS.includes(id) || typeof switchTool !== 'function') return;
