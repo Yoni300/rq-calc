@@ -31,7 +31,9 @@ const POPUP_MS = { short: { soon: 6000, up: 12000 }, normal: { soon: 12000, up: 
 function applySettings() {
   const root = document.documentElement;
   root.dataset.theme = SETTINGS.theme;
-  root.style.zoom = SETTINGS.zoom === 100 ? '' : SETTINGS.zoom / 100;
+  // the app scales the whole window; CSS zoom (the website) also stretches 100vh/100vw and moves tips off the screen
+  if (window.rqcApp?.setZoom) { window.rqcApp.setZoom(SETTINGS.zoom / 100); root.style.zoom = ''; }
+  else root.style.zoom = SETTINGS.zoom === 100 ? '' : SETTINGS.zoom / 100;
   root.classList.toggle('no-motion', !SETTINGS.motion);
   if (IS_APP) {
     const t = typeof T !== 'undefined' ? T : {}; // app.js (texts) may not be loaded yet

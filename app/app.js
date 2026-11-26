@@ -258,13 +258,16 @@ document.addEventListener('scroll', () => { clearTimeout(pressTimer); if (Date.n
 // the release after a long press is not a tap: don't open or toggle anything
 document.addEventListener('click', e => { if (pressShown) { pressShown = false; e.preventDefault(); e.stopPropagation(); } }, true);
 document.addEventListener('contextmenu', e => { if (Date.now() - lastTouch < 1200) e.preventDefault(); });
+// CSS zoom of the page (website only; the app zooms the window, then it is 1): mouse and getBoundingClientRect
+// are in screen px, style.left/top/width in the page's own px, which the zoom then multiplies again
+const pageZoom = () => parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
 function placeTip(e, touch = false) {
-  const r = tipEl.getBoundingClientRect();
+  const r = tipEl.getBoundingClientRect(), z = pageZoom();
   let x = e.clientX + 16, y = e.clientY + 14;
   if (touch) { x = e.clientX - r.width / 2; y = e.clientY - r.height - 24; if (y < 8) y = e.clientY + 28; } // above the finger
   if (x + r.width > innerWidth - 8) x = touch ? innerWidth - r.width - 8 : e.clientX - r.width - 12;
   if (y + r.height > innerHeight - 8) y = innerHeight - r.height - 8;
-  tipEl.style.left = Math.max(8, x) + 'px'; tipEl.style.top = Math.max(8, y) + 'px';
+  tipEl.style.left = Math.max(8, x) / z + 'px'; tipEl.style.top = Math.max(8, y) / z + 'px';
 }
 // confirmation in the app's style (instead of the system confirm window); resolves true/false
 function confirmBox(text, { ok = T.yes, danger = false } = {}) {
@@ -793,9 +796,9 @@ function openClassPicker(anchor, opts = {}) {
     h('div', { class: 'cp-grid' }, roots.map(r => h('div', { class: 'cp-col' },
       card(r, false), h('div', { class: 'cp-subs' }, r.children.map(id => card(ctx.classes.get(id), true)))))));
   document.body.append(popover);
-  const rc = anchor.getBoundingClientRect();
-  popover.style.left = Math.max(8, Math.min(rc.left, innerWidth - popover.offsetWidth - 8)) + 'px';
-  popover.style.top = rc.bottom + 6 + 'px';
+  const rc = anchor.getBoundingClientRect(), z = pageZoom();
+  popover.style.left = Math.max(8, Math.min(rc.left, innerWidth - popover.getBoundingClientRect().width - 8)) / z + 'px';
+  popover.style.top = (rc.bottom + 6) / z + 'px';
 }
 function renderLeft() {
   const el = $('left'); el.innerHTML = '';
@@ -1157,13 +1160,13 @@ function openPopover(anchor, options, curId, onPick) {
   search.addEventListener('input', draw);
   popover = h('div', { class: 'pop' }, search, list);
   document.body.append(popover);
-  const r = anchor.getBoundingClientRect();
-  const w = Math.max(r.width, 380);
-  popover.style.width = w + 'px';
-  popover.style.left = Math.min(r.left, innerWidth - w - 10) + 'px';
+  const r = anchor.getBoundingClientRect(), z = pageZoom();
+  const w = Math.max(r.width, 380 * z), px = v => v / z + 'px';
+  popover.style.width = px(w);
+  popover.style.left = px(Math.min(r.left, innerWidth - w - 10));
   const below = innerHeight - r.bottom - 10, above = r.top - 10;
-  if (below >= 300 || below >= above) { popover.style.top = r.bottom + 4 + 'px'; popover.style.maxHeight = Math.min(460, below) + 'px'; }
-  else { popover.style.bottom = innerHeight - r.top + 4 + 'px'; popover.style.maxHeight = Math.min(460, above) + 'px'; }
+  if (below >= 300 * z || below >= above) { popover.style.top = px(r.bottom + 4); popover.style.maxHeight = px(Math.min(460 * z, below)); }
+  else { popover.style.bottom = px(innerHeight - r.top + 4); popover.style.maxHeight = px(Math.min(460 * z, above)); }
   draw();
   search.focus();
   list.querySelector('.pop-opt.on')?.scrollIntoView({ block: 'center' });

@@ -1,5 +1,5 @@
 // Small bridge for the page: updates and the boss alert window.
-const { contextBridge, ipcRenderer } = require('electron');
+const { contextBridge, ipcRenderer, webFrame } = require('electron');
 
 contextBridge.exposeInMainWorld('rqcApp', {
   onUpdate: cb => ipcRenderer.on('rqc-update', (_e, state) => cb(state)),
@@ -11,6 +11,8 @@ contextBridge.exposeInMainWorld('rqcApp', {
   onOpenBosses: cb => ipcRenderer.on('rqc-open-bosses', () => cb()),
   // settings only the app has: tray, start with Windows
   appSettings: s => ipcRenderer.send('rqc-app-settings', s),
+  // interface scale: the window's own zoom (like Ctrl+ in a browser), so mouse coordinates, 100vh and @media stay right
+  setZoom: f => webFrame.setZoomFactor(f),
   // card scanner: { enabled, hotkey } → main.js; results of the hotkey and whether the hotkey could be taken
   cardSettings: s => ipcRenderer.send('rqc-card-settings', s),
   onCardResult: cb => ipcRenderer.on('rqc-card-result', (_e, r) => cb(r)),
