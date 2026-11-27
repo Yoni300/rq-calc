@@ -496,6 +496,7 @@ const TOP_ICONS = {
   font: '<path d="M3 19.5 8.6 5h1.3l5.6 14.5M5 14.5h7.5"/><path d="M17 19.5V12M17 12c.6-1.3 1.8-2 3.3-1.8M17 15.5c.6-1.3 1.8-2 3.3-1.8"/>',
   chart: '<path d="M4 4v16h16"/><path d="M7.5 15l3.5-4 3 2.5 5-6.5"/>',
   trade: '<path d="M4 8h14l-3.5-3.5"/><path d="M20 16H6l3.5 3.5"/>',
+  market: '<path d="M4 9.5 5.5 4h13L20 9.5"/><path d="M4 9.5a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0 2.7 2.7 0 0 0 5.3 0"/><path d="M5.5 12v8h13v-8"/><path d="M10 20v-4.5h4V20"/>',
   skull: '<path d="M12 3a7.5 7.5 0 0 0-7.5 7.5c0 2.6 1.3 4.6 3 5.8V19a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1v-2.7c1.7-1.2 3-3.2 3-5.8A7.5 7.5 0 0 0 12 3z"/><circle cx="9.2" cy="11" r="1.6"/><circle cx="14.8" cy="11" r="1.6"/><path d="M10.5 20v-2.5M13.5 20v-2.5M11.2 14.8l.8-1.3.8 1.3"/>',
   group: '<circle cx="9" cy="8.5" r="3"/><path d="M3.5 19.5c.4-3.2 2.6-5 5.5-5s5.1 1.8 5.5 5"/><circle cx="16.5" cy="9" r="2.4"/><path d="M15.5 14.6c2.6-.3 4.6 1.3 5 4.4"/>',
   lock: '<rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/>',
@@ -596,6 +597,7 @@ function drawMobileNav() {
 const TOOLS = [
   { id: 'calc', icon: 'calc', name: () => T.toolCalc, sub: () => T.toolCalcSub },
   { id: 'timer', tab: 'bosses', icon: 'skull', name: () => T.toolTimer, sub: () => T.toolTimerSub },
+  { id: 'market', tab: 'market', icon: 'market', name: () => MKX().title, sub: () => MKX().sub },
   { id: 'base', tab: 'base', icon: 'book', name: () => BTX().title, sub: () => BTX().sub },
   { id: 'steam', tab: 'steam', icon: 'news', name: () => STX().title, sub: () => STX().sub },
   { id: 'guides', tab: 'guides', icon: 'guide', name: () => GTX().title, sub: () => GTX().sub },
@@ -869,6 +871,7 @@ function renderCenter() {
   else if (tab === 'cal') renderCalendar(el);
   else if (tab === 'stats') renderStatsTool(el);
   else if (tab === 'trade') renderTradeTool(el);
+  else if (tab === 'market') renderMarket(el);
   else renderCollection(el);
   el.scrollTop = scroll;
 }
