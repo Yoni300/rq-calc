@@ -17,9 +17,11 @@ const IS_TEST = new URLSearchParams(location.search).get('test') === '1';
 let T = RQC_I18N[lang] || RQC_I18N.uk;
 let ch = normalize(store.get('current', null)) || ctx.defaultCharacter();
 let buildName = store.get('currentName', '');
-let tab = store.get('tab', 'gear');
-// a tab that no longer exists (e.g. a removed tool) opens the gear instead
-if (!['gear', 'talents', 'effects', 'builds', 'collection', 'bosses', 'base'].includes(tab)) tab = 'gear';
+// the app opens on the home page (app/home.js); the calculator's last tab is kept for «Калькулятор»
+if (['gear', 'talents', 'effects', 'collection'].includes(store.get('tab', ''))) store.set('calcTab', store.get('tab'));
+if (!['gear', 'talents', 'effects', 'collection'].includes(store.get('calcTab', 'gear'))) store.set('calcTab', 'gear'); // e.g. the removed community builds
+let tab = 'home';
+store.set('tab', tab);
 let baseline = null;      // pinned stats (Map) or null
 let previous = null;      // stats before the last change
 let lastResult = null;
@@ -137,25 +139,6 @@ function validTalents(c) {
 }
 
 // The engine gets a cleaned copy: things the character can't use are left out.
-// Recomputes a shared build from its data: the DPS/HP/EHP numbers stored with a public build are typed in by
-// whoever published it, so they are never shown as is. Also lists what makes the build impossible in the game.
-function verifyBuild(data) {
-  try {
-    const c = normalize(data && typeof data === 'object' ? JSON.parse(JSON.stringify(data)) : null);
-    if (!c) return null;
-    const cls = ctx.classes.get(c.classId);
-    const problems = [];
-    if (!(c.level >= cls.minLevel && c.level <= cls.maxLevel)) { problems.push(T.pbBadLevel); c.level = clamp(+c.level || cls.minLevel, cls.minLevel, cls.maxLevel); }
-    if (Object.values(c.stats).some(v => !Number.isInteger(v) || v < 1 || v > ctx.settings.maxStatCount) || ctx.freeStats(c) < 0) problems.push(T.pbBadStats);
-    const x = calcInput(c);
-    const worn = Object.entries(c.equipment || {}).filter(([key, e]) => e && !slotLockedByTwoHander(c, key));
-    if (worn.length > Object.keys(x.equipment).length) problems.push(T.pbBadGear);
-    if ((c.talents || []).length > x.talents.length) problems.push(T.pbBadTalents);
-    const r = ctx.calc(x);
-    return { classId: c.classId, level: c.level, dps: r.stats.get(75) ?? 0, hp: r.stats.get(ctx.ids.HP) ?? 0, ehp: r.stats.get(76) ?? 0, problems };
-  } catch { return null; }
-}
-
 function calcInput(c) {
   const sets = allowedSets(c);
   const x = JSON.parse(JSON.stringify(c));
@@ -475,6 +458,8 @@ const TOP_ICONS = {
   folder: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M3 10h18"/>',
   new: '<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M12 12v6M9 15h6"/>',
   code: '<path d="M8 7l-5 5 5 5M16 7l5 5-5 5M13.5 5l-3 14"/>',
+  home: '<path d="M3.5 11.5 12 4l8.5 7.5"/><path d="M6 9.8V20h4.5v-5.5h3V20H18V9.8"/>',
+  search: '<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/>',
   globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.6 3.9 5.6 3.9 9s-1.3 6.4-3.9 9c-2.6-2.6-3.9-5.6-3.9-9S9.4 5.6 12 3z"/>',
   down: '<path d="M6 9l6 6 6-6"/>',
   tag: '<path d="M3.5 12.2V4.5a1 1 0 0 1 1-1h7.7l8.3 8.3-8.7 8.7z"/><circle cx="8" cy="8" r="1.4"/>',
@@ -492,8 +477,8 @@ const TOP_ICONS = {
   download: '<path d="M12 3.5v11.5M7.5 10.5 12 15l4.5-4.5"/><path d="M4.5 16.5v2a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-2"/>',
   news: '<path d="M4 5h13v13.5a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2z"/><path d="M17 9h3v9.5a2 2 0 0 1-4 0"/><path d="M7 8.5h7M7 12h7M7 15.5h4"/>',
   book: '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/><path d="M8 7.5h8M8 11h6"/>',
-  guide: '<path d="M2 5.5c3-1.4 6-1.4 10 1v14c-4-2.4-7-2.4-10-1z"/><path d="M22 5.5c-3-1.4-6-1.4-10 1v14c4-2.4 7-2.4 10-1z"/>',
   font: '<path d="M3 19.5 8.6 5h1.3l5.6 14.5M5 14.5h7.5"/><path d="M17 19.5V12M17 12c.6-1.3 1.8-2 3.3-1.8M17 15.5c.6-1.3 1.8-2 3.3-1.8"/>',
+  guide: '<path d="M2 5.5c3-1.4 6-1.4 10 1v14c-4-2.4-7-2.4-10-1z"/><path d="M22 5.5c-3-1.4-6-1.4-10 1v14c4-2.4 7-2.4 10-1z"/>',
   chart: '<path d="M4 4v16h16"/><path d="M7.5 15l3.5-4 3 2.5 5-6.5"/>',
   trade: '<path d="M4 8h14l-3.5-3.5"/><path d="M20 16H6l3.5 3.5"/>',
   market: '<path d="M4 9.5 5.5 4h13L20 9.5"/><path d="M4 9.5a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0 2.7 2.7 0 0 0 5.3 0"/><path d="M5.5 12v8h13v-8"/><path d="M10 20v-4.5h4V20"/>',
@@ -523,8 +508,6 @@ function renderTop() {
   topButton('btnBuilds', 'folder', T.builds, true);
   topButton('btnNew', 'new', T.newBuild);
   topButton('btnCode', 'code', T.code);
-  topButton('btnPublic', 'globe', T.publicBuilds);
-  $('btnPublic').classList.toggle('on', tab === 'builds');
   // tools: the brand opens the list (calculator, boss timer, …); the timer hides the calculator's buttons
   if (!$('brandBtn').querySelector('.caret')) $('brandBtn').insertAdjacentHTML('beforeend', svgIcon('down', 'ic caret'));
   $('brandBtn').title = T.toolsTip;
@@ -560,11 +543,6 @@ $('btnSave').addEventListener('click', () => {
   store.set('builds', builds);
   toast(T.saved);
 });
-// community builds open in the center area
-$('btnPublic').addEventListener('click', () => {
-  tab = tab === 'builds' ? 'gear' : 'builds'; store.set('tab', tab);
-  renderCenter(); animateEnter($('center')); renderTop();
-});
 // settings (app/settings.js)
 let settingsLang = null;
 $('btnSettings').addEventListener('click', () => openSettings());
@@ -595,6 +573,7 @@ function drawMobileNav() {
 }
 // a tool other than the calculator owns one `tab` value and takes the whole window
 const TOOLS = [
+  { id: 'home', tab: 'home', icon: 'home', name: () => HTX().title, sub: () => HTX().sub },
   { id: 'calc', icon: 'calc', name: () => T.toolCalc, sub: () => T.toolCalcSub },
   { id: 'timer', tab: 'bosses', icon: 'skull', name: () => T.toolTimer, sub: () => T.toolTimerSub },
   { id: 'market', tab: 'market', icon: 'market', name: () => MKX().title, sub: () => MKX().sub },
@@ -859,10 +838,10 @@ function renderCenter() {
   document.querySelector('.layout').classList.toggle('wide', !!toolOfTab(tab));
   renderTabs();
   const el = $('center'); const scroll = el.scrollTop; el.innerHTML = '';
-  if (tab === 'gear') renderGear(el);
+  if (tab === 'home') renderHome(el);
+  else if (tab === 'gear') renderGear(el);
   else if (tab === 'talents') renderTalents(el);
   else if (tab === 'effects') renderEffects(el);
-  else if (tab === 'builds') renderBuilds(el);
   else if (tab === 'bosses') renderBosses(el);
   else if (tab === 'base') renderBase(el);
   else if (tab === 'steam') renderSteamNews(el);
@@ -878,7 +857,7 @@ function renderCenter() {
 
 // Character window like in the game: grid positions [column, row] for each slot.
 // Left: head, face, armor, gloves, legs, boots, weapon. Right: decoration, amulet, rings, totem, artifact.
-// Bottom row: left hand and spear. Decorations, costume and mount sit in a separate "Украшения" block.
+// Bottom row as in the game: weapon + left hand on the left, mount + spear on the right.
 const DOLL_POS = {
   '1:0': [1, 1], '2:0': [1, 2], '3:0': [1, 3], '4:0': [1, 4], '5:0': [1, 5], '6:0': [1, 6], '21:0': [1, 7],
   '14:0': [3, 1], '13:0': [4, 1], '12:0': [4, 2], '11:0': [4, 3], '11:1': [4, 4], '10:0': [4, 5], '9:0': [4, 6],
@@ -1769,7 +1748,7 @@ async function openLinkedBuild() {
   if (!b) { toast(T.badLink); return; }
   const name = b.name || `${ctx.classes.get(b.ch.classId)?.name || ''} ${b.ch.level}`;
   if (store.get('current', null) && !await confirmBox(fmtT(T.linkAsk, { name }), { ok: T.load })) return;
-  if (tab === 'bosses') switchTool('calc');
+  if (toolOfTab(tab)) switchTool('calc');
   loadBuild({ name: b.name, ch: b.ch });
   toast(T.linkOpened);
 }

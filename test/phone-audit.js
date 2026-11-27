@@ -33,13 +33,15 @@ const base = (kind, key) => `switchTool('base'); openBase(${JSON.stringify(kind)
 const q = s => JSON.stringify(s);
 // name → script run on the page (after the sample build is loaded). `shots` = how many screens down to capture.
 const VIEWS = {
+  'home': { js: "switchTool('home');", shots: 3 },
+  'home-timers': { js: "BOSSES.slice(0, 6).forEach((b, i) => { BT.local[b.key] = { t: Date.now() - respMs(b) + (i + 1) * 170e3 }; }); switchTool('calc'); switchTool('home');", shots: 1 },
+  'home-search': { js: "switchTool('home'); const q = document.getElementById('hmQ'); q.value = 'вол'; q.dispatchEvent(new Event('input'));", shots: 1 },
   'calc-gear': { js: calc('gear'), shots: 4 },
   'calc-talents': { js: calc('talents'), shots: 3 },
   // a talent tooltip from the game's own texts (data/talents-game.js): Crusader, «Охотник на ведьм»
   'tip-talent': { js: calc('talents') + "setClass(2); recalc(); renderAll(); { const el = [...document.querySelectorAll('#center *')].find(x => x._tip && String(typeof x._tip === 'function' ? x._tip() : x._tip).includes('Охотник на ведьм')); el.dispatchEvent(new MouseEvent('mouseover', { bubbles: true, clientX: 120, clientY: 160 })); }", shots: 1 },
   'calc-effects': { js: calc('effects'), shots: 3 },
   'calc-collection': { js: calc('collection'), shots: 2 },
-  'calc-builds': { js: calc('builds'), shots: 2, wait: 2500 },
     'calc-editor-weapon': { js: calc('gear') + "openEditor('21:0');", shots: 1 },
   'calc-editor-detail': { js: calc('gear') + "openEditor('1:0');", shots: 2 },
   'calc-editor-list': { js: calc('gear') + "openEditor('1:0'); editor.setPane('list');", shots: 1 },
@@ -49,7 +51,6 @@ const VIEWS = {
   'menu-builds': { js: calc('gear') + "document.getElementById('btnBuilds').click();", shots: 1 },
   'dlg-code': { js: calc('gear') + "document.getElementById('btnCode').click();", shots: 1 },
   'dlg-buildcard': { js: calc('gear') + 'openBuildCard();', shots: 1, wait: 2500 },
-  'dlg-publish': { js: calc('gear') + 'openPublish();', shots: 1 },
   'dlg-settings': { js: calc('gear') + 'openSettings();', shots: 2 },
   'dlg-report': { js: calc('gear') + 'openReport();', shots: 1 },
   'dlg-news': { js: calc('gear') + "document.getElementById('btnNews').click();", shots: 1 },

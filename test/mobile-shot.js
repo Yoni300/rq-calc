@@ -19,7 +19,6 @@ const VIEWS = {
   baseItem: "switchTool('base'); openBase('monster', 'Пещерный Волк', { push: false });",
   editor: "switchTool('calc'); openEditor('1:0');",
   settings: "openSettings();",
-  builds: "switchTool('calc'); tab='builds'; renderCenter(); renderTop();",
   report: "openReport();",
 };
 

@@ -82,6 +82,7 @@ async function loadServerHist() {
   } catch { /* offline: the app still has its own answers */ }
   SRV.loading = false;
   drawServer();
+  if (typeof homeRefresh === 'function') homeRefresh(['status']); // the home page's tile (app/home.js)
 }
 // an answer from main.js (the app only)
 function onServerAnswer(st) {
@@ -90,6 +91,7 @@ function onServerAnswer(st) {
   SRV.live.push([st.at, srvN(st.online), st.canRun == null ? null : st.canRun ? 1 : 0]);
   store.set('srvLive', SRV.live);
   drawServer();
+  if (typeof homeRefresh === 'function') homeRefresh(['status']);
 }
 
 // 'ok' | 'maint' | 'drop' | 'unknown', with the numbers of a drop
