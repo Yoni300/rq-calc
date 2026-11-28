@@ -6,7 +6,7 @@
 const SET_DEFAULTS = {
   theme: 'gold', zoom: 100, motion: true,
   volume: 70, sound: 'bell',
-  warnMin: 5, alertUp: true, popup: true, corner: 'br', popupTime: 'normal', titleTimer: true,
+  warnMin: 5, warnMins: null, alertUp: true, popup: true, corner: 'br', popupTime: 'normal', titleTimer: true, // warnMins: early warnings in minutes, several at once; null = the old single warnMin
   tray: false, autostart: false,
   cardScan: false, cardKey: 'F8', cardServer: 'fenix', cardCopy: true, cardTotal: false, statsOn: false, tradeOn: false, // card scanner (app/card-scanner.js); prices: cardPrice_<server>
 };
@@ -16,6 +16,8 @@ const SETTINGS = (() => {
   return Object.assign({}, SET_DEFAULTS, saved);
 })();
 const IS_APP = !!(window.rqcApp && window.rqcApp.appSettings); // the installed app (not the website)
+// the boss timer's early warnings, minutes, ascending (settings saved before 1.0.42 have one number: warnMin, 0 = off)
+const warnList = () => (Array.isArray(SETTINGS.warnMins) ? SETTINGS.warnMins : SETTINGS.warnMin ? [SETTINGS.warnMin] : []).filter(m => m > 0).sort((a, b) => a - b);
 
 const THEMES = {
   // accent colors; the dark background stays
@@ -99,7 +101,11 @@ function drawSettings() {
           onclick: () => { set('sound', k); beep('up'); } }, T.soundNames[k]))),
         h('button', { class: 'btn small', title: T.bossTestTip, onclick: () => { beep('soon'); setTimeout(() => beep('up'), 900); } }, '▶')))),
     sec(T.setTimer,
-      row(T.setWarn, T.setWarnHint, seg('warnMin', [[0, T.setOff], [1, '1'], [3, '3'], [5, '5'], [10, '10'], [15, '15']])),
+      // several warnings at once: a press turns one on, the next press turns it off; «off» clears them all
+      row(T.setWarn, T.setWarnHint, h('div', { class: 'seg' }, [[0, T.setOff], [1, '1'], [3, '3'], [5, '5'], [10, '10'], [15, '15']].map(([v, label]) => {
+        const cur = warnList(), on = v === 0 ? !cur.length : cur.includes(v);
+        return h('button', { class: on ? 'on' : '', onclick: () => set('warnMins', v === 0 ? [] : on ? cur.filter(x => x !== v) : [...cur, v].sort((a, b) => a - b)) }, label);
+      }))),
       row(T.setAlertUp, null, sw('alertUp')),
       IS_APP ? row(T.setPopup, T.setPopupHint, sw('popup')) : null,
       IS_APP && SETTINGS.popup ? row(T.setCorner, null, seg('corner', [['tl', '↖', T.cornerNames.tl], ['tr', '↗', T.cornerNames.tr], ['bl', '↙', T.cornerNames.bl], ['br', '↘', T.cornerNames.br]])) : null,

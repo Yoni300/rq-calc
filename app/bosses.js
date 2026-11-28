@@ -257,7 +257,7 @@ async function testAlert(e) {
   const now = Date.now();
   const next = BOSSES.map(b => ({ b, st: bossState(b, now) })).filter(x => x.st.s === 'wait').sort((x, y) => x.st.spawn - y.st.spawn)[0];
   const b = next ? next.b : BOSSES.find(x => BT.fav.has(x.name)) || { name: T.bossTestName, loc: '' };
-  alertBoss(b, 'soon', (SETTINGS.warnMin || 5) * 60e3, true);
+  alertBoss(b, 'soon', (warnList().slice(-1)[0] || 5) * 60e3, true);
   setTimeout(() => alertBoss(b, 'up', 0, true), 2200);
   setTimeout(() => { testing = false; if (btn) btn.disabled = false; }, 3200);
 }
@@ -265,19 +265,25 @@ async function testAlert(e) {
 function checkAlerts(now) {
   if (!BT.notify) return;
   const onlyFav = BT.fav.size > 0;
-  const soon = SETTINGS.warnMin * 60e3; // settings: 0 = no early warning
+  const warns = warnList().map(m => m * 60e3).reverse(); // early warnings, the longest first; none = off
   for (const b of BOSSES) {
     if (onlyFav && !BT.fav.has(b.name)) continue;
     const st = bossState(b, now);
     if (st.s === 'none') continue;
     let w = BT.warned[b.key];
-    if (!w || w.t !== st.k.t) w = BT.warned[b.key] = { t: st.k.t, soon: 0, up: 1 }; // a new kill starts over
+    if (!w || w.t !== st.k.t) w = BT.warned[b.key] = { t: st.k.t, soon: {}, up: 1 }; // a new kill starts over
+    if (typeof w.soon !== 'object') w.soon = {}; // soon: warning ms → the countdown it already rang for
     if (st.cd > w.up) { // the countdown has just moved on: the cooldown before it ended with a respawn
       w.up = st.cd;
       if (now - st.last < UP_FRESH && SETTINGS.alertUp && claimAlert(`${b.key}|${st.k.t}|${st.cd - 1}|up`)) alertBoss(b, 'up', 0, false, st.cd - 1);
-    } else if (soon && st.left <= soon && w.soon < st.cd && (st.cd === 1 || soon < respMs(b))) { // a warning longer than the cooldown would ring all the time
-      w.soon = st.cd;
-      if (claimAlert(`${b.key}|${st.k.t}|${st.cd}|soon`)) alertBoss(b, 'soon', st.left, false, st.cd);
+    } else {
+      // a warning longer than the cooldown would ring all the time; several passed at once (the app was closed) ring once
+      const due = warns.filter(ms => st.left <= ms && (w.soon[ms] || 0) < st.cd && (st.cd === 1 || ms < respMs(b)));
+      if (due.length) {
+        for (const ms of due) w.soon[ms] = st.cd;
+        const ms = due[due.length - 1];
+        if (claimAlert(`${b.key}|${st.k.t}|${st.cd}|soon${ms}`)) alertBoss(b, 'soon', st.left, false, st.cd);
+      }
     }
   }
 }
@@ -288,7 +294,7 @@ function primeAlerts() {
     const st = bossState(b, now);
     if (st.s === 'none' || st.cd === 1 || now - st.last < UP_FRESH) continue;
     const w = BT.warned[b.key];
-    BT.warned[b.key] = { t: st.k.t, soon: w && w.t === st.k.t ? w.soon : 0, up: st.cd };
+    BT.warned[b.key] = { t: st.k.t, soon: w && w.t === st.k.t && typeof w.soon === 'object' ? w.soon : {}, up: st.cd };
   }
 }
 
